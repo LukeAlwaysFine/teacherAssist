@@ -1,0 +1,35 @@
+# ═══════════════════════════════════════════════════
+# 教师助手 — Docker Compose 配置
+# 启动: docker compose up -d
+# 停止: docker compose down
+# ═══════════════════════════════════════════════════
+
+services:
+  app:
+    build: .
+    container_name: teacherassist
+    ports:
+      - "${PORT:-8000}:8000"
+    volumes:
+      # 语音模型持久化（首次下载 1.5GB，后续启动无需重复下载）
+      - teacherassist_models:/app/models
+      # 数据库持久化（课堂记录、分析报告等）
+      - teacherassist_data:/app/data
+      # 上传的音频文件持久化
+      - teacherassist_uploads:/app/uploads
+      # 配置文件（只读）
+      - ./.env:/app/.env:ro
+    environment:
+      - WHISPER_MODELS_DIR=/app/models
+      - DATABASE_URL=sqlite+aiosqlite:///./data/teacher_assist.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/status')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  teacherassist_models:
+  teacherassist_data:
+  teacherassist_uploads:

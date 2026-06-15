@@ -1,0 +1,44 @@
+{
+  "reasoningEffort": "max",
+  "permissions": {
+    "allow": [
+      "Bash(python *)",
+      "Bash(pip *)",
+      "Bash(pytest *)",
+      "Bash(ruff *)",
+      "Bash(git *)",
+      "Bash(docker *)",
+      "Bash(mkdir *)",
+      "Bash(touch *)",
+      "Bash(alembic *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(rm *)",
+      "Bash(cat *)",
+      "Bash(echo *)"
+    ],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(dropdb *)",
+      "Bash(git push --force origin main)",
+      "Bash(git push --force origin master)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "ruff check --fix \"${CLAUDE_TOOL_INPUT_FILE_PATH}\" 2>/dev/null || true"
+        }]
+      }
+    ]
+  },
+  "env": {
+    "ANTHROPIC_API_KEY": "from .env file — do not hardcode",
+    "PROJECT_NAME": "teacherAssist",
+    "PYTHONPATH": "."
+  },
+  "agent": "claude"
+}

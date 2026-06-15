@@ -1,0 +1,50 @@
+# 环境 & 密钥
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 数据库文件
+*.db
+*.db-shm
+*.db-wal
+*.sqlite3
+
+# 上传文件
+uploads/
+
+# 模型文件（运行时挂载）
+models/
+*.bin
+
+# 测试 & 报告
+.pytest_cache/
+test_report.xml
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# 临时文件
+*.tmp
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

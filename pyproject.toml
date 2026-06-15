@@ -1,0 +1,14 @@
+[tool.pytest.ini_options]
+# JUnit XML 报告 — CI/CD 兼容，失败时附带完整堆栈
+addopts = "-v --junitxml=test_report.xml"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.ruff.format]
+quote-style = "double"

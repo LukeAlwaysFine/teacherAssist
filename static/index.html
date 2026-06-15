@@ -1,0 +1,2223 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-version="20250615-v4">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>教师助手</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+.container{max-width:900px;margin:0 auto;padding:20px}
+header{background:#fff;padding:16px 24px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:24px;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:20px;color:#1a73e8}
+.card{background:#fff;border-radius:8px;padding:24px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.card h2{font-size:16px;margin-bottom:16px;color:#1a73e8;border-bottom:2px solid #e8f0fe;padding-bottom:8px}
+.btn{padding:8px 20px;border:none;border-radius:6px;cursor:pointer;font-size:14px;transition:.2s}
+.btn-primary{background:#1a73e8;color:#fff}
+.btn-primary:hover{background:#1557b0}
+.btn-danger{background:#dc3545;color:#fff}
+.btn-danger:hover{background:#c82333}
+.btn-success{background:#28a745;color:#fff}
+.btn-success:hover{background:#218838}
+.btn-outline{background:#fff;border:1px solid #ddd}
+.btn-outline:hover{background:#f5f5f5}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-sm{padding:4px 12px;font-size:12px}
+.input,.textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:8px}
+.textarea{min-height:80px;resize:vertical;font-family:inherit}
+.input:focus,.textarea:focus{outline:none;border-color:#1a73e8;box-shadow:0 0 0 3px rgba(26,115,232,.15)}
+.engine-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:12px 0}
+.engine-card{padding:16px;border:2px solid #e0e0e0;border-radius:8px;cursor:pointer;transition:.2s;position:relative}
+.engine-card:hover{border-color:#1a73e8}
+.engine-card.selected{border-color:#1a73e8;background:#e8f0fe}
+.engine-card .name{font-size:16px;font-weight:600;margin-bottom:4px}
+.engine-card .meta{font-size:12px;color:#666;margin-bottom:8px}
+.engine-card ul{list-style:none;font-size:13px}
+.engine-card ul li{margin:3px 0}
+.engine-card .badge{position:absolute;top:8px;right:8px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge-rec{background:#28a745;color:#fff}
+.status-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff3cd;border-radius:6px;margin:8px 0;font-size:13px}
+.status-bar.success{background:#d4edda}
+.status-bar.error{background:#f8d7da}
+.progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden;margin:8px 0}
+.progress-bar .fill{height:100%;background:#1a73e8;transition:width .3s}
+.transcript-box{background:#f8f9fa;border-radius:6px;padding:12px;max-height:300px;overflow-y:auto;font-size:13px;white-space:pre-wrap}
+.report-section{margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;border-left:3px solid #1a73e8}
+.report-section h3{font-size:14px;margin-bottom:8px}
+.kp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.kp-item{padding:12px;background:#fff;border-radius:8px;border:1px solid #e0e0e0;transition:box-shadow .2s}
+.kp-item:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.kp-item .kp-name{font-weight:600;font-size:15px;margin-bottom:6px}
+.kp-item .kp-status{font-size:13px;font-weight:500;line-height:1.6}
+.kp-covered{color:#188038}
+.kp-mastered{color:#188038}
+.kp-uncertain{color:#e65100}
+.kp-not-mastered{color:#d93025}
+.kp-unknown{color:#888}
+.kp-uncovered{color:#999}
+.tabs{display:flex;gap:0;margin-bottom:16px}
+.tab{padding:8px 20px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:14px}
+.tab:first-child{border-radius:6px 0 0 6px}
+.tab:last-child{border-radius:0 6px 6px 0}
+.tab.active{background:#1a73e8;color:#fff;border-color:#1a73e8}
+.hidden{display:none!important}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(40,167,69,.4)}50%{box-shadow:0 0 0 8px rgba(40,167,69,0)}}
+.session-list-item{padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.session-list-item:hover{background:#f8f9fa}
+/* Auth */
+.auth-container{max-width:400px;margin:60px auto}
+.auth-tabs{display:flex;margin-bottom:0}
+.auth-tab{flex:1;padding:12px;text-align:center;background:#f0f0f0;border:1px solid #ddd;cursor:pointer;font-size:14px}
+.auth-tab:first-child{border-radius:6px 0 0 0}
+.auth-tab:last-child{border-radius:0 6px 0 0}
+.auth-tab.active{background:#fff;border-bottom-color:#fff}
+.auth-form{padding:24px;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 6px 6px}
+.auth-form .input{margin-bottom:12px}
+.error-msg{color:#dc3545;font-size:13px;margin:4px 0}
+/* Knowledge Outline Selector */
+.outline-selector{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.outline-selector select{padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px}
+.outline-tree{max-height:400px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:6px;background:#fafafa}
+.outline-unit{border-bottom:1px solid #eee}
+.outline-unit-header{padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;user-select:none}
+.outline-unit-header:hover{background:#f0f7ff}
+.outline-unit-header .arrow{font-size:10px;transition:transform .2s;color:#999}
+.outline-unit-header.open .arrow{transform:rotate(90deg)}
+.outline-unit-header .outline-point{font-size:13px;cursor:pointer;user-select:none}
+.outline-unit-body{padding:0 12px 8px 24px;display:none}
+.outline-unit-header.open+.outline-unit-body{display:block}
+.outline-section{border-top:1px solid #f0f0f0}
+.outline-section-header{padding:6px 0;cursor:pointer;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;user-select:none;color:#555}
+.outline-section-header:hover{background:#f5f9ff}
+.outline-section-header .arrow{font-size:9px;transition:transform .2s;color:#aaa}
+.outline-section-header.open .arrow{transform:rotate(90deg)}
+.outline-section-body{padding:0 8px 4px 18px;display:none}
+.outline-section-header.open+.outline-section-body{display:block}
+.outline-point{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:13px;cursor:pointer}
+.outline-point:hover{color:#1a73e8}
+.outline-point input[type=checkbox]{cursor:pointer;accent-color:#1a73e8}
+.selected-count{font-size:12px;color:#1a73e8;font-weight:600;margin-left:4px}
+.outline-actions{display:flex;gap:8px;margin-top:10px;align-items:center}
+.engine-card.disabled{opacity:.55;cursor:not-allowed;border-color:#eee;background:#f9f9f9}
+.engine-card.disabled:hover{border-color:#eee}
+.badge-unavailable{position:absolute;top:8px;right:8px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#dc3545;color:#fff}
+.unavailable-reason{font-size:12px;color:#dc3545;margin-top:8px;padding:6px 10px;background:#fff5f5;border-radius:4px;border-left:3px solid #dc3545;line-height:1.5}
+/* Step indicator */
+.step-indicator{display:flex;align-items:center;justify-content:center;margin-bottom:20px;gap:0}
+.step-item{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;user-select:none;background:#f0f0f0;color:#999}
+.step-item.active{background:#1a73e8;color:#fff}
+.step-item.done{background:#e8f5e9;color:#2e7d32;cursor:pointer}
+.step-item .step-num{display:inline-flex;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:rgba(0,0,0,.1)}
+.step-item.active .step-num{background:rgba(255,255,255,.3)}
+.step-item.done .step-num{background:#c8e6c9}
+.step-arrow{color:#ccc;font-size:14px;margin:0 2px}
+.step-content{padding:0}
+.step-content.hidden{display:none!important}
+/* Analyzing spinner */
+.analyzing-box{display:flex;align-items:center;gap:12px;padding:16px 20px;background:#fff8e1;border-radius:8px;border-left:4px solid #f9a825;margin:12px 0}
+.analyzing-box .spinner{border-width:3px;width:24px;height:24px;border-top-color:#f9a825}
+.analyzing-box .analyzing-text{font-size:14px;color:#e65100;font-weight:500}
+/* File upload */
+.file-upload-wrapper{position:relative;margin-top:8px}
+.file-upload-wrapper input[type=file]{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2}
+.file-upload-trigger{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:#fff;border:2px dashed #1a73e8;border-radius:8px;color:#1a73e8;font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
+.file-upload-trigger:hover{background:#e8f0fe;border-style:solid}
+.file-name{display:inline-block;margin-left:10px;padding:6px 12px;background:#e8f5e9;color:#2e7d32;border-radius:6px;font-size:13px;font-weight:500;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+/* Editable report */
+.editable-report{width:100%;min-height:600px;font-size:14px;line-height:1.8;padding:20px;border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;font-family:inherit;resize:none}
+.editable-report:focus{outline:none;border-color:#1a73e8;box-shadow:0 0 0 3px rgba(26,115,232,.1);background:#fff}
+/* Transcript method cards */
+.transcript-method{border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;overflow:hidden}
+.transcript-method-header{padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none;background:#fafafa;transition:background .15s}
+.transcript-method-header:hover{background:#e8f0fe}
+.transcript-method-header .method-arrow{font-size:10px;color:#999;transition:transform .2s;display:inline-block;width:16px;text-align:center}
+.transcript-method-header.open .method-arrow{transform:rotate(90deg)}
+.transcript-method-body{padding:16px;border-top:1px solid #eee;background:#fff}
+.transcript-method-body.hidden{display:none}
+.confirm-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:999;display:flex;align-items:center;justify-content:center}
+.confirm-dialog{background:#fff;border-radius:12px;padding:28px 32px;max-width:440px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.confirm-dialog h3{font-size:17px;margin-bottom:12px;color:#d84315}
+.confirm-dialog p{font-size:13px;line-height:1.7;color:#555;margin-bottom:10px}
+.confirm-dialog .confirm-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
+.confirm-dialog .confirm-input{width:100%;padding:8px 12px;border:2px solid #dc3545;border-radius:6px;font-size:14px;margin-top:8px}
+.confirm-dialog .confirm-input:focus{outline:none;box-shadow:0 0 0 3px rgba(220,53,69,.15)}
+</style>
+</head>
+<body>
+
+<!-- ========== Auth Page (when not logged in) ========== -->
+<div id="authPage" class="auth-container hidden">
+  <h1 style="text-align:center;color:#1a73e8;margin-bottom:24px">📚 教师助手</h1>
+  <div class="auth-tabs">
+    <div class="auth-tab active" onclick="switchAuthTab('login')">登录</div>
+    <div class="auth-tab" onclick="switchAuthTab('register')">注册</div>
+  </div>
+  <!-- Login form -->
+  <div class="auth-form" id="loginForm">
+    <input class="input" id="loginEmail" placeholder="邮箱" type="email">
+    <input class="input" id="loginPassword" placeholder="密码" type="password">
+    <div id="loginError" class="error-msg hidden"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="handleLogin()">登录</button>
+  </div>
+  <!-- Register form -->
+  <div class="auth-form hidden" id="registerForm">
+    <input class="input" id="regName" placeholder="姓名">
+    <input class="input" id="regEmail" placeholder="邮箱" type="email">
+    <input class="input" id="regPassword" placeholder="密码（6位以上）" type="password">
+    <select class="input" id="regRole">
+      <option value="teacher">教师</option>
+      <option value="student">学生</option>
+    </select>
+    <div id="regError" class="error-msg hidden"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="handleRegister()">注册</button>
+  </div>
+</div>
+
+<!-- ========== Main App (when logged in) ========== -->
+<div id="appPage" class="container hidden">
+<header>
+  <h1>📚 教师助手</h1>
+  <div>
+    <span id="userInfo" style="margin-right:12px;font-size:13px;color:#666"></span>
+    <button class="btn btn-outline btn-sm" onclick="logout()">退出</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('new')">➕ 新建课堂</button>
+  <button class="tab" onclick="switchTab('history')">📋 历史记录</button>
+</div>
+
+<!-- New Session -->
+<div id="tab-new">
+  <!-- Step indicator -->
+  <div class="step-indicator" style="margin-bottom:24px">
+    <div class="step-item active" id="stepItem1" onclick="goToStep(1)">
+      <span class="step-num">1</span> 课堂信息
+    </div>
+    <span class="step-arrow">▸</span>
+    <div class="step-item" id="stepItem2" onclick="goToStep(2)">
+      <span class="step-num">2</span> 录制转录
+    </div>
+    <span class="step-arrow">▸</span>
+    <div class="step-item" id="stepItem3" onclick="goToStep(3)">
+      <span class="step-num">3</span> 分析报告
+    </div>
+  </div>
+
+  <!-- 课堂信息摘要（历史记录查看 / 新建课堂均显示） -->
+  <div id="sessionInfoCard" class="card hidden" style="border-left:4px solid #1a73e8">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="font-size:16px;font-weight:700;color:#1a73e8" id="infoTitle"></span>
+      <span style="font-size:14px;color:#555" id="infoStudent"></span>
+      <span style="font-size:13px;color:#888" id="infoTime"></span>
+    </div>
+    <div style="margin-top:8px;font-size:13px;color:#666">
+      <strong>知识点大纲：</strong><span id="infoOutline"></span>
+    </div>
+  </div>
+
+  <!-- Step 1: 课堂信息 -->
+  <div id="step1" class="step-content">
+    <!-- 课堂信息（可折叠，默认展开） -->
+    <div class="transcript-method">
+      <div class="transcript-method-header open" onclick="toggleMethod('classInfo')">
+        <span class="method-arrow" id="methodArrowClassInfo">▶</span>
+        <strong>📋 课堂信息</strong>
+        <span style="font-size:12px;color:#888">填写学生、标题和时间</span>
+      </div>
+      <div class="transcript-method-body" id="methodBodyClassInfo">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="font-size:12px;color:#666">学生姓名</label>
+            <input class="input" id="studentName" placeholder="学生姓名" maxlength="50" style="margin-bottom:0">
+          </div>
+          <div>
+            <label style="font-size:12px;color:#666">课堂标题</label>
+            <input class="input" id="sessionTitle" placeholder="课堂标题（可选）" maxlength="200" style="margin-bottom:0">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+          <div>
+            <label style="font-size:12px;color:#666">上课开始时间</label>
+            <input class="input" id="classStartTime" placeholder="如 16:30" maxlength="20" style="margin-bottom:0">
+          </div>
+          <div>
+            <label style="font-size:12px;color:#666">上课结束时间</label>
+            <input class="input" id="classEndTime" placeholder="如 18:30" maxlength="20" style="margin-bottom:0">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 知识点大纲（可折叠，默认收起） -->
+    <div class="transcript-method">
+      <div class="transcript-method-header" onclick="toggleMethod('outline')">
+        <span class="method-arrow" id="methodArrowOutline">▶</span>
+        <strong>📖 知识点大纲</strong>
+        <span style="font-size:12px;color:#888">从教材中选择知识点</span>
+      </div>
+      <div class="transcript-method-body hidden" id="methodBodyOutline">
+        <div class="outline-selector" id="outlineSelector"></div>
+        <div class="outline-tree" id="outlineTree">
+          <div style="padding:20px;text-align:center;color:#999;font-size:13px">请选择学科和学段</div>
+        </div>
+        <div class="outline-actions">
+          <span class="selected-count" id="selectedCount"></span>
+          <button class="btn btn-outline btn-sm" onclick="toggleAllUnits(true)" style="display:none" id="btnSelectAll">全选当前</button>
+          <button class="btn btn-outline btn-sm" onclick="clearOutline()" style="display:none" id="btnClear">清空</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 已选知识点（可折叠，默认展开） -->
+    <div class="transcript-method" style="margin-top:8px">
+      <div class="transcript-method-header open" onclick="toggleMethod('selectedPoints')">
+        <span class="method-arrow" id="methodArrowSelectedPoints">▶</span>
+        <strong>📝 已选知识点</strong>
+        <span style="font-size:12px;color:#888">从上方大纲选择或手动输入</span>
+      </div>
+      <div class="transcript-method-body" id="methodBodySelectedPoints">
+        <textarea class="textarea" id="manualSupplement" placeholder="从上方大纲选择知识点，或直接在此手动输入（每行一个）" style="min-height:240px;font-size:13px;margin-bottom:0" oninput="syncToTextarea()"></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="btnCreateSession" onclick="createSession()" style="font-size:15px;padding:10px 32px;margin-top:20px">创建课堂 → 进入下一步</button>
+    <div id="createError" class="error-msg hidden" style="margin-top:8px"></div>
+  </div>
+
+  <!-- Step 2: 录制与转录 -->
+  <div id="step2" class="step-content hidden">
+    <!-- 转录状态 -->
+    <div class="card" id="statusCard">
+      <h2>📡 转录状态</h2>
+      <div id="statusDisplay" class="status-bar">
+        📝 状态：<strong id="sessionStatus">等待开始</strong>
+      </div>
+      <div style="font-size:12px;color:#666;margin-top:4px">
+        课堂 <strong id="sessionIdDisplay"></strong>
+        <span id="step2StudentInfo" style="margin-left:8px"></span>
+      </div>
+    </div>
+
+    <!-- 获取转录文本：三种方式 -->
+    <div class="card">
+      <h2>🎙️ 获取转录文本</h2>
+
+      <!-- 方式一：实时录制 -->
+      <div class="transcript-method" id="methodRecord">
+        <div class="transcript-method-header" onclick="toggleMethod('record')">
+          <span class="method-arrow" id="methodArrowRecord">▶</span>
+          <strong>🎤 实时录制</strong>
+          <span style="font-size:12px;color:#888">使用浏览器麦克风实时录音并转文字</span>
+        </div>
+        <div class="transcript-method-body hidden" id="methodBodyRecord">
+          <button class="btn btn-primary" onclick="startRecording()" id="btnStartRecord">
+            🎤 开始录制
+          </button>
+          <button class="btn btn-danger hidden" onclick="stopRecording()" id="btnStopRecord" style="margin-left:8px">
+            ⏹ 停止录制
+          </button>
+          <div style="margin-top:8px;font-size:13px;color:#666">
+            录制时长：<strong id="recordDuration">00:00</strong>
+          </div>
+          <div class="progress-bar"><div class="fill" id="recordProgress" style="width:0%"></div></div>
+          <h3 style="font-size:14px;margin-top:12px">实时转录结果：</h3>
+          <div class="transcript-box" id="liveTranscript">尚未开始录制...</div>
+        </div>
+      </div>
+
+      <!-- 方式二：上传音频文件 -->
+      <div class="transcript-method" id="methodUpload">
+        <div class="transcript-method-header" onclick="toggleMethod('upload')">
+          <span class="method-arrow" id="methodArrowUpload">▶</span>
+          <strong>📁 上传音频文件</strong>
+          <span style="font-size:12px;color:#888">上传已录制的音频文件进行转录</span>
+        </div>
+        <div class="transcript-method-body hidden" id="methodBodyUpload">
+          <div class="file-upload-wrapper">
+            <input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.opus" onchange="onFileSelected(this)">
+            <div class="file-upload-trigger">📁 点击选择音频文件</div>
+          </div>
+          <span id="selectedFileName" class="file-name" style="display:none"></span>
+          <h3 style="font-size:14px;margin:12px 0 8px">选择转录引擎</h3>
+          <div class="engine-cards" id="engineCards"></div>
+          <button class="btn btn-primary" onclick="uploadFile()" id="btnUpload" style="margin-top:8px;font-size:14px;padding:10px 24px">🚀 上传并开始转录</button>
+          <div id="uploadProgress" class="hidden" style="margin-top:8px">
+            <div class="progress-bar"><div class="fill" id="uploadFill" style="width:0%"></div></div>
+            <div style="font-size:12px;color:#666" id="uploadStatus"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 方式三：复用已有转录文档 -->
+      <div class="transcript-method" id="methodExisting">
+        <div class="transcript-method-header" onclick="toggleMethod('existing')">
+          <span class="method-arrow" id="methodArrowExisting">▶</span>
+          <strong>📄 复用已有文档</strong>
+          <span style="font-size:12px;color:#888">从历史课堂中选择已转录完成的文档直接使用</span>
+        </div>
+        <div class="transcript-method-body hidden" id="methodBodyExisting">
+          <div id="existingTranscriptsList" style="max-height:300px;overflow-y:auto">
+            <p style="color:#999;text-align:center;padding:12px;font-size:13px">加载中...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: 分析与报告 -->
+  <div id="step3" class="step-content hidden">
+    <div class="card">
+      <h2>🤖 课堂分析</h2>
+
+      <!-- 知识点大纲预览（可折叠） -->
+      <div class="transcript-method" style="margin-bottom:12px">
+        <div class="transcript-method-header" onclick="toggleMethod('outlinePreview')">
+          <span class="method-arrow" id="methodArrowOutlinePreview">▶</span>
+          <strong>📖 知识点大纲预览</strong>
+          <span style="font-size:12px;color:#888">分析前可再次编辑</span>
+        </div>
+        <div class="transcript-method-body hidden" id="methodBodyOutlinePreview">
+          <textarea class="textarea" id="updateOutline" placeholder="请先在第一步选择教材知识点大纲" readonly style="background:#f8f9fa;font-size:12px;margin-bottom:0"></textarea>
+          <button class="btn btn-outline btn-sm" onclick="enableEditOutline()" style="margin-top:4px">✏️ 解锁编辑</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="triggerAnalysis()" id="btnAnalyze" disabled>
+        🤖 开始 AI 分析（请先完成转录）
+      </button>
+      <button class="btn btn-outline" onclick="retriggerAnalysis()" id="btnReAnalyze" style="display:none;margin-left:8px">
+        🔄 重新分析
+      </button>
+      <div id="analyzingBox" class="hidden" style="padding:16px 20px;background:#fff8e1;border-radius:8px;border-left:4px solid #f9a825;margin:12px 0">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <div class="spinner" style="border-width:3px;width:24px;height:24px;border-top-color:#f9a825"></div>
+          <div id="analyzingStage" style="font-size:14px;color:#e65100;font-weight:500">准备分析...</div>
+        </div>
+        <div class="progress-bar" style="height:8px;background:#ffe0b2">
+          <div class="fill" id="analyzeFill" style="width:0%;background:#f9a825;transition:width .5s"></div>
+        </div>
+        <div style="font-size:11px;color:#999;margin-top:4px;text-align:right" id="analyzePct">0%</div>
+      </div>
+    </div>
+
+    <div id="analysisResults" class="hidden card">
+      <h2>📊 分析报告</h2>
+      <div id="reportContent"></div>
+    </div>
+
+    <div id="parentReportArea" class="hidden card">
+      <h2>📨 家长反馈报告</h2>
+      <div id="parentReportGenerating" class="analyzing-box hidden">
+        <div class="spinner"></div>
+        <div class="analyzing-text">正在生成家长报告...</div>
+      </div>
+      <div id="parentReportActions" class="hidden" style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <button class="btn btn-outline btn-sm" onclick="generateParentReport(true)" id="btnRegenReport">🔄 重新生成</button>
+        <button class="btn btn-primary btn-sm" onclick="saveReportEdits()" id="btnSaveReport">💾 保存修改</button>
+        <button class="btn btn-primary btn-sm" onclick="downloadReportImage()" id="btnDownloadImage">📷 生成图片</button>
+        <span style="font-size:11px;color:#888">报告可双击直接编辑</span>
+      </div>
+      <textarea id="parentReportContent" class="editable-report hidden" placeholder="报告内容..." style="resize:none;overflow-y:auto"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- History -->
+<div id="tab-history" class="hidden">
+  <!-- 列表 -->
+  <div id="historyListPane">
+    <button class="btn" style="width:100%;padding:12px 20px;background:#fff;border:2px solid #dc3545;border-radius:8px;color:#dc3545;font-size:15px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:8px"
+            onclick="showClearConfirm()"
+            onmouseenter="this.style.background='#fff5f5'"
+            onmouseleave="this.style.background='#fff'">
+      🗑️ 清空上传音频
+    </button>
+    <div style="font-size:11px;color:#999;margin-bottom:16px;line-height:1.6">
+      ⚠️ 操作不可逆，删除后音频文件无法恢复。仅删除音频，不影响转录文本和分析报告。
+      <span style="cursor:pointer;color:#1a73e8" onclick="this.nextElementSibling.classList.toggle('hidden')">更多 ›</span>
+      <span class="hidden" style="display:block;margin-top:4px;color:#888">
+        如课堂正在转录中，删除音频会导致转录失败。建议确认所有课堂已完成分析后再执行。
+      </span>
+    </div>
+
+    <div class="card">
+      <h2>历史课堂记录</h2>
+      <div id="sessionList"></div>
+    </div>
+
+  <!-- 详情（点击某条记录后显示） -->
+  <div id="historyDetailPane" class="hidden">
+    <div style="margin-bottom:12px">
+      <button class="btn btn-outline" onclick="backToHistoryList()">← 返回列表</button>
+      <span style="font-size:13px;color:#888;margin-left:12px" id="historyDetailTitle"></span>
+    </div>
+
+    <!-- 课堂信息 -->
+    <div class="card">
+      <h2>📋 课堂信息</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:14px">
+        <tr><td style="padding:6px 12px;color:#888;width:80px">标题</td><td style="padding:6px 0" id="hTitle"></td></tr>
+        <tr><td style="padding:6px 12px;color:#888">学生</td><td style="padding:6px 0" id="hStudent"></td></tr>
+        <tr><td style="padding:6px 12px;color:#888">时间</td><td style="padding:6px 0" id="hTime"></td></tr>
+        <tr><td style="padding:6px 12px;color:#888">科目</td><td style="padding:6px 0" id="hSubject"></td></tr>
+        <tr><td style="padding:6px 12px;color:#888">教材</td><td style="padding:6px 0" id="hTextbook"></td></tr>
+        <tr><td style="padding:6px 12px;color:#888">年级</td><td style="padding:6px 0" id="hGrade"></td></tr>
+        <tr><td style="padding:6px 12px;color:#888">状态</td><td style="padding:6px 0" id="hStatus"></td></tr>
+      </table>
+    </div>
+
+    <!-- 知识点大纲 -->
+    <div class="card">
+      <h2>📖 知识点大纲</h2>
+      <pre style="white-space:pre-wrap;font-size:14px;line-height:1.8;margin:0" id="hOutline"></pre>
+    </div>
+
+    <!-- 转录文本 -->
+    <div class="card" id="hTranscriptCard">
+      <h2>📝 转录文本</h2>
+      <div style="max-height:400px;overflow-y:auto;font-size:14px;line-height:1.8;white-space:pre-wrap;background:#f9f9f9;padding:16px;border-radius:8px" id="hTranscript"></div>
+    </div>
+
+    <!-- 分析报告 -->
+    <div class="card hidden" id="hAnalysisCard">
+      <h2>📊 分析报告</h2>
+      <div id="hAnalysis"></div>
+    </div>
+
+    <!-- 家长报告 -->
+    <div class="card hidden" id="hParentCard">
+      <h2>📨 家长反馈报告</h2>
+      <div id="hParentGenerating" class="analyzing-box hidden">
+        <div class="spinner"></div>
+        <div class="analyzing-text">正在生成家长报告...</div>
+      </div>
+      <div id="hParentActions" style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn btn-primary btn-sm" id="hBtnGenerate" onclick="generateHistoryParentReport(false)">📝 生成报告</button>
+        <button class="btn btn-outline btn-sm" id="hBtnRegen" onclick="regenerateHistoryReport()" style="display:none">🔄 重新生成</button>
+        <button class="btn btn-primary btn-sm" onclick="downloadHistoryReportImage()">📷 生成图片</button>
+      </div>
+      <textarea id="hParentContent" class="editable-report" placeholder="报告内容..." style="resize:none;overflow-y:auto"></textarea>
+    </div>
+  </div>
+</div>
+
+</div><!-- .container #appPage -->
+
+<script>
+// ═══════════════════════════════ Auth ═══════════════════════════════
+const API = '/api/v1';
+let authToken = null;
+let currentUser = null;
+
+function getHeaders() {
+  const h = {'Content-Type': 'application/json'};
+  if (authToken) h['Authorization'] = `Bearer ${authToken}`;
+  return h;
+}
+
+async function api(method, path, body, isForm) {
+  const opts = {method, headers: isForm ? {} : getHeaders()};
+  if (isForm && authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
+  if (body && !isForm) opts.body = JSON.stringify(body);
+  else if (body && isForm) opts.body = body;
+  const r = await fetch(API + path, opts);
+  if (r.status === 401) {
+    logout();
+    throw new Error('登录已过期，请重新登录');
+  }
+  return r.json();
+}
+
+async function apiRaw(method, path, body, isForm) {
+  const opts = {method, headers: isForm ? {} : getHeaders()};
+  if (isForm && authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
+  if (body && !isForm) opts.body = JSON.stringify(body);
+  else if (body && isForm) opts.body = body;
+  return fetch(API + path, opts);
+}
+
+function switchAuthTab(tab) {
+  const tabs = document.querySelectorAll('.auth-tab');
+  tabs[0].classList.toggle('active', tab === 'login');
+  tabs[1].classList.toggle('active', tab === 'register');
+  document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('registerForm').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('loginError').classList.add('hidden');
+  document.getElementById('regError').classList.add('hidden');
+}
+
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  if (!email || !password) { errEl.textContent = '请填写邮箱和密码'; errEl.classList.remove('hidden'); return; }
+  const res = await apiRaw('POST', '/auth/login', {email, password});
+  const data = await res.json();
+  if (res.ok && data.code === 200) {
+    authToken = data.data.access_token;
+    localStorage.setItem('ta_token', authToken);
+    localStorage.setItem('ta_user', JSON.stringify({email}));
+    showApp();
+  } else {
+    errEl.textContent = data.detail || data.message || '登录失败';
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function handleRegister() {
+  const full_name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const role = document.getElementById('regRole').value;
+  const errEl = document.getElementById('regError');
+  if (!full_name || !email || !password) {
+    errEl.textContent = '请填写所有字段'; errEl.classList.remove('hidden'); return;
+  }
+  if (password.length < 6) {
+    errEl.textContent = '密码至少 6 位'; errEl.classList.remove('hidden'); return;
+  }
+  const res = await apiRaw('POST', '/auth/register', {full_name, email, password, role});
+  const data = await res.json();
+  if (res.ok && data.code === 201) {
+    authToken = data.data.access_token;
+    localStorage.setItem('ta_token', authToken);
+    localStorage.setItem('ta_user', JSON.stringify({email, full_name}));
+    showApp();
+  } else {
+    errEl.textContent = data.detail || data.message || '注册失败';
+    errEl.classList.remove('hidden');
+  }
+}
+
+function logout() {
+  stopStatusPolling();
+  authToken = null;
+  currentUser = null;
+  localStorage.removeItem('ta_token');
+  localStorage.removeItem('ta_user');
+  localStorage.removeItem('ta_session_id');
+  currentSessionId = null;
+  // 清理所有状态
+  stepsCompleted = {1: false, 2: false, 3: false};
+  _parentReportGenerated = false;
+  _historyData = null;
+  selectedPoints = [];
+  currentSubject = null;
+  currentTextbook = null;
+  currentGrade = null;
+  document.getElementById('appPage').classList.add('hidden');
+  document.getElementById('authPage').classList.remove('hidden');
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+}
+
+function showApp() {
+  document.getElementById('authPage').classList.add('hidden');
+  document.getElementById('appPage').classList.remove('hidden');
+  const user = JSON.parse(localStorage.getItem('ta_user') || '{}');
+  document.getElementById('userInfo').textContent = user.email || '';
+  loadHistory();
+  startStatusPolling();
+}
+
+// Check stored token on load — validate before showing app
+(async function init() {
+  const token = localStorage.getItem('ta_token');
+  if (token) {
+    authToken = token;
+    // Validate token with a lightweight API call
+    try {
+      const r = await fetch(API + '/users/me', { headers: getHeaders() });
+      if (r.ok) {
+        showApp();
+        // 恢复上次打开的 session（刷新后自动回到分析步骤）
+        if (currentSessionId) {
+          await viewSession(currentSessionId);
+        }
+        return;
+      }
+    } catch (e) { /* network error — proceed to login */ }
+    // Token invalid or expired — clear and show login
+    localStorage.removeItem('ta_token');
+    localStorage.removeItem('ta_user');
+    localStorage.removeItem('ta_session_id');
+    authToken = null;
+    currentSessionId = null;
+  }
+  document.getElementById('authPage').classList.remove('hidden');
+})();
+
+// ═══════════════════════════════ App ═══════════════════════════════
+let currentSessionId = localStorage.getItem('ta_session_id') ? parseInt(localStorage.getItem('ta_session_id')) : null;
+let currentEngine = 'auto';
+let mediaRecorder = null;
+let recordTimer = null;
+let recordStartTime = null;
+let chunkIndex = 0;
+let currentStep = 1;  // 1=课堂信息, 2=录制转录, 3=分析报告
+let stepsCompleted = {1: false, 2: false, 3: false};
+let _statusPollTimer = null;  // 历史记录状态轮询
+let _parentReportGenerated = false;  // 家长报告是否已自动生成
+
+function goToStep(n) {
+  // 只允许跳转到已解锁的步骤
+  if (n === 1 || stepsCompleted[1]) {
+    // Step 1 始终可访问
+  }
+  if (n === 2 && !stepsCompleted[1]) return;
+  if (n === 3 && !stepsCompleted[2]) return;
+
+  currentStep = n;
+  document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+  document.getElementById('step' + n).classList.remove('hidden');
+
+  // 更新步骤指示器：保留已解锁步骤的 done 状态
+  document.querySelectorAll('.step-item').forEach((el, i) => {
+    el.classList.remove('active');
+    const stepNum = i + 1;
+    if (stepsCompleted[stepNum]) el.classList.add('done');
+    if (stepNum === n) { el.classList.add('active'); el.classList.remove('done'); }
+  });
+
+  // 进入 step 2 时加载引擎列表 + 已转录文档
+  if (n === 2 && currentSessionId) {
+    loadEngines();
+    loadExistingTranscripts();
+  }
+  // 进入 step 3 时加载 transcript + 自动生成家长报告
+  if (n === 3 && currentSessionId) {
+    if (!stepsCompleted[2]) pollSessionStatus();
+    const hasAnalysis = !document.getElementById('analysisResults').classList.contains('hidden');
+    if (!_parentReportGenerated && hasAnalysis) {
+      generateParentReport();
+    }
+  }
+}
+
+function unlockStep(n) {
+  stepsCompleted[n] = true;
+  if (n >= 1) {
+    document.getElementById('stepItem2').classList.add('done');
+  }
+  if (n >= 2) {
+    document.getElementById('stepItem3').classList.add('done');
+  }
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', (tab==='new'&&i===0)||(tab==='history'&&i===1));
+  });
+  document.getElementById('tab-new').classList.toggle('hidden', tab !== 'new');
+  document.getElementById('tab-history').classList.toggle('hidden', tab !== 'history');
+  if (tab === 'history') {
+    // 切到历史 tab 时始终显示列表
+    document.getElementById('historyDetailPane').classList.add('hidden');
+    document.getElementById('historyListPane').classList.remove('hidden');
+    _historyData = null;
+    loadHistory();
+  }
+  if (tab === 'new') {
+    document.getElementById('sessionInfoCard').classList.add('hidden');
+    document.getElementById('btnCreateSession').classList.remove('hidden');
+  }
+}
+
+async function loadEngines() {
+  const res = await api('GET', '/engines');
+  if (!res.data) return;
+  const cards = document.getElementById('engineCards');
+  const engines = res.data.engines || res.data.available || [];
+  cards.innerHTML = engines.map(e => {
+    const isDefault = e.id === (res.data.default_engine || 'whisper_cpu');
+    const disabled = !e.available;
+    const statusBadge = disabled
+      ? `<span class="badge badge-unavailable">不可用</span>`
+      : (isDefault ? '<span class="badge badge-rec">推荐</span>' : '');
+    const reasonHtml = disabled && e.unavailable_reason
+      ? `<div class="unavailable-reason">⚠️ ${e.unavailable_reason}</div>`
+      : '';
+    return `<div class="engine-card ${isDefault && !disabled ? 'selected' : ''} ${disabled ? 'disabled' : ''}"
+        ${disabled ? '' : `onclick="selectEngine('${e.id}')"`} id="eng-${e.id}">
+      ${statusBadge}
+      <div class="name">${e.name}</div>
+      <div class="meta">⚡ ${e.speed} &nbsp;|&nbsp; 💰 ${e.cost}</div>
+      <ul>${e.pros.map(p => `<li>✅ ${p}</li>`).join('')}</ul>
+      <ul>${e.cons.map(c => `<li>⚠️ ${c}</li>`).join('')}</ul>
+      <div style="font-size:11px;color:#999;margin-top:4px">硬件：${e.hardware_requirements}</div>
+      ${reasonHtml}
+    </div>`;
+  }).join('');
+
+  // If default engine is unavailable, auto-select first available
+  if (!engines.find(e => e.id === currentEngine && e.available)) {
+    const first = engines.find(e => e.available);
+    if (first) currentEngine = first.id;
+  }
+}
+
+function selectEngine(id) {
+  const card = document.getElementById('eng-' + id);
+  if (!card || card.classList.contains('disabled')) return;
+  currentEngine = id;
+  document.querySelectorAll('.engine-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+}
+
+// ═══ 已转录文档 ═══
+async function loadExistingTranscripts() {
+  const list = document.getElementById('existingTranscriptsList');
+  list.innerHTML = '<p style="color:#999;text-align:center;padding:12px;font-size:13px">加载中...</p>';
+  try {
+    const res = await api('GET', '/transcripts');
+    if (!res.data) { list.innerHTML = '<p style="color:#999;text-align:center;padding:12px">加载失败</p>'; return; }
+    const transcripts = res.data.transcripts || [];
+    if (!transcripts.length) {
+      list.innerHTML = '<p style="color:#999;text-align:center;padding:12px">暂无已转录文档</p>';
+      return;
+    }
+    list.innerHTML = transcripts.map(t => {
+      const idInfo = [];
+      if (t.student_name) idInfo.push('学生：' + e(t.student_name));
+      if (t.subject) idInfo.push('科目：' + e(t.subject));
+      if (t.grade) idInfo.push('年级：' + e(t.grade));
+      if (t.class_start_time && t.class_end_time) idInfo.push('时间：' + e(t.class_start_time) + '~' + e(t.class_end_time));
+      const textLen = t.text_length ? (t.text_length > 500 ? Math.round(t.text_length/500) + ' 页' : t.text_length + ' 字') : '';
+      const duration = t.audio_duration_seconds ? Math.round(t.audio_duration_seconds/60) + ' 分钟' : '';
+      const date = t.created_at ? t.created_at.substring(0, 10) : '';
+      return `<div class="transcript-item" onclick="useExistingTranscript(${t.session_id})"
+        style="padding:10px 12px;margin:4px 0;background:#f9f9f9;border-radius:6px;cursor:pointer;border:1px solid #e0e0e0;transition:.15s"
+        onmouseover="this.style.background='#e8f0fe';this.style.borderColor='#1a73e8'"
+        onmouseout="this.style.background='#f9f9f9';this.style.borderColor='#e0e0e0'">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="font-size:14px">${e(t.session_title || '未命名课堂')}</strong>
+          <span style="font-size:11px;color:#888">${date} · ${textLen}${duration ? ' · ' + duration : ''}</span>
+        </div>
+        <div style="font-size:12px;color:#666;margin-top:3px">${idInfo.join(' ｜ ')}</div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    list.innerHTML = '<p style="color:#dc3545;text-align:center;padding:12px">加载失败: ' + e.message + '</p>';
+  }
+}
+
+async function useExistingTranscript(sessionId) {
+  if (!currentSessionId) { alert('请先创建课堂'); return; }
+  if (sessionId === currentSessionId) { alert('当前已是该课堂的转录'); return; }
+  if (!confirm('将使用该文档的转录文本替换当前课堂的转录，确定继续？')) return;
+
+  try {
+    // 获取源 session 的转录
+    const res = await api('GET', `/sessions/${sessionId}`);
+    if (!res.data || !res.data.transcript || !res.data.transcript.full_text) {
+      alert('该文档没有转录文本'); return;
+    }
+    const text = res.data.transcript.full_text;
+
+    // 保存到当前 session 的转录
+    // 通过 upload 端点逻辑：直接后台保存转录文本
+    // 利用现有的 transcript 模型：直接写入
+    const headers = {};
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+    headers['Content-Type'] = 'application/json';
+    const r = await fetch(`${API}/sessions/${currentSessionId}/transcript`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({
+        full_text: text,
+        source_session_id: sessionId
+      })
+    });
+    if (r.status === 401) { logout(); return; }
+    if (r.ok) {
+      const btn = document.getElementById('btnAnalyze');
+      btn.disabled = false;
+      btn.textContent = '🤖 开始 AI 分析';
+      // 更新状态
+      document.getElementById('sessionStatus').textContent = '转录完成';
+      document.getElementById('statusDisplay').className = 'status-bar success';
+      // 展开录制区域显示导入的文本
+      toggleMethod('record');
+      document.getElementById('liveTranscript').textContent = text;
+      alert('转录文本已导入，可以开始分析');
+    } else {
+      const err = await r.json();
+      alert('导入失败: ' + (err.detail || err.message));
+    }
+  } catch (e) {
+    alert('导入失败: ' + e.message);
+  }
+}
+
+function onFileSelected(input) {
+  const nameEl = document.getElementById('selectedFileName');
+  if (input.files.length > 0) {
+    nameEl.textContent = '📎 ' + input.files[0].name + ' — 已添加';
+    nameEl.style.display = 'inline-block';
+  } else {
+    nameEl.style.display = 'none';
+  }
+}
+
+// ═══ 转录方式切换 ═══
+function toggleMethod(method) {
+  const body = document.getElementById('methodBody' + method.charAt(0).toUpperCase() + method.slice(1));
+  const arrow = document.getElementById('methodArrow' + method.charAt(0).toUpperCase() + method.slice(1));
+  const header = arrow.parentElement;
+  const isOpen = !body.classList.contains('hidden');
+  // 关闭所有
+  document.querySelectorAll('.transcript-method-body').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.transcript-method-header').forEach(el => el.classList.remove('open'));
+  // 打开当前
+  if (!isOpen) {
+    body.classList.remove('hidden');
+    header.classList.add('open');
+    if (method === 'existing') loadExistingTranscripts();
+    if (method === 'upload') loadEngines();
+  }
+}
+
+// ═══ Path A: Recording ═══
+async function startRecording() {
+  if (!currentSessionId) { alert('请先创建课堂'); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio: {channelCount: 1, sampleRate: 16000}});
+    mediaRecorder = new MediaRecorder(stream, {mimeType: 'audio/webm;codecs=opus'});
+    chunkIndex = 0;
+    recordStartTime = Date.now();
+    toggleMethod('record');
+    document.getElementById('liveTranscript').textContent = '';
+
+    mediaRecorder.ondataavailable = async (e) => {
+      if (e.data.size > 0) {
+        const form = new FormData();
+        form.append('file', e.data, `chunk_${chunkIndex}.webm`);
+        form.append('chunk_index', chunkIndex);
+        const r = await fetch(`${API}/sessions/${currentSessionId}/chunk?chunk_index=${chunkIndex}`, {
+          method: 'POST', headers: authToken ? {'Authorization': 'Bearer ' + authToken} : {}, body: form
+        });
+        const data = await r.json();
+        if (data.data && data.data.text) {
+          const el = document.getElementById('liveTranscript');
+          el.textContent += data.data.text + ' ';
+          el.scrollTop = el.scrollHeight;
+        }
+        chunkIndex++;
+      }
+    };
+
+    mediaRecorder.start(300000);
+    document.getElementById('btnStartRecord').disabled = true;
+    document.getElementById('sessionStatus').textContent = '录制中...';
+    document.getElementById('statusDisplay').className = 'status-bar';
+    recordTimer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - recordStartTime) / 1000);
+      document.getElementById('recordDuration').textContent =
+        `${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(elapsed%60).padStart(2,'0')}`;
+    }, 1000);
+  } catch (err) {
+    alert('无法访问麦克风: ' + err.message);
+  }
+}
+
+async function stopRecording() {
+  if (mediaRecorder) { mediaRecorder.stop(); mediaRecorder.stream.getTracks().forEach(t => t.stop()); }
+  clearInterval(recordTimer);
+  document.getElementById('btnStartRecord').disabled = false;
+  document.getElementById('sessionStatus').textContent = '录制完成';
+  document.getElementById('statusDisplay').className = 'status-bar success';
+  if (currentSessionId) await api('POST', `/sessions/${currentSessionId}/finish`);
+}
+
+// ═══ Path B/C/D: Upload ═══
+async function uploadFile() {
+  const fileInput = document.getElementById('fileInput');
+  if (!fileInput.files.length) { alert('请选择音频文件'); return; }
+  if (!currentSessionId) { alert('请先创建课堂'); return; }
+
+  const form = new FormData();
+  form.append('file', fileInput.files[0]);
+  form.append('engine_type', currentEngine);
+
+  document.getElementById('uploadProgress').classList.remove('hidden');
+  document.getElementById('uploadFill').style.width = '0%';
+  document.getElementById('uploadStatus').innerHTML = '上传中...';
+  document.getElementById('sessionStatus').textContent = '转录中...';
+  document.getElementById('statusDisplay').className = 'status-bar';
+
+  const r = await fetch(`${API}/sessions/${currentSessionId}/upload`, {
+    method: 'POST', headers: authToken ? {'Authorization': 'Bearer ' + authToken} : {}, body: form
+  });
+  const data = await r.json();
+  if (data.code === 200) {
+    document.getElementById('uploadStatus').innerHTML = `引擎: ${data.data.engine_label}<br>转录处理中...`;
+    pollTranscriptionProgress();
+  } else {
+    document.getElementById('uploadStatus').innerHTML = '失败: ' + (data.detail || data.message);
+    document.getElementById('statusDisplay').className = 'status-bar error';
+  }
+}
+
+// ═══ Poll transcription progress ═══
+async function pollTranscriptionProgress() {
+  if (!currentSessionId) return;
+
+  const fill = document.getElementById('uploadFill');
+  const status = document.getElementById('uploadStatus');
+  const sessionStatus = document.getElementById('sessionStatus');
+  const statusDisplay = document.getElementById('statusDisplay');
+
+  const poll = async () => {
+    try {
+      const res = await api('GET', `/sessions/${currentSessionId}/transcription-progress`);
+      if (!res.data) { setTimeout(poll, 2000); return; }
+      const p = res.data;
+      const pct = (p.progress_pct || 0).toFixed(1);
+
+      fill.style.width = pct + '%';
+
+      let html = `进度: ${pct}%`;
+      if (p.elapsed_seconds != null) {
+        html += ` | 已用: ${formatDuration(p.elapsed_seconds)}`;
+      }
+      if (p.estimated_remaining_seconds != null && p.estimated_remaining_seconds > 0) {
+        html += ` | 剩余: ${formatDuration(p.estimated_remaining_seconds)}`;
+      }
+      if (p.audio_duration_seconds) {
+        html += ` | 音频时长: ${formatDuration(p.audio_duration_seconds)}`;
+      }
+      if (p.latest_segment_time > 0 && p.audio_duration_seconds) {
+        html += `<br><span style="font-size:11px;color:#888">已转录: ${formatDuration(p.latest_segment_time)} / ${formatDuration(p.audio_duration_seconds)}</span>`;
+      }
+      if (p.start_time) {
+        const startDate = new Date(p.start_time * 1000);
+        html += `<br><span style="font-size:11px;color:#888">开始: ${startDate.toLocaleTimeString()}</span>`;
+      }
+      if (p.status === 'finalizing') {
+        html += '<br><span style="font-size:12px;color:#e67e22">⏳ 最终化中（尾清处理）...</span>';
+        fill.style.background = '#f39c12';
+        sessionStatus.textContent = '转录中（最终化）';
+        statusDisplay.className = 'status-bar';
+      } else if (p.status === 'completed') {
+        const endDate = p.end_time ? new Date(p.end_time * 1000) : new Date();
+        html += ` <span style="font-size:11px;color:#888">结束: ${endDate.toLocaleTimeString()}</span>`;
+        html += `<br><span style="font-size:11px;color:#28a745">总耗时: ${formatDuration(p.elapsed_seconds)}</span>`;
+        fill.style.width = '100%';
+        fill.style.background = '#28a745';
+        sessionStatus.textContent = '转录完成';
+        statusDisplay.className = 'status-bar success';
+        status.innerHTML = html;
+        // 显示完成通知
+        showTranscriptionCompleteNotice();
+        // 自动加载转录文本
+        setTimeout(() => pollSessionStatus(), 1000);
+        return;
+      } else if (p.status === 'failed') {
+        html += `<br><span style="font-size:12px;color:#dc3545">❌ 失败: ${e(p.error_message || '未知错误')}</span>`;
+        fill.style.background = '#dc3545';
+        sessionStatus.textContent = '转录失败';
+        statusDisplay.className = 'status-bar error';
+        status.innerHTML = html;
+        return;
+      }
+      status.innerHTML = html;
+    } catch(e) {}
+    setTimeout(poll, 1500);
+  };
+  poll();
+}
+
+function formatDuration(seconds) {
+  if (seconds == null || seconds < 0) return '—';
+  const m = Math.floor(seconds / 60);
+  const s = Math.round(seconds % 60);
+  if (m > 0) return `${m}分${s}秒`;
+  return `${s}秒`;
+}
+
+// ═══ Completion notice ═══
+function showTranscriptionCompleteNotice() {
+  // 显示醒目的完成提示
+  const statusEl = document.getElementById('uploadStatus');
+  statusEl.innerHTML += '<br><span style="font-size:14px;font-weight:600;color:#28a745">✅ 转录完成！点击上方"分析报告"进入下一步</span>';
+  // 高亮分析按钮
+  const btn = document.getElementById('btnAnalyze');
+  btn.disabled = false;
+  btn.textContent = '🤖 开始 AI 分析';
+  // 解锁 step 3
+  unlockStep(2);
+  // 更新 step indicator
+  document.getElementById('stepItem3').classList.add('done');
+  document.getElementById('stepItem2').classList.add('done');
+  // 自动跳转到 step 3
+  setTimeout(() => goToStep(3), 1500);
+}
+
+// ═══ Poll session (after transcription complete) ═══
+async function pollSessionStatus() {
+  if (!currentSessionId) return;
+  const poll = async () => {
+    const res = await api('GET', `/sessions/${currentSessionId}`);
+    if (!res.data) { setTimeout(poll, 3000); return; }
+    const s = res.data;
+    document.getElementById('sessionStatus').textContent =
+      statusLabelPlain(s.status);
+    if (s.transcript) {
+      document.getElementById('liveTranscript').textContent = s.transcript.full_text || '';
+      // 转录已就绪，启用分析按钮
+      const btn = document.getElementById('btnAnalyze');
+      btn.disabled = false;
+      btn.textContent = '🤖 开始 AI 分析';
+    }
+    if (s.analysis) { showAnalysis(s.analysis); return; }
+    if (s.status === 'completed' || s.status === 'failed') return;
+    setTimeout(poll, 3000);
+  };
+  poll();
+}
+
+// ═══ Analysis ═══
+async function triggerAnalysis() {
+  if (!currentSessionId) { alert('请先创建课堂'); return; }
+  const btn = document.getElementById('btnAnalyze');
+  const btnRe = document.getElementById('btnReAnalyze');
+  const box = document.getElementById('analyzingBox');
+  btn.disabled = true;
+  btn.textContent = '⏳ 分析中...';
+  btn.style.display = 'none';
+  btnRe.style.display = 'none';
+  // 清空旧结果
+  _parentReportGenerated = false;
+  document.getElementById('analysisResults').classList.add('hidden');
+  document.getElementById('reportContent').innerHTML = '';
+  document.getElementById('parentReportArea').classList.add('hidden');
+  document.getElementById('parentReportContent').classList.add('hidden');
+  document.getElementById('parentReportActions').classList.add('hidden');
+  box.classList.remove('hidden');
+  document.getElementById('analyzeFill').style.width = '0%';
+  document.getElementById('analyzeFill').style.background = '#f9a825';
+  document.getElementById('analyzePct').textContent = '0%';
+  document.getElementById('analyzingStage').textContent = '准备分析...';
+  document.getElementById('sessionStatus').textContent = '分析中...';
+  document.getElementById('statusDisplay').className = 'status-bar';
+  const res = await api('POST', `/sessions/${currentSessionId}/analyze`);
+  if (res.code === 200) { pollAnalysisProgress(); }
+  else {
+    alert('分析触发失败: ' + (res.detail || res.message));
+    btn.style.display = '';
+    btn.disabled = false;
+    btn.textContent = '🤖 开始 AI 分析';
+    box.classList.add('hidden');
+  }
+}
+
+// 重新分析（基于已有转录）
+async function retriggerAnalysis() {
+  if (!confirm('将基于当前转录重新进行分析，之前的分析结果会被覆盖。确定继续？')) return;
+  await triggerAnalysis();
+}
+
+async function pollAnalysisProgress() {
+  // 同时轮询进度和最终结果
+  const pollProgress = async () => {
+    try {
+      const res = await api('GET', `/sessions/${currentSessionId}/analysis-progress`);
+      if (res.data) {
+        const pct = res.data.progress_pct || 0;
+        document.getElementById('analyzeFill').style.width = pct + '%';
+        document.getElementById('analyzePct').textContent = Math.round(pct) + '%';
+        document.getElementById('analyzingStage').textContent = res.data.stage || '分析中...';
+      }
+    } catch(e) {}
+    setTimeout(pollProgress, 1200);
+  };
+  pollProgress();
+
+  // 轮询最终结果
+  const btn = document.getElementById('btnAnalyze');
+  const box = document.getElementById('analyzingBox');
+  const pollResult = async () => {
+    const res = await api('GET', `/sessions/${currentSessionId}`);
+    if (res.data && res.data.analysis) {
+      // 完成
+      document.getElementById('analyzeFill').style.width = '100%';
+      document.getElementById('analyzeFill').style.background = '#28a745';
+      document.getElementById('analyzePct').textContent = '100%';
+      document.getElementById('analyzingStage').textContent = '✅ 分析完成';
+      setTimeout(() => { box.classList.add('hidden'); }, 800);
+      btn.style.display = '';
+      btn.textContent = '✅ 分析完成';
+      btn.disabled = true;
+      document.getElementById('btnReAnalyze').style.display = 'inline-block';
+      showAnalysis(res.data.analysis);
+      document.getElementById('sessionStatus').textContent = '已完成';
+      document.getElementById('statusDisplay').className = 'status-bar success';
+      generateParentReport();
+    } else if (res.data && res.data.status === 'failed') {
+      document.getElementById('analyzeFill').style.background = '#dc3545';
+      document.getElementById('analyzingStage').textContent = '❌ 分析失败';
+      box.querySelector('.spinner').style.display = 'none';
+      btn.style.display = '';
+      btn.className = 'btn btn-danger';
+      btn.textContent = '❌ 失败，重试';
+      btn.disabled = false;
+      document.getElementById('sessionStatus').textContent = '失败';
+      document.getElementById('statusDisplay').className = 'status-bar error';
+    } else {
+      setTimeout(pollResult, 3000);
+    }
+  };
+  pollResult();
+}
+
+// ═══ Display ═══
+let _fullTranscript = '';  // 缓存完整转录
+function toggleFullTranscript(btn) {
+  const box = btn.previousElementSibling;
+  if (btn.dataset.expanded === '1') {
+    // 收起
+    const lines = _fullTranscript.split('\n');
+    box.innerHTML = e(lines.slice(0, 10).join('\n')) + `\n<span style="color:#999;font-style:italic">... 共 ${lines.length} 行，仅显示前 10 行</span>`;
+    btn.textContent = '📋 显示全部转录';
+    btn.dataset.expanded = '0';
+  } else {
+    // 展开
+    box.innerHTML = e(_fullTranscript);
+    btn.textContent = '📋 收起转录';
+    btn.dataset.expanded = '1';
+  }
+}
+
+function showAnalysis(analysis) {
+  const div = document.getElementById('analysisResults');
+  div.classList.remove('hidden');
+  let html = '';
+  if (analysis.cleaned_transcript) {
+    _fullTranscript = analysis.cleaned_transcript;
+    const lines = _fullTranscript.split('\n');
+    const collapsed = lines.length > 10;
+    const preview = collapsed ? lines.slice(0, 10).join('\n') : _fullTranscript;
+    html += `<div class="report-section"><h3>📝 清理后的转录</h3>`;
+    html += `<div class="transcript-box">${e(preview)}`;
+    if (collapsed) {
+      html += `\n<span style="color:#999;font-style:italic">... 共 ${lines.length} 行，仅显示前 10 行</span>`;
+    }
+    html += `</div>`;
+    if (collapsed) {
+      html += `<button class="btn btn-outline btn-sm" style="margin-top:6px" onclick="toggleFullTranscript(this)" data-expanded="0">📋 显示全部转录</button>`;
+    }
+    html += `</div>`;
+  }
+  if (analysis.knowledge_points && analysis.knowledge_points.length) {
+    // 图例
+    html += `<div class="report-section"><h3>📖 知识点覆盖</h3>
+      <div style="font-size:11px;color:#888;margin-bottom:10px;display:flex;gap:16px;flex-wrap:wrap">
+        <span>🟢 已掌握</span><span>🟡 存疑</span><span>🔴 未掌握</span><span>⚪ 待确认</span><span style="color:#999">— 未覆盖</span>
+      </div>`;
+
+    // 先已覆盖的，再未覆盖的
+    const covered = analysis.knowledge_points.filter(k => k.covered);
+    const uncovered = analysis.knowledge_points.filter(k => !k.covered);
+    const sorted = [...covered, ...uncovered];
+
+    sorted.forEach((kp, idx) => {
+      let borderColor = '#e0e0e0', statusText = '', statusColor = '#888';
+      if (kp.covered) {
+        const level = kp.student_understanding || '';
+        if (level === '已掌握') { borderColor = '#28a745'; statusText = '已掌握'; statusColor = '#28a745'; }
+        else if (level === '存疑') { borderColor = '#f9a825'; statusText = '存疑'; statusColor = '#e65100'; }
+        else if (level === '未掌握') { borderColor = '#dc3545'; statusText = '未掌握'; statusColor = '#dc3545'; }
+        else { borderColor = '#999'; statusText = '待确认'; statusColor = '#888'; }
+      } else {
+        statusText = '未覆盖'; statusColor = '#999'; borderColor = '#ddd';
+      }
+      const evidenceText = kp.evidence || '';
+      const placeholderPatterns = ['课堂转录中未找到', '未找到该知识点', '转录中未提及', '未找到相关讨论'];
+      const hasEvidence = evidenceText && !placeholderPatterns.some(p => evidenceText.includes(p));
+      const evidenceId = 'kpEvidence_' + idx;
+      html += `<div class="kp-item" style="border-left:4px solid ${borderColor};margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1">
+            <div class="kp-name" style="margin-bottom:2px">${e(kp.name)}</div>
+            <span style="font-size:12px;color:${statusColor};font-weight:500">${statusText}</span>
+          </div>
+          ${kp.time_spent_minutes ? `<span style="font-size:11px;color:#888;white-space:nowrap">⏱ ${kp.time_spent_minutes} 分钟</span>` : ''}
+        </div>
+        ${hasEvidence ? `
+          <div id="${evidenceId}" style="display:none;font-size:12px;color:#555;margin-top:6px;padding-top:6px;border-top:1px solid #f0f0f0;line-height:1.6">📝 ${e(evidenceText)}</div>
+          <button class="btn btn-outline btn-sm" style="margin-top:6px;font-size:11px" onclick="const e=document.getElementById('${evidenceId}');const t=this;if(e.style.display==='none'){e.style.display='block';t.textContent='收起证据'}else{e.style.display='none';t.textContent='查看证据'}">查看证据</button>
+        ` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  if (analysis.classroom_performance) {
+    const cp = analysis.classroom_performance;
+    html += `<div class="report-section"><h3>🙋 课堂互动</h3>
+      <p>学生提问：<strong>${cp.student_questions_count} 次</strong> | 参与度：<strong>${cp.engagement_level}</strong> | 对话比：<strong>${cp.teacher_student_ratio}</strong></p>
+      ${cp.key_questions?.length ? `<p>关键问题：${cp.key_questions.map(q => e(q)).join('；')}</p>` : ''}
+    </div>`;
+  }
+  if (analysis.reinforcement_plan && analysis.reinforcement_plan.length) {
+    html += `<div class="report-section"><h3>💪 巩固建议</h3>
+      <div style="font-size:11px;color:#888;margin-bottom:8px;display:flex;gap:16px;flex-wrap:wrap">
+        <span>🔴 高优先级：需要立即重点巩固</span>
+        <span>🟡 中优先级：建议近期加强练习</span>
+        <span>🟢 低优先级：适当关注即可</span>
+      </div>${
+      analysis.reinforcement_plan.map(item => `<div style="margin:6px 0;padding:8px;background:#fff;border-radius:4px">
+        <strong>${item.priority==='高'?'🔴':item.priority==='中'?'🟡':'🟢'} ${e(item.area)}</strong>
+        ${item.reason?`<div style="font-size:13px;color:#666">${e(item.reason)}</div>`:''}
+        ${item.suggested_exercise_type?`<div style="font-size:13px;color:#1a73e8">建议：${e(item.suggested_exercise_type)}</div>`:''}
+      </div>`).join('')
+    }</div>`;
+  }
+  document.getElementById('reportContent').innerHTML = html;
+  // Show parent report area (analysis data now available)
+  document.getElementById('parentReportArea').classList.remove('hidden');
+}
+
+// ═══ Parent Report ═══
+async function generateParentReport(forceRegen = false) {
+  if (!currentSessionId) { alert('请先创建课堂并完成分析'); return; }
+  _parentReportGenerated = true;
+
+  // 从 session 数据获取 subject/date/time
+  const formData = new FormData();
+  // subject 默认用学生姓名
+  const subject = document.getElementById('studentName').value.trim();
+  formData.append('subject', subject || '');
+  // date 用今天
+  const today = new Date();
+  formData.append('class_date', today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日');
+  // time 从 session 时间字段获取
+  const startTime = document.getElementById('classStartTime').value.trim();
+  const endTime = document.getElementById('classEndTime').value.trim();
+  formData.append('class_time', (startTime && endTime) ? startTime + '-' + endTime : '');
+
+  // 显示生成中
+  document.getElementById('parentReportGenerating').classList.remove('hidden');
+  document.getElementById('parentReportActions').classList.add('hidden');
+  document.getElementById('parentReportContent').classList.add('hidden');
+
+  try {
+    const opts = { method: 'POST', headers: {} };
+    if (authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
+    opts.body = formData;
+    const url = `${API}/sessions/${currentSessionId}/parent-report${forceRegen ? '?regenerate=true' : ''}`;
+    const r = await fetch(url, opts);
+    if (r.status === 401) { logout(); return; }
+    const res = await r.json();
+    if (res.code === 200) {
+      const textarea = document.getElementById('parentReportContent');
+      const reportText = (res.data.report || '').trim();
+      if (!reportText) {
+        // 报告为空 — 分析数据可能不完整
+        textarea.value = '⚠️ 家长报告生成失败，分析数据不完整。\n\n' +
+          '可能原因：上一次分析时返回被截断。\n' +
+          '请点击上方"🔄 重新分析"按钮，基于已有转录重新生成分析报告。';
+        textarea.style.color = '#dc3545';
+      } else {
+        textarea.value = reportText;
+        textarea.style.color = '';
+      }
+      textarea.classList.remove('hidden');
+      document.getElementById('parentReportActions').classList.remove('hidden');
+      document.getElementById('parentReportGenerating').classList.add('hidden');
+    } else {
+      alert('生成失败: ' + (res.detail || res.message));
+      document.getElementById('parentReportGenerating').classList.add('hidden');
+    }
+  } catch (e) {
+    alert('生成失败: ' + e.message);
+    document.getElementById('parentReportGenerating').classList.add('hidden');
+  }
+}
+
+function saveReportEdits() {
+  const textarea = document.getElementById('parentReportContent');
+  // 保存到 localStorage 作为草稿
+  const key = 'report_draft_' + currentSessionId;
+  localStorage.setItem(key, textarea.value);
+  const btn = document.getElementById('btnSaveReport');
+  const orig = btn.textContent;
+  btn.textContent = '✅ 已保存';
+  btn.style.background = '#28a745';
+  btn.style.color = '#fff';
+  setTimeout(() => {
+    btn.textContent = orig;
+    btn.style.background = '';
+    btn.style.color = '';
+  }, 1500);
+}
+
+// ═══ Report Image Download ═══
+async function downloadReportImage() {
+  if (!currentSessionId) { alert('请先完成课堂分析'); return; }
+
+  const btn = document.getElementById('btnDownloadImage');
+  const origText = btn.textContent;
+  btn.textContent = '⏳ 生成中...';
+  btn.disabled = true;
+
+  try {
+    const headers = {};
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const r = await fetch(`${API}/sessions/${currentSessionId}/report-image`, {
+      method: 'POST',
+      headers,
+    });
+
+    if (r.status === 401) { logout(); return; }
+    if (!r.ok) {
+      const err = await r.json();
+      throw new Error(err.detail || '生成失败');
+    }
+
+    // 下载图片
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    // 从 Content-Disposition 解析文件名（优先 RFC 5987 编码）
+    const disposition = r.headers.get('Content-Disposition');
+    let filename = '课堂分析报告.png';
+    if (disposition) {
+      // 优先解析 RFC 5987: filename*=UTF-8''encoded_value
+      const starMatch = disposition.match(/filename\*=UTF-8''(.+?)(?:;|$)/i);
+      if (starMatch) {
+        filename = decodeURIComponent(starMatch[1]);
+      } else {
+        const match = disposition.match(/filename="?(.+?)"?$/);
+        if (match) filename = match[1];
+      }
+    }
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('图片生成失败: ' + e.message);
+  } finally {
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
+}
+
+// ═══ 全局状态映射 ═══
+const STATUS_LABEL = {created:'📝 已创建',recording:'🔴 录制中',transcribing:'🔄 转录中',transcribed:'✅ 转录完成',analyzing:'🤖 分析中',completed:'✅ 已完成',failed:'❌ 失败'};
+const STATUS_LABEL_PLAIN = {created:'已创建',recording:'录制中',transcribing:'转录中',transcribed:'转录完成',analyzing:'分析中',completed:'已完成',failed:'失败'};
+const STATUS_COLOR = {completed:'#d4edda',failed:'#f8d7da',transcribed:'#d1ecf1',analyzing:'#fff3cd',transcribing:'#fff3cd',recording:'#fce4ec',created:'#f5f5f5'};
+function statusLabel(s) { return STATUS_LABEL[s] || s; }
+function statusLabelPlain(s) { return STATUS_LABEL_PLAIN[s] || s; }
+
+async function loadHistory() {
+  const list = document.getElementById('sessionList');
+  try {
+    const res = await api('GET', '/sessions?page=1&page_size=50');
+    if (!res || !res.data) {
+      list.innerHTML = '<p style="color:#dc3545;text-align:center;padding:20px">加载失败：服务器返回数据为空</p>';
+      return;
+    }
+    const sessions = res.data.sessions || [];
+    if (!sessions.length) {
+      list.innerHTML = '<p style="color:#999;text-align:center;padding:20px">暂无历史记录<br><span style="font-size:12px">（当前账号 ' + (JSON.parse(localStorage.getItem('ta_user')||'{}').email || '未知') + ' 下没有课堂）</span></p>';
+      return;
+    }
+  list.innerHTML = sessions.map(s => {
+    const student = s.student_name ? `<span style="font-size:13px;color:#1a73e8;font-weight:500">${e(s.student_name)}</span>` : '';
+    const time = s.class_start_time ? `<span style="font-size:11px;color:#888">${e(s.class_start_time)}</span>` : '';
+    const date = (s.created_at||'').substring(0,16);
+    const stLabel = statusLabel(s.status);
+    const bg = STATUS_COLOR[s.status] || '#fff3cd';
+    return `<div class="session-list-item" onclick="viewHistoryDetail(${s.id})">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          ${student}
+          <strong>${e(s.title)}</strong>
+        </div>
+        <div style="font-size:11px;color:#999;margin-top:2px">
+          ${date} ${time ? '| ' + time : ''}
+          ${s.class_end_time ? ' - ' + e(s.class_end_time) : ''}
+        </div>
+      </div>
+      <span style="font-size:12px;padding:3px 10px;border-radius:10px;background:${bg};white-space:nowrap">${stLabel}</span>
+    </div>`;
+  }).join('');
+  } catch (e) {
+    list.innerHTML = '<p style="color:#dc3545;text-align:center;padding:20px">加载失败：' + e.message + '</p>';
+  }
+}
+
+// ═══ History Detail ═══
+let _historyData = null;  // 当前查看的 session 数据
+
+async function viewHistoryDetail(id) {
+  const res = await api('GET', `/sessions/${id}`);
+  if (!res.data) {
+    alert('该课堂记录不存在或已被删除');
+    loadHistory();
+    return;
+  }
+  const s = res.data;
+  _historyData = s;
+
+  // 隐藏列表，显示详情
+  document.getElementById('historyListPane').classList.add('hidden');
+  document.getElementById('historyDetailPane').classList.remove('hidden');
+  document.getElementById('historyDetailTitle').textContent = `#${id} ${s.title || '未命名课堂'}`;
+
+  // 课堂信息
+  document.getElementById('hTitle').textContent = s.title || '未命名课堂';
+  document.getElementById('hStudent').textContent = s.student_name || '（未填写）';
+  document.getElementById('hTime').textContent = (s.class_start_time && s.class_end_time)
+    ? s.class_start_time + ' ~ ' + s.class_end_time : '（未填写）';
+  document.getElementById('hSubject').textContent = s.subject || '（未选择）';
+  document.getElementById('hTextbook').textContent = s.textbook || '（未选择）';
+  document.getElementById('hGrade').textContent = s.grade || '（未选择）';
+  const stLabel = statusLabel(s.status);
+  document.getElementById('hStatus').innerHTML = `<span style="padding:2px 10px;border-radius:10px;background:${STATUS_COLOR[s.status]||'#fff3cd'}">${stLabel}</span>`;
+
+  // 知识点大纲
+  document.getElementById('hOutline').textContent = s.knowledge_outline || '（未设置）';
+
+  // 转录文本
+  if (s.transcript && s.transcript.full_text) {
+    document.getElementById('hTranscript').textContent = s.transcript.full_text;
+    document.getElementById('hTranscriptCard').classList.remove('hidden');
+  } else {
+    document.getElementById('hTranscript').textContent = '暂无转录数据';
+    document.getElementById('hTranscriptCard').classList.remove('hidden');
+  }
+
+  // 分析报告
+  if (s.analysis) {
+    document.getElementById('hAnalysisCard').classList.remove('hidden');
+    // 渲染分析报告（复用 showAnalysis 的数据，但渲染到 hAnalysis）
+    const a = s.analysis;
+    let html = '';
+    if (a.knowledge_points && a.knowledge_points.length) {
+      html += '<div class="report-section"><h3>📖 知识点覆盖</h3>' +
+        '<div style="font-size:11px;color:#888;margin-bottom:10px;display:flex;gap:16px;flex-wrap:wrap">' +
+        '<span>🟢 已掌握</span><span>🟡 存疑</span><span>🔴 未掌握</span><span>⚪ 待确认</span><span style="color:#999">— 未覆盖</span></div>';
+      a.knowledge_points.forEach((kp, idx) => {
+        let borderColor = '#e0e0e0', statusText = '', statusColor = '#888';
+        if (kp.covered) {
+          const level = kp.student_understanding || '';
+          if (level === '已掌握') { borderColor = '#28a745'; statusText = '已掌握'; statusColor = '#28a745'; }
+          else if (level === '存疑') { borderColor = '#f9a825'; statusText = '存疑'; statusColor = '#e65100'; }
+          else if (level === '未掌握') { borderColor = '#dc3545'; statusText = '未掌握'; statusColor = '#dc3545'; }
+          else { borderColor = '#999'; statusText = '待确认'; statusColor = '#888'; }
+        } else { statusText = '未覆盖'; statusColor = '#999'; borderColor = '#ddd'; }
+        const ev = kp.evidence || '';
+        const evId = 'hkp_' + idx;
+        html += `<div class="kp-item" style="border-left:4px solid ${borderColor};margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div><div class="kp-name">${e(kp.name)}</div><span style="font-size:12px;color:${statusColor};font-weight:500">${statusText}</span></div>
+            ${kp.time_spent_minutes ? `<span style="font-size:11px;color:#888;white-space:nowrap">⏱ ${kp.time_spent_minutes}分</span>` : ''}
+          </div>
+          ${ev ? `<div id="${evId}" style="display:none;font-size:12px;color:#555;margin-top:6px;padding-top:6px;border-top:1px solid #f0f0f0;line-height:1.6">📝 ${e(ev)}</div>
+          <button class="btn btn-outline btn-sm" style="margin-top:6px;font-size:11px" onclick="const el=document.getElementById('${evId}');const t=this;if(el.style.display==='none'){el.style.display='block';t.textContent='收起证据'}else{el.style.display='none';t.textContent='查看证据'}">查看证据</button>` : ''}
+        </div>`;
+      });
+      html += '</div>';
+    }
+    if (a.classroom_performance) {
+      const cp = a.classroom_performance;
+      html += `<div class="report-section"><h3>🙋 课堂互动</h3>
+        <p>提问：<strong>${cp.student_questions_count} 次</strong> | 参与度：<strong>${cp.engagement_level||'—'}</strong> | 对话比：<strong>${cp.teacher_student_ratio||'—'}</strong></p>
+        ${cp.key_questions?.length ? `<p>关键问题：${cp.key_questions.map(q=>e(q)).join('；')}</p>` : ''}
+      </div>`;
+    }
+    if (a.reinforcement_plan && a.reinforcement_plan.length) {
+      html += '<div class="report-section"><h3>💪 巩固建议</h3>' +
+        a.reinforcement_plan.map(item => `<div style="margin:6px 0;padding:8px;background:#fff;border-radius:4px">
+          <strong>${item.priority==='高'?'🔴':item.priority==='中'?'🟡':'🟢'} ${e(item.area)}</strong>
+          ${item.reason?`<div style="font-size:13px;color:#666">${e(item.reason)}</div>`:''}
+          ${item.suggested_exercise_type?`<div style="font-size:13px;color:#1a73e8">建议：${e(item.suggested_exercise_type)}</div>`:''}
+        </div>`).join('') + '</div>';
+    }
+    document.getElementById('hAnalysis').innerHTML = html || '（分析数据为空）';
+  } else {
+    document.getElementById('hAnalysisCard').classList.add('hidden');
+  }
+
+  // 家长报告
+  if (s.analysis && s.status === 'completed') {
+    document.getElementById('hParentCard').classList.remove('hidden');
+    document.getElementById('hParentGenerating').classList.add('hidden');
+    if (s.analysis.parent_report) {
+      // 有缓存 → 直接显示
+      document.getElementById('hParentContent').value = s.analysis.parent_report;
+      document.getElementById('hParentContent').classList.remove('hidden');
+      document.getElementById('hBtnGenerate').style.display = 'none';
+      document.getElementById('hBtnRegen').style.display = '';
+      document.getElementById('hParentActions').classList.remove('hidden');
+    } else {
+      // 无缓存 → 显示占位，等用户手动点击生成
+      document.getElementById('hParentContent').value = '';
+      document.getElementById('hParentContent').placeholder = '点击下方「生成报告」按钮生成家长反馈报告';
+      document.getElementById('hParentContent').classList.remove('hidden');
+      document.getElementById('hBtnGenerate').style.display = '';
+      document.getElementById('hBtnRegen').style.display = 'none';
+      document.getElementById('hParentActions').classList.remove('hidden');
+    }
+  } else {
+    document.getElementById('hParentCard').classList.add('hidden');
+  }
+}
+
+function backToHistoryList() {
+  document.getElementById('historyDetailPane').classList.add('hidden');
+  document.getElementById('historyListPane').classList.remove('hidden');
+  _historyData = null;
+  loadHistory();
+}
+
+async function generateHistoryParentReport(forceRegenerate = false) {
+  if (!_historyData) return;
+  const s = _historyData;
+
+  // 显示生成中
+  document.getElementById('hParentContent').classList.add('hidden');
+  document.getElementById('hBtnGenerate').style.display = 'none';
+  document.getElementById('hBtnRegen').style.display = 'none';
+  document.getElementById('hParentGenerating').classList.remove('hidden');
+
+  const formData = new FormData();
+  formData.append('subject', s.student_name || '');
+  formData.append('class_date', '');
+  formData.append('class_time', (s.class_start_time && s.class_end_time)
+    ? s.class_start_time + '-' + s.class_end_time : '');
+
+  try {
+    const opts = { method: 'POST', headers: {} };
+    if (authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
+    opts.body = formData;
+    const url = `${API}/sessions/${s.id}/parent-report${forceRegenerate ? '?regenerate=true' : ''}`;
+    const r = await fetch(url, opts);
+    if (r.status === 401) { logout(); return; }
+    const res = await r.json();
+    if (res.code === 200) {
+      const ta = document.getElementById('hParentContent');
+      ta.value = (res.data.report || '').trim() || '（报告生成失败，请重试）';
+      ta.placeholder = '报告内容...';
+      ta.classList.remove('hidden');
+      // 生成成功后切换按钮：隐藏「生成报告」，显示「重新生成」
+      document.getElementById('hBtnGenerate').style.display = 'none';
+      document.getElementById('hBtnRegen').style.display = '';
+      document.getElementById('hParentActions').classList.remove('hidden');
+      document.getElementById('hParentGenerating').classList.add('hidden');
+      // 更新本地缓存
+      if (_historyData && _historyData.analysis) {
+        _historyData.analysis.parent_report = res.data.report;
+      }
+    } else {
+      document.getElementById('hParentGenerating').classList.add('hidden');
+      document.getElementById('hParentContent').classList.remove('hidden');
+      document.getElementById('hParentContent').value = '生成失败: ' + (res.detail || res.message);
+    }
+  } catch (e) {
+    document.getElementById('hParentGenerating').classList.add('hidden');
+    document.getElementById('hParentContent').classList.remove('hidden');
+    document.getElementById('hParentContent').value = '生成失败: ' + e.message;
+  }
+}
+
+async function regenerateHistoryReport() {
+  document.getElementById('hParentContent').classList.add('hidden');
+  document.getElementById('hBtnGenerate').style.display = 'none';
+  document.getElementById('hBtnRegen').style.display = 'none';
+  document.getElementById('hParentGenerating').classList.remove('hidden');
+  await generateHistoryParentReport(true);
+}
+
+async function downloadHistoryReportImage() {
+  if (!_historyData) return;
+  try {
+    const headers = {};
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+    const r = await fetch(`${API}/sessions/${_historyData.id}/report-image`, { method: 'POST', headers });
+    if (r.status === 401) { logout(); return; }
+    if (!r.ok) { const err = await r.json(); throw new Error(err.detail || '生成失败'); }
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const disposition = r.headers.get('Content-Disposition');
+    let filename = '课堂分析报告.png';
+    if (disposition) {
+      const starMatch = disposition.match(/filename\*=UTF-8''(.+?)(?:;|$)/i);
+      if (starMatch) filename = decodeURIComponent(starMatch[1]);
+      else { const m = disposition.match(/filename="?(.+?)"?$/); if (m) filename = m[1]; }
+    }
+    a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('图片生成失败: ' + e.message);
+  }
+}
+
+function startStatusPolling() {
+  if (_statusPollTimer) return;
+  _statusPollTimer = setInterval(async () => {
+    // 静默刷新历史列表（即使在新建课堂 tab 也刷新，切过来时已是最新）
+    await loadHistory();
+    // 如果当前有活跃 session，同步刷新顶部状态栏
+    if (currentSessionId) {
+      try {
+        const r = await api('GET', `/sessions/${currentSessionId}`);
+        if (r.data) {
+          const s = r.data;
+          document.getElementById('sessionStatus').textContent =
+            statusLabelPlain(s.status);
+          document.getElementById('statusDisplay').className = (s.status==='completed'||s.status==='transcribed')?'status-bar success':s.status==='failed'?'status-bar error':'status-bar';
+        }
+      } catch (e) { /* 静默失败 */ }
+    }
+  }, 10000);  // 每 10 秒刷新
+}
+
+function stopStatusPolling() {
+  if (_statusPollTimer) {
+    clearInterval(_statusPollTimer);
+    _statusPollTimer = null;
+  }
+}
+
+async function viewSession(id) {
+  switchTab('new');
+  currentSessionId = id;
+  localStorage.setItem('ta_session_id', currentSessionId);
+  const res = await api('GET', `/sessions/${id}`);
+  if (!res.data) {
+    // session 可能被删除了 — 清理本地状态
+    localStorage.removeItem('ta_session_id');
+    currentSessionId = null;
+    alert('该课堂记录不存在或已被删除');
+    loadHistory();
+    return;
+  }
+  const s = res.data;
+
+  // 填充 step 1 字段
+  document.getElementById('sessionTitle').value = s.title || '';
+  document.getElementById('studentName').value = s.student_name || '';
+  document.getElementById('classStartTime').value = s.class_start_time || '';
+  document.getElementById('classEndTime').value = s.class_end_time || '';
+  // 大纲同时填到 step 1 和 step 3 的 textarea
+  document.getElementById('updateOutline').value = s.knowledge_outline || '';
+  document.getElementById('manualSupplement').value = s.knowledge_outline || '';
+  document.getElementById('sessionIdDisplay').textContent = id;
+  document.getElementById('sessionStatus').textContent =
+    statusLabelPlain(s.status);
+  document.getElementById('statusDisplay').className = (s.status==='completed'||s.status==='transcribed')?'status-bar success':s.status==='failed'?'status-bar error':'status-bar';
+
+  // 显示 step 2 学生信息
+  const infoParts = [];
+  if (s.student_name) infoParts.push('学生：' + s.student_name);
+  if (s.class_start_time && s.class_end_time) infoParts.push(s.class_start_time + '-' + s.class_end_time);
+  document.getElementById('step2StudentInfo').textContent = infoParts.join(' | ');
+
+  // 填充 step 3 课堂信息摘要卡片
+  document.getElementById('infoTitle').textContent = s.title || '（无标题）';
+  document.getElementById('infoStudent').textContent = s.student_name ? '👤 ' + s.student_name : '';
+  document.getElementById('infoTime').textContent = (s.class_start_time && s.class_end_time) ? '🕐 ' + s.class_start_time + ' ~ ' + s.class_end_time : '';
+  document.getElementById('infoOutline').textContent = s.knowledge_outline || '（未设置）';
+  document.getElementById('sessionInfoCard').classList.remove('hidden');
+
+  // 根据状态决定 unlock 哪些 step
+  unlockStep(1);
+  if (['recording','transcribing','transcribed','analyzing','completed'].includes(s.status)) {
+    unlockStep(2);
+  }
+
+  if (s.transcript && s.transcript.full_text) {
+    document.getElementById('liveTranscript').textContent = s.transcript.full_text;
+  } else {
+    document.getElementById('liveTranscript').textContent = s.status === 'created'
+      ? '📝 课堂已创建，尚未上传音频或开始录制'
+      : '⏳ 转录尚未完成或未开始';
+  }
+  if (s.analysis) showAnalysis(s.analysis);
+  document.getElementById('analysisResults').classList.toggle('hidden', !s.analysis);
+  document.getElementById('parentReportArea').classList.toggle('hidden', !s.analysis);
+
+  // 分析按钮状态
+  const btn = document.getElementById('btnAnalyze');
+  if (s.status === 'completed') {
+    btn.textContent = '✅ 分析完成';
+    btn.disabled = true;
+    document.getElementById('btnReAnalyze').style.display = 'inline-block';
+  } else if (s.status === 'transcribed') {
+    btn.disabled = false;
+    btn.textContent = '🤖 开始 AI 分析';
+  }
+
+  loadEngines();
+
+  // 查看已有课堂：停在 step 1 显示信息，所有步骤已解锁
+  goToStep(1);
+
+  // 恢复教材大纲选择（科目/教材/年级下拉框）— 在 goToStep(1) 之后，确保 DOM 就绪
+  if (s.subject || s.textbook || s.grade) {
+    try {
+      currentSubject = null;
+      currentTextbook = null;
+      currentGrade = null;
+      await loadOutline();
+      buildSelector();
+      const selSub = document.getElementById('selSubject');
+      const selTb = document.getElementById('selTextbook');
+      const selGr = document.getElementById('selGrade');
+      if (s.subject && selSub) {
+        currentSubject = s.subject;
+        selSub.value = s.subject;
+        onSubjectChange();
+      }
+      if (s.textbook && selTb) {
+        currentTextbook = s.textbook;
+        selTb.value = s.textbook;
+        onTextbookChange();
+      }
+      if (s.grade && selGr) {
+        currentGrade = s.grade;
+        selGr.value = s.grade;
+        onGradeChange();
+      }
+    } catch (e) {
+      // 大纲恢复失败不影响基本信息展示
+    }
+  }
+}
+
+function e(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ═══════════════════════════════ Knowledge Outline (5-level) ═══════════════════════════════
+let outlineData = null;
+let currentSubject = null;
+let currentTextbook = null;
+let currentGrade = null;
+let selectedPoints = [];
+
+async function loadOutline() {
+  if (outlineData) return outlineData;
+  const r = await fetch('/knowledge_outline.json?v=4');
+  outlineData = await r.json();
+  return outlineData;
+}
+
+function buildSelector() {
+  const sel = document.getElementById('outlineSelector');
+  if (!outlineData) return;
+  let html = '<select id="selSubject" onchange="onSubjectChange()"><option value="">1. 选择科目</option>';
+  for (const [k, v] of Object.entries(outlineData.subjects)) {
+    html += `<option value="${k}">${v.name}</option>`;
+  }
+  html += '</select>';
+  html += '<select id="selTextbook" onchange="onTextbookChange()" disabled><option value="">2. 选择教材</option></select>';
+  html += '<select id="selGrade" onchange="onGradeChange()" disabled><option value="">3. 选择年级</option></select>';
+  sel.innerHTML = html;
+  if (currentSubject) document.getElementById('selSubject').value = currentSubject;
+}
+
+async function onSubjectChange() {
+  const sub = document.getElementById('selSubject').value;
+  currentSubject = sub || null;
+  currentTextbook = null; currentGrade = null;
+  const selTb = document.getElementById('selTextbook');
+  const selGr = document.getElementById('selGrade');
+  selTb.disabled = !sub; selGr.disabled = true;
+  selTb.innerHTML = '<option value="">2. 选择教材</option>';
+  selGr.innerHTML = '<option value="">3. 选择年级</option>';
+  resetTree();
+  if (!sub) return;
+  const textbooks = outlineData.subjects[sub].textbooks;
+  for (const [k, v] of Object.entries(textbooks)) {
+    selTb.innerHTML += `<option value="${k}">${v.name}</option>`;
+  }
+}
+
+async function onTextbookChange() {
+  const tb = document.getElementById('selTextbook').value;
+  currentTextbook = tb || null;
+  currentGrade = null;
+  const selGr = document.getElementById('selGrade');
+  selGr.disabled = !tb;
+  selGr.innerHTML = '<option value="">3. 选择年级</option>';
+  resetTree();
+  if (!tb) return;
+  const grades = outlineData.subjects[currentSubject].textbooks[tb].grades;
+  for (const [k, v] of Object.entries(grades)) {
+    selGr.innerHTML += `<option value="${k}">${v.name}</option>`;
+  }
+}
+
+async function onGradeChange() {
+  const gr = document.getElementById('selGrade').value;
+  currentGrade = gr || null;
+  if (!gr) { resetTree(); return; }
+  renderOutlineTree();
+  document.getElementById('btnSelectAll').style.display = 'inline-block';
+  document.getElementById('btnClear').style.display = 'inline-block';
+  updateSelectedCount();
+}
+
+function resetTree() {
+  document.getElementById('outlineTree').innerHTML = '<div style="padding:20px;text-align:center;color:#999;font-size:13px">请依次选择科目 → 教材 → 年级</div>';
+  document.getElementById('btnSelectAll').style.display = 'none';
+  document.getElementById('btnClear').style.display = 'none';
+}
+
+function getSections(unit) {
+  // backward compat: old format unit.points, new format unit.sections
+  if (unit.sections) return unit.sections;
+  if (unit.points) return [{ name: '', points: unit.points }];
+  return [];
+}
+
+function renderOutlineTree() {
+  const grades = outlineData.subjects[currentSubject].textbooks[currentTextbook].grades;
+  const gradeData = grades[currentGrade];
+  if (!gradeData) { resetTree(); return; }
+  let html = '';
+  const volumes = gradeData.volumes;
+  for (const [volKey, volData] of Object.entries(volumes)) {
+    html += `<div style="padding:8px 12px;background:#e8f0fe;font-weight:600;font-size:13px;color:#1a73e8;border-bottom:1px solid #c8ddf8">${e(volData.name)}</div>`;
+    volData.units.forEach((unit, ui) => {
+      const unitId = `${currentSubject}_${currentTextbook}_${currentGrade}_${volKey}_${ui}`;
+      const sections = getSections(unit);
+	      let allPtsSelected = false;
+	      if (sections.length > 0) {
+	        allPtsSelected = sections.every((sec, si) =>
+	          sec.points.length > 0 && sec.points.every((pt, pi) => selectedPoints.includes(`${unitId}_${si}_${pi}`))
+	        );
+	      }
+      html += `<div class="outline-unit">
+        <div class="outline-unit-header" onclick="toggleUnit(this)" id="unitHeader_${unitId}">
+          <label class="outline-point" onclick="event.stopPropagation()" style="margin-right:8px;font-weight:600">
+            <input type="checkbox" id="unitAll_${unitId}" ${allPtsSelected ? 'checked' : ''} onchange="toggleUnitPoints('${unitId}', this.checked)">
+          </label>
+          <span class="arrow">▶</span> ${e(unit.name)}
+        </div>
+        <div class="outline-unit-body" id="unitBody_${unitId}">`;
+      sections.forEach((sec, si) => {
+        const sectionId = `${unitId}_${si}`;
+        const hasSectionName = sec.name && sec.name.length > 0;
+        const allSecSelected = sec.points.length > 0 && sec.points.every((pt, pi) => selectedPoints.includes(`${sectionId}_${pi}`));
+        if (hasSectionName) {
+          html += `<div class="outline-section">
+            <div class="outline-section-header" onclick="toggleSection(this)" id="secHeader_${sectionId}">
+              <label class="outline-point" onclick="event.stopPropagation()" style="margin-right:8px">
+                <input type="checkbox" id="secAll_${sectionId}" ${allSecSelected ? 'checked' : ''} onchange="toggleSectionPoints('${sectionId}', this.checked)">
+              </label>
+              <span class="arrow">▶</span> ${e(sec.name)}
+            </div>
+            <div class="outline-section-body" id="secBody_${sectionId}">`;
+        }
+        sec.points.forEach((pt, pi) => {
+          const ptId = `${sectionId}_${pi}`;
+          const checked = selectedPoints.includes(ptId) ? 'checked' : '';
+          html += `<label class="outline-point" onclick="event.stopPropagation()">
+            <input type="checkbox" id="pt_${ptId}" ${checked} onchange="onPointToggle('${ptId}', this.checked)">
+            ${e(pt)}
+          </label>`;
+        });
+        if (hasSectionName) {
+          html += '</div></div>';
+        }
+      });
+      html += '</div></div>';
+    });
+  }
+  document.getElementById('outlineTree').innerHTML = html;
+  updateSelectedCount();
+}
+
+function toggleUnit(header) {
+  header.classList.toggle('open');
+}
+
+function toggleSection(header) {
+  header.classList.toggle('open');
+}
+
+function toggleUnitPoints(unitId, checked) {
+  const body = document.getElementById('unitBody_' + unitId);
+  if (!body) return;
+  const checkboxes = body.querySelectorAll('input[type=checkbox]');
+  checkboxes.forEach(cb => {
+    cb.checked = checked;
+    onPointToggle(cb.id.replace('pt_', ''), checked);
+  });
+  body.querySelectorAll('[id^="secAll_"]').forEach(secCb => { secCb.checked = checked; });
+  const unitAll = document.getElementById('unitAll_' + unitId);
+  if (unitAll) unitAll.checked = checked;
+}
+
+function toggleSectionPoints(sectionId, checked) {
+  const body = document.getElementById('secBody_' + sectionId);
+  if (!body) return;
+  const checkboxes = body.querySelectorAll('input[type=checkbox]');
+  checkboxes.forEach(cb => {
+    cb.checked = checked;
+    onPointToggle(cb.id.replace('pt_', ''), checked);
+  });
+  const secAll = document.getElementById('secAll_' + sectionId);
+  if (secAll) secAll.checked = checked;
+  const unitId = sectionId.replace(/_[^_]+$/, '');
+  updateUnitAllCheckbox(unitId);
+}
+
+function updateUnitAllCheckbox(unitId) {
+  const unitAll = document.getElementById('unitAll_' + unitId);
+  const body = document.getElementById('unitBody_' + unitId);
+  if (!unitAll || !body) return;
+  const checkboxes = body.querySelectorAll('input[type=checkbox]');
+  const allChecked = checkboxes.length > 0 && Array.from(checkboxes).every(c => c.checked);
+  unitAll.checked = allChecked;
+  body.querySelectorAll('[id^="secAll_"]').forEach(secAll => {
+    const secId = secAll.id.replace('secAll_', '');
+    const secBody = document.getElementById('secBody_' + secId);
+    if (secBody) {
+      const secCbs = secBody.querySelectorAll('input[type=checkbox]');
+      secAll.checked = secCbs.length > 0 && Array.from(secCbs).every(c => c.checked);
+    }
+  });
+}
+
+function getPointName(ptId) {
+  const parts = ptId.split('_');
+  if (parts.length < 6) return '';
+  const sub = parts[0], tb = parts[1], gr = parts[2], volKey = parts[3], ui = parseInt(parts[4]);
+  try {
+    const unit = outlineData.subjects[sub].textbooks[tb].grades[gr].volumes[volKey].units[ui];
+    if (parts.length >= 7) {
+      const si = parseInt(parts[5]), pi = parseInt(parts[6]);
+      const sections = unit.sections || [{ name: '', points: unit.points }];
+      return sections[si].points[pi];
+    } else {
+      const pi = parseInt(parts[5]);
+      if (unit.points) return unit.points[pi];
+      const allPts = [];
+      (unit.sections || []).forEach(s => allPts.push(...s.points));
+      return allPts[pi];
+    }
+  } catch(e) { return ''; }
+}
+
+function onPointToggle(ptId, checked) {
+  if (checked) {
+    if (!selectedPoints.includes(ptId)) selectedPoints.push(ptId);
+  } else {
+    selectedPoints = selectedPoints.filter(p => p !== ptId);
+  }
+  const parts = ptId.split('_');
+  if (parts.length >= 7) { parts.pop(); parts.pop(); }
+  else { parts.pop(); }
+  const unitId = parts.join('_');
+  updateUnitAllCheckbox(unitId);
+  updateSelectedCount();
+  syncToTextarea();
+}
+
+function syncToTextarea() {
+  // 合并大纲勾选 + 手动补充
+  const lines = selectedPoints.map(getPointName).filter(Boolean);
+  const supplement = document.getElementById('manualSupplement');
+  const manualText = supplement ? supplement.value.trim() : '';
+
+  const allLines = [...lines];
+  if (manualText) allLines.push(manualText);
+
+  document.getElementById('updateOutline').value = allLines.join('\n');
+}
+
+function updateSelectedCount() {
+  const el = document.getElementById('selectedCount');
+  el.textContent = selectedPoints.length ? `已选 ${selectedPoints.length} 个知识点` : '';
+}
+
+function clearOutline() {
+  selectedPoints = [];
+  document.getElementById('updateOutline').value = '';
+  document.getElementById('manualSupplement').value = '';
+  if (currentGrade) renderOutlineTree();
+  updateSelectedCount();
+}
+
+function toggleAllUnits(selectAll) {
+  if (!currentGrade) return;
+  const grades = outlineData.subjects[currentSubject].textbooks[currentTextbook].grades;
+  const gradeData = grades[currentGrade];
+  selectedPoints = [];
+  if (selectAll) {
+    for (const [volKey, volData] of Object.entries(gradeData.volumes)) {
+      volData.units.forEach((unit, ui) => {
+        const unitId = `${currentSubject}_${currentTextbook}_${currentGrade}_${volKey}_${ui}`;
+        const sections = getSections(unit);
+        sections.forEach((sec, si) => {
+          sec.points.forEach((pt, pi) => {
+            selectedPoints.push(`${unitId}_${si}_${pi}`);
+          });
+        });
+      });
+    }
+  }
+  renderOutlineTree();
+  syncToTextarea();
+}
+
+function enableEditOutline() {
+  const ta = document.getElementById('updateOutline');
+  ta.readOnly = false;
+  ta.style.background = '#fff';
+  ta.focus();
+}
+
+// ═══════════════════════════════ Updated createSession ═══════════════════════════════
+createSession = async function() {
+  const title = document.getElementById('sessionTitle').value || '未命名课堂';
+  const knowledge = document.getElementById('updateOutline').value;
+  const studentName = document.getElementById('studentName').value.trim() || null;
+  const classStartTime = document.getElementById('classStartTime').value.trim() || null;
+  const classEndTime = document.getElementById('classEndTime').value.trim() || null;
+  const errEl = document.getElementById('createError');
+  try {
+    const res = await api('POST', '/sessions', {
+      title,
+      knowledge_outline: knowledge || null,
+      student_name: studentName,
+      class_start_time: classStartTime,
+      class_end_time: classEndTime,
+      subject: currentSubject || null,
+      textbook: currentTextbook || null,
+      grade: currentGrade || null,
+      source: 'upload'
+    });
+    if (res.code === 201) {
+      currentSessionId = res.data.id;
+      localStorage.setItem('ta_session_id', currentSessionId);
+      document.getElementById('sessionIdDisplay').textContent = currentSessionId;
+      document.getElementById('sessionStatus').textContent = '已创建';
+      document.getElementById('statusDisplay').className = 'status-bar';
+      // 在 step 2 显示学生信息
+      const infoParts = [];
+      if (studentName) infoParts.push('学生：' + studentName);
+      if (classStartTime && classEndTime) infoParts.push(classStartTime + '-' + classEndTime);
+      document.getElementById('step2StudentInfo').textContent = infoParts.join(' | ');
+      // 填充 step 3 课堂信息摘要卡片
+      document.getElementById('infoTitle').textContent = title;
+      document.getElementById('infoStudent').textContent = studentName ? '👤 ' + studentName : '';
+      document.getElementById('infoTime').textContent = (classStartTime && classEndTime) ? '🕐 ' + classStartTime + ' ~ ' + classEndTime : '';
+      document.getElementById('infoOutline').textContent = knowledge || '（未设置）';
+      document.getElementById('sessionInfoCard').classList.remove('hidden');
+      // 重置状态（新课堂，清除旧缓存）
+      _parentReportGenerated = false;
+      selectedPoints = [];
+      // 解锁 step 2 并跳转
+      unlockStep(1);
+      goToStep(2);
+    } else {
+      errEl.textContent = '创建失败: ' + (res.message || res.detail || '未知错误');
+      errEl.classList.remove('hidden');
+    }
+  } catch (e) {
+    if (!e.message.includes('登录已过期')) {
+      errEl.textContent = '创建失败: ' + e.message;
+      errEl.classList.remove('hidden');
+    }
+  }
+};
+
+// ═══════════════════════════════ Updated updateOutline ═══════════════════════════════
+updateOutline = async function() {
+  if (!currentSessionId) return;
+  const outline = document.getElementById('updateOutline').value.trim();
+  if (!outline) { alert('请先选择或输入知识点大纲'); return; }
+  const res = await api('PUT', `/sessions/${currentSessionId}/outline`, {knowledge_outline: outline});
+  if (res.code === 200) {
+    document.getElementById('infoOutline').textContent = outline;
+    alert('大纲已更新');
+  }
+};
+
+// ═══════════════════════════════ Init Outline on Load ═══════════════════════════════
+(async function initOutline() {
+  await loadOutline();
+  buildSelector();
+})();
+
+// ═══════════════════════════════ 清空上传缓存 ═══════════════════════════════
+
+function showClearConfirm() {
+  const existing = document.querySelector('.confirm-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-overlay';
+  overlay.innerHTML = `
+    <div class="confirm-dialog">
+      <h3>🗑️ 清空上传音频</h3>
+
+      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:12px 14px;margin:12px 0;font-size:12px;line-height:1.8;color:#795548">
+        <strong style="color:#d84315">⚠️ 注意事项：</strong><br>
+        ① 此操作<strong>不可逆</strong>，删除后音频文件无法恢复<br>
+        ② 如果某课堂<strong>正在转录中</strong>，删除其音频会导致转录失败<br>
+        ③ 仅删除上传的音频文件，<strong>不影响</strong>已保存的转录文本和分析报告
+      </div>
+
+      <div class="confirm-actions" style="justify-content:space-between">
+        <button class="btn btn-outline btn-sm" onclick="closeConfirm()">取消</button>
+        <button class="btn btn-danger" onclick="executeClear()" id="btnConfirmDelete">🗑️ 确认清空</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.remove();
+  });
+}
+
+function closeConfirm() {
+  const overlay = document.querySelector('.confirm-overlay');
+  if (overlay) overlay.remove();
+}
+
+async function executeClear() {
+  const confirmBtn = document.getElementById('btnConfirmDelete');
+  confirmBtn.disabled = true;
+  confirmBtn.innerHTML = '<span class="spinner" style="margin-right:4px"></span>删除中...';
+
+  const url = API + '/maintenance/clear-uploads';
+
+  try {
+    const headers = {};
+    if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
+    const resp = await fetch(url, { method: 'POST', headers: headers });
+    const res = await resp.json();
+    if (res.code === 200) {
+      closeConfirm();
+      alert(res.message);
+    } else {
+      alert('请求 ' + url + ' 失败 [' + resp.status + ']: ' + (res.message || res.detail || '未知错误'));
+    }
+  } catch (e) {
+    alert('请求 ' + url + ' 异常: ' + e.message);
+  } finally {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = '🗑️ 确认清空';
+  }
+}
+
+</script>
+</body>
+</html>

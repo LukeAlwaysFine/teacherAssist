@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# 测试
+.pytest_cache/
+test_report.xml
+
+# IDE
+.vscode/
+.idea/
+
+# 数据库
+*.db
+*.db-shm
+*.db-wal
+*.sqlite3
+
+# 上传文件
+uploads/
+
+# 构建产物
+build/
+dist/
+
+# 运行时数据
+models/
+data/
+
+# 日志
+*.log
