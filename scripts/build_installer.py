@@ -82,26 +82,77 @@ def download(url: str, dest: Path, description: str = ""):
         raise
 
 
-def step1_clean():
-    """Step 1: 清理旧构建产物。"""
+def step1_clean(skip_installer: bool = False):
+    """Step 1: 清理旧构建产物。
+
+    Args:
+        skip_installer: 为 True 时保留 build/installer/ 目录（用于 --skip-download）。
+    """
     step("1/6 清理构建目录")
     if BUILD_DIR.exists():
-        shutil.rmtree(BUILD_DIR)
+        if skip_installer and INSTALLER_SRC.exists():
+            # 只清理 dist/，保留 installer 和 cache
+            for item in BUILD_DIR.iterdir():
+                if item.name not in ("installer", "cache"):
+                    if item.is_dir():
+                        _rmtree_ignore_errors(item)
+                    else:
+                        try:
+                            item.unlink()
+                        except OSError:
+                            pass
+            print(f"  保留已构建目录: {INSTALLER_SRC}")
+        else:
+            # 只清理 installer 和 dist，保留 cache
+            for item in BUILD_DIR.iterdir():
+                if item.name not in ("cache",):
+                    if item.is_dir():
+                        _rmtree_ignore_errors(item)
+                    else:
+                        try:
+                            item.unlink()
+                        except OSError:
+                            pass
+            print("  保留下载缓存")
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     INSTALLER_SRC.mkdir(parents=True, exist_ok=True)
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     print("  完成")
 
 
+def _rmtree_ignore_errors(path: Path):
+    """删除目录树，忽略权限错误（文件被占用时跳过）。"""
+    import stat
+    for root, dirs, files in os.walk(path, topdown=False):
+        for name in files:
+            file_path = os.path.join(root, name)
+            try:
+                os.chmod(file_path, stat.S_IWRITE)
+                os.unlink(file_path)
+            except OSError:
+                pass
+        for name in dirs:
+            dir_path = os.path.join(root, name)
+            try:
+                os.rmdir(dir_path)
+            except OSError:
+                pass
+    try:
+        os.rmdir(path)
+    except OSError:
+        pass
+
+
 def step2_python():
     """Step 2: 下载并解压 Python 嵌入式运行时。"""
     step("2/6 准备 Python 运行时")
 
-    # 下载（优先国内镜像）
+    # 下载 Python 嵌入式运行时
+    # 先尝试官方源，失败再走镜像
     try:
-        download(PYTHON_EMBED_MIRROR, PYTHON_ZIP, "Python 嵌入式运行时 (~30MB) [镜像]")
+        download(PYTHON_EMBED_URL, PYTHON_ZIP, "Python 嵌入式运行时 (~11MB) [官方]")
     except Exception:
-        download(PYTHON_EMBED_URL, PYTHON_ZIP, "Python 嵌入式运行时 (~30MB) [官方]")
+        download(PYTHON_EMBED_MIRROR, PYTHON_ZIP, "Python 嵌入式运行时 (~11MB) [镜像]")
 
     # 解压到构建目录
     python_dir = INSTALLER_SRC / "python"
@@ -141,25 +192,14 @@ def step3_dependencies():
 
     PIP_CACHE = os.environ.get("PIP_CACHE_DIR", os.path.expanduser("~/AppData/Local/pip/cache"))
 
-    # pip install 到 Lib 目录
-    print("  安装主依赖...")
+    # pip install 到 Lib 目录（含 PyTorch CPU 版）
+    print("  安装主依赖 (含 PyTorch CPU)...")
     subprocess.run(
         [str(python_exe), "-m", "pip", "install",
          "-r", str(REQUIREMENTS),
          "--target", str(lib_dir),
          "--cache-dir", PIP_CACHE,
-         "--no-warn-script-location",
-         "--progress-bar", "on"],
-        cwd=str(INSTALLER_SRC), check=True,
-    )
-
-    # 安装 PyTorch CPU 版
-    print("  安装 PyTorch (CPU 版, ~125MB)...")
-    subprocess.run(
-        [str(python_exe), "-m", "pip", "install",
-         "torch", "--index-url", "https://download.pytorch.org/whl/cpu",
-         "--target", str(lib_dir),
-         "--cache-dir", PIP_CACHE,
+         "--extra-index-url", "https://download.pytorch.org/whl/cpu",
          "--no-warn-script-location",
          "--progress-bar", "on"],
         cwd=str(INSTALLER_SRC), check=True,
@@ -208,10 +248,9 @@ def step5_copy_code():
         # 排除 __pycache__
         shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
 
-    # 复制文档和配置
+    # 复制 .env.example（安装后用户改名为 .env）
     shutil.copy2(PROJECT_DIR / ".env.example", INSTALLER_SRC / ".env.example")
     shutil.copy2(PROJECT_DIR / "launcher.py", INSTALLER_SRC / "launcher.py")
-    shutil.copy2(PROJECT_DIR / "USER_GUIDE.md", INSTALLER_SRC / "USER_GUIDE.md")
 
     # 创建空的 data 目录占位
     (INSTALLER_SRC / "data").mkdir(parents=True, exist_ok=True)
@@ -274,10 +313,15 @@ def main():
     print(f"  输出: {DIST_DIR}")
     print()
 
-    step1_clean()
-    step2_python() if not args.skip_download else print("  [跳过] Python 运行时")
-    step3_dependencies() if not args.skip_download else print("  [跳过] pip 依赖")
-    step4_model(lite=args.lite) if not args.skip_download else print("  [跳过] 语音模型")
+    step1_clean(skip_installer=args.skip_download)
+    if args.skip_download:
+        print("  [跳过] Python 运行时 (--skip-download)")
+        print("  [跳过] pip 依赖 (--skip-download)")
+        print("  [跳过] 语音模型 (--skip-download)")
+    else:
+        step2_python()
+        step3_dependencies()
+        step4_model(lite=args.lite)
     step5_copy_code()
 
     if not args.skip_compile:

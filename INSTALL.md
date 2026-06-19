@@ -7,7 +7,7 @@
 | 准备项 | 说明 |
 |--------|------|
 | Windows 电脑 | Windows 10/11（64 位），建议 8GB+ 内存，10GB+ 磁盘空间 |
-| LLM API Key | 可选。首次启动后通过 UI（⚙️ 按钮）配置，或编辑 `.env` 文件 |
+| LLM API Key | 支持 DeepSeek/OpenAI/Anthropic/Groq/Ollama 等厂商（[获取 DeepSeek Key](https://platform.deepseek.com/api_keys) 注册即送额度） |
 | 安装包 | `teacherAssist-setup-0.2.1.exe` |
 
 > **不需要**安装 Python 或任何其他软件——安装包已包含全部运行环境。
@@ -38,28 +38,21 @@
 
 进度条完成后点击 **完成**。
 
-### 5. 开始使用
+### 5. 首次配置
+
+首次启动时输入 API Key 和 API 地址（可跳过，稍后在应用内 ⚙️ 设置中配置）。
+
+### 6. 开始使用
 
 浏览器自动打开 `http://localhost:8000`，注册账号即可。
-
-首次使用前需配置 AI 大模型：点击右上角 **⚙️ API** → 填写 API Key 和 API 地址 → 保存。
-
-### 各服务商配置参考
-
-| 服务 | API 地址 |
-|------|---------|
-| DeepSeek | `https://api.deepseek.com` |
-| OpenAI | `https://api.openai.com/v1` |
-| Groq | `https://api.groq.com/openai/v1` |
-| 本地 Ollama | `http://localhost:11434/v1` |
 
 ## 日常使用
 
 | 操作 | 方法 |
 |------|------|
 | 启动 | 双击桌面"教师助手"图标 |
-| 停止 | 右键托盘图标 → 退出 |
-| 修改配置 | 打开应用 → ⚙️ API 按钮，或编辑安装目录下的 `.env` |
+| 停止 | 关闭启动时弹出的命令窗口 |
+| 修改 API Key | 应用内 ⚙️ 设置修改，或记事本打开安装目录下的 `.env` |
 | 修改端口 | 编辑 `.env`，添加 `PORT=8080`，重新启动 |
 
 ## 安装后目录
@@ -110,7 +103,6 @@
 
 ```bash
 pip install -r requirements.txt
-python scripts/build_installer.py          # 完整构建（含模型）
-python scripts/build_installer.py --lite   # 轻量（不含模型，首次启动下载）
-python scripts/build_installer.py --skip-compile  # 仅准备，不打包 exe
+python scripts/build_installer.py    # 完整构建
+python scripts/build_installer.py --lite  # 轻量（不含模型）
 ```
