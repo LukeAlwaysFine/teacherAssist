@@ -34,6 +34,10 @@ from app.schemas.session import (
     APIResponse,
     SystemStatusResponse,
     EngineInfoResponse,
+    ParentReportReviseRequest,
+    ReportTemplateCreate,
+    ReportTemplateUpdate,
+    ReportTemplateResponse,
 )
 from app.services.stt import get_system_info, create_stt_engine
 from app.services.stt.whisper_cpu import WhisperCPUEngine, _detect_audio_duration
@@ -56,6 +60,19 @@ _ANALYSIS_STAGES = [
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["sessions"])
+
+
+async def _create_ai_service(db: AsyncSession, user_id: int) -> "AIService":
+    """创建 AIService，自动加载用户 LLM 配置。"""
+    from sqlalchemy import select as _select
+    from app.models.user_llm_config import UserLLMConfig
+    from app.services.ai_service import AIService
+
+    result = await db.execute(
+        _select(UserLLMConfig).where(UserLLMConfig.user_id == user_id)
+    )
+    config = result.scalar_one_or_none()
+    return AIService(user_config=config)
 
 # 上传文件目录
 UPLOAD_DIR = Path("uploads")
@@ -831,8 +848,7 @@ async def trigger_analysis(
         try:
             async with AsyncSessionLocal() as bg_db:
                 try:
-                    from app.services.ai_service import AIService
-                    ai_service = AIService()
+                    ai_service = await _create_ai_service(bg_db, session.teacher_id)
 
                     start = _time.time()
                     result = await ai_service.analyze_classroom(
@@ -917,6 +933,193 @@ async def trigger_analysis(
 
 
 # ═══════════════════════════════════════════════════════════
+# 家长反馈报告模板管理
+# ═══════════════════════════════════════════════════════════
+
+@router.post("/templates", response_model=APIResponse)
+async def create_template(
+    request: ReportTemplateCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """上传自定义家长报告模板。
+
+    模板为纯文本文件，支持变量占位符：
+    {subject}, {date}, {time}, {student_name},
+    {total_knowledge_points}, {covered_count}, {mastered_count},
+    {engagement_level}
+    """
+    from app.models.template import ReportTemplate
+
+    # 检查同名模板
+    existing = await db.execute(
+        select(ReportTemplate).where(
+            ReportTemplate.user_id == current_user.id,
+            ReportTemplate.name == request.name,
+        )
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail=f"模板「{request.name}」已存在")
+
+    # 如果设为默认，先取消其他默认
+    if request.set_as_default:
+        defaults = (await db.execute(
+            select(ReportTemplate).where(
+                ReportTemplate.user_id == current_user.id,
+                ReportTemplate.is_default == True,  # noqa: E712
+            )
+        )).scalars().all()
+        for t in defaults:
+            t.is_default = False
+
+    template = ReportTemplate(
+        user_id=current_user.id,
+        name=request.name,
+        content=request.content,
+        is_default=request.set_as_default,
+    )
+    db.add(template)
+    await db.commit()
+    await db.refresh(template)
+
+    return APIResponse(
+        message="模板已上传",
+        data=ReportTemplateResponse.model_validate(template).model_dump(),
+    )
+
+
+@router.get("/templates", response_model=APIResponse)
+async def list_templates(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """列出当前用户的所有模板（默认模板排在最前面）。"""
+    from app.models.template import ReportTemplate
+
+    result = await db.execute(
+        select(ReportTemplate)
+        .where(ReportTemplate.user_id == current_user.id)
+        .order_by(ReportTemplate.is_default.desc(), ReportTemplate.created_at.desc())
+    )
+    templates = result.scalars().all()
+
+    # 系统默认模板（虚拟条目，始终在列表首位）
+    import os
+    default_prompt_path = os.path.join(
+        os.path.dirname(__file__), "..", "..", "prompts", "parent_report.txt"
+    )
+    try:
+        with open(default_prompt_path, "r", encoding="utf-8") as f:
+            default_content = f.read()
+    except FileNotFoundError:
+        default_content = ""
+
+    data = {
+        "templates": [ReportTemplateResponse.model_validate(t).model_dump() for t in templates],
+        "system_default": {
+            "id": 0,
+            "name": "学达默认模板",
+            "content_preview": default_content[:200] + ("..." if len(default_content) > 200 else ""),
+            "is_default": not any(t.is_default for t in templates),
+        },
+        "total": len(templates),
+    }
+
+    return APIResponse(data=data)
+
+
+@router.get("/templates/{template_id}", response_model=APIResponse)
+async def get_template(
+    template_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """获取单个模板的完整内容。"""
+    from app.models.template import ReportTemplate
+
+    result = await db.execute(
+        select(ReportTemplate).where(
+            ReportTemplate.id == template_id,
+            ReportTemplate.user_id == current_user.id,
+        )
+    )
+    template = result.scalar_one_or_none()
+    if not template:
+        raise HTTPException(status_code=404, detail="模板不存在")
+
+    return APIResponse(data=ReportTemplateResponse.model_validate(template).model_dump())
+
+
+@router.put("/templates/{template_id}", response_model=APIResponse)
+async def update_template(
+    template_id: int,
+    request: ReportTemplateUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """更新模板（目前仅支持「设为默认」）。"""
+    from app.models.template import ReportTemplate
+
+    result = await db.execute(
+        select(ReportTemplate).where(
+            ReportTemplate.id == template_id,
+            ReportTemplate.user_id == current_user.id,
+        )
+    )
+    template = result.scalar_one_or_none()
+    if not template:
+        raise HTTPException(status_code=404, detail="模板不存在")
+
+    if request.is_default:
+        # 取消其他默认
+        all_defaults = (await db.execute(
+            select(ReportTemplate).where(
+                ReportTemplate.user_id == current_user.id,
+                ReportTemplate.is_default == True,  # noqa: E712
+            )
+        )).scalars().all()
+        for t in all_defaults:
+            t.is_default = False
+        template.is_default = True
+        await db.commit()
+
+    return APIResponse(
+        message=f"模板「{template.name}」已设为默认",
+        data=ReportTemplateResponse.model_validate(template).model_dump(),
+    )
+
+
+@router.delete("/templates/{template_id}", response_model=APIResponse)
+async def delete_template(
+    template_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """删除自定义模板。"""
+    from app.models.template import ReportTemplate
+
+    result = await db.execute(
+        select(ReportTemplate).where(
+            ReportTemplate.id == template_id,
+            ReportTemplate.user_id == current_user.id,
+        )
+    )
+    template = result.scalar_one_or_none()
+    if not template:
+        raise HTTPException(status_code=404, detail="模板不存在")
+
+    name = template.name
+    was_default = template.is_default
+    await db.delete(template)
+    await db.commit()
+
+    return APIResponse(
+        message=f"模板「{name}」已删除",
+        data={"was_default": was_default},
+    )
+
+
+# ═══════════════════════════════════════════════════════════
 # 家长反馈报告
 # ═══════════════════════════════════════════════════════════
 
@@ -926,7 +1129,9 @@ async def generate_parent_report(
     subject: str = Form(default=""),
     class_date: str = Form(default=""),
     class_time: str = Form(default=""),
+    teacher_feedback: str = Form(default=""),
     regenerate: bool = Query(False, description="强制重新生成，忽略缓存"),
+    template_id: int = Query(0, description="模板ID，0 表示使用系统默认模板"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -934,8 +1139,10 @@ async def generate_parent_report(
 
     首次生成后缓存到数据库，后续直接返回缓存。
     传 regenerate=true 可强制重新生成。
+    传 template_id 可指定自定义模板，0 为系统默认模板。
     """
     from app.services.ai_service import AIService, AIServiceError
+    from app.models.template import ReportTemplate
 
     # 验证 session
     result = await db.execute(
@@ -980,13 +1187,46 @@ async def generate_parent_report(
         "reinforcement_plan": analysis.reinforcement_plan or [],
     }
 
+    # 加载自定义模板（如指定）
+    custom_template: str | None = None
+    if template_id > 0:
+        tmpl_result = await db.execute(
+            select(ReportTemplate).where(
+                ReportTemplate.id == template_id,
+                ReportTemplate.user_id == current_user.id,
+            )
+        )
+        tmpl = tmpl_result.scalar_one_or_none()
+        if tmpl:
+            custom_template = tmpl.content
+        else:
+            raise HTTPException(status_code=404, detail="指定模板不存在")
+    elif template_id == 0:
+        # 检查用户是否有默认模板
+        default_result = await db.execute(
+            select(ReportTemplate).where(
+                ReportTemplate.user_id == current_user.id,
+                ReportTemplate.is_default == True,  # noqa: E712
+            )
+        )
+        default_tmpl = default_result.scalar_one_or_none()
+        if default_tmpl:
+            custom_template = default_tmpl.content
+
+    # 存储教师定性反馈
+    if teacher_feedback.strip():
+        analysis.teacher_feedback = teacher_feedback
+
     try:
-        ai_service = AIService()
+        ai_service = await _create_ai_service(db, current_user.id)
         report = await ai_service.generate_parent_report(
             analysis_result=analysis_data,
             subject=subject,
             class_date=class_date,
             class_time=class_time,
+            student_name=session.student_name or "",
+            teacher_feedback=teacher_feedback,
+            custom_template=custom_template,
         )
         # 缓存到数据库
         analysis.parent_report = report
@@ -997,6 +1237,88 @@ async def generate_parent_report(
             data={
                 "session_id": session_id,
                 "report": report,
+            },
+        )
+    except AIServiceError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ═══════════════════════════════════════════════════════════
+# 家长报告修改建议（与 LLM 交互修订）
+# ═══════════════════════════════════════════════════════════
+
+@router.post("/sessions/{session_id}/parent-report/revise", response_model=APIResponse)
+async def revise_parent_report(
+    session_id: int,
+    request: ParentReportReviseRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """根据教师修改建议，让 LLM 修订已有家长反馈报告。
+
+    需要已有家长报告；传入自然语言修改建议，LLM 基于原始分析数据
+    和现有报告生成修订版本。
+    """
+    from app.services.ai_service import AIService, AIServiceError
+
+    # 验证 session 归属
+    result = await db.execute(
+        select(Session).where(
+            Session.id == session_id,
+            Session.teacher_id == current_user.id,
+        )
+    )
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(status_code=404, detail="课堂记录不存在")
+
+    # 获取分析报告
+    analysis_result = await db.execute(
+        select(AnalysisReport).where(AnalysisReport.session_id == session_id)
+    )
+    analysis = analysis_result.scalar_one_or_none()
+    if not analysis:
+        raise HTTPException(
+            status_code=400,
+            detail="该课堂尚未完成分析",
+        )
+    if not analysis.parent_report:
+        raise HTTPException(
+            status_code=400,
+            detail="该课堂尚未生成家长报告，请先生成",
+        )
+
+    # 构建分析结果字典
+    analysis_data = {
+        "knowledge_points": analysis.knowledge_points or [],
+        "classroom_performance": analysis.classroom_performance,
+        "reinforcement_plan": analysis.reinforcement_plan or [],
+    }
+
+    # 获取 session 的上下文信息
+    subject = session.subject or ""
+    class_time = ""
+    if session.class_start_time and session.class_end_time:
+        class_time = f"{session.class_start_time}-{session.class_end_time}"
+
+    try:
+        ai_service = await _create_ai_service(db, current_user.id)
+        revised_report = await ai_service.revise_parent_report(
+            existing_report=analysis.parent_report,
+            revision_instruction=request.revision_instruction,
+            analysis_result=analysis_data,
+            subject=subject,
+            class_time=class_time,
+        )
+        # 更新缓存
+        analysis.parent_report = revised_report
+        await db.commit()
+
+        return APIResponse(
+            message="报告已修订",
+            data={
+                "session_id": session_id,
+                "report": revised_report,
             },
         )
     except AIServiceError as e:
@@ -1053,18 +1375,44 @@ async def create_report_image(
     parent_report_text = analysis.parent_report or ""
     if not parent_report_text:
         try:
-            from app.services.ai_service import AIService
-            ai_service = AIService()
+            ai_service = await _create_ai_service(db, current_user.id)
             analysis_data = {
                 "knowledge_points": knowledge_points,
                 "classroom_performance": classroom_performance,
                 "reinforcement_plan": reinforcement_plan,
             }
+            # 格式化日期时间
+            class_date = ""
+            class_time = ""
+            if session.class_start_time:
+                try:
+                    class_date = session.class_start_time.strftime("%Y年%m月%d日")
+                except Exception:
+                    pass
+                if session.class_end_time:
+                    class_time = f"{session.class_start_time}-{session.class_end_time}"
+                else:
+                    class_time = str(session.class_start_time)
+            # 获取自定义模板
+            custom_template = None
+            from app.models.template import ReportTemplate
+            default_result = await db.execute(
+                select(ReportTemplate).where(
+                    ReportTemplate.user_id == current_user.id,
+                    ReportTemplate.is_default == True,  # noqa: E712
+                )
+            )
+            default_tmpl = default_result.scalar_one_or_none()
+            if default_tmpl:
+                custom_template = default_tmpl.content
             parent_report_text = await ai_service.generate_parent_report(
                 analysis_result=analysis_data,
-                subject=session.student_name or "",
-                class_date="",
-                class_time="",
+                subject=session.subject or "",
+                class_date=class_date,
+                class_time=class_time,
+                student_name=session.student_name or "",
+                teacher_feedback=analysis.teacher_feedback or "",
+                custom_template=custom_template,
             )
             # 缓存
             analysis.parent_report = parent_report_text
@@ -1247,3 +1595,130 @@ async def clear_uploads(current_user: User = Depends(get_current_user)):
 
     return APIResponse(code=200, message=msg,
         data={"file_count": len(files), "total_size_mb": size_mb, "deleted_dirs": deleted_count, "errors": errors})
+
+
+# ═══════════════════════════════════════════════════════════
+# 删除课堂记录
+# ═══════════════════════════════════════════════════════════
+
+@router.delete("/sessions/{session_id}", response_model=APIResponse)
+async def delete_session(
+    session_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """删除指定课堂及其关联的转录、分析报告和音频文件（不可逆）。"""
+    import shutil
+
+    result = await db.execute(
+        select(Session).where(
+            Session.id == session_id,
+            Session.teacher_id == current_user.id,
+        )
+    )
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(status_code=404, detail="课堂记录不存在")
+
+    # 记录信息用于响应
+    title = session.title
+    audio_path = session.audio_file_path
+
+    # 级联删除数据库记录（Session.transcripts 和 Session.analysis 均配置了 cascade="all, delete-orphan"，确保一并删除）
+    await db.delete(session)
+    await db.commit()
+
+    # 清理内存中的转录进度跟踪（如有）
+    from app.services.transcription_tracker import get_tracker
+    get_tracker().remove(session_id)
+
+    # 删除关联的音频文件（磁盘清理）
+    deleted_files = 0
+    errors: list[str] = []
+    # 1. 删除 session 目录下的上传文件
+    session_upload_dir = UPLOAD_DIR / str(session_id)
+    if session_upload_dir.exists():
+        try:
+            shutil.rmtree(session_upload_dir)
+            deleted_files += 1
+        except Exception as e:
+            errors.append(f"删除上传目录失败: {e}")
+    # 2. 删除 audio_file_path 指向的文件
+    if audio_path:
+        try:
+            audio_file = Path(audio_path)
+            if audio_file.exists():
+                audio_file.unlink()
+                deleted_files += 1
+        except Exception as e:
+            errors.append(f"删除音频文件失败: {e}")
+
+    return APIResponse(
+        code=200,
+        message=f"已删除课堂「{title}」及其关联数据",
+        data={
+            "session_id": session_id,
+            "deleted_files": deleted_files,
+            "errors": errors if errors else None,
+        },
+    )
+
+
+@router.delete("/sessions", response_model=APIResponse)
+async def clear_all_sessions(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """删除当前用户的所有课堂记录及关联音频文件（不可逆）。"""
+    import shutil
+
+    result = await db.execute(
+        select(Session).where(Session.teacher_id == current_user.id)
+    )
+    sessions = result.scalars().all()
+
+    if not sessions:
+        return APIResponse(code=200, message="没有需要删除的课堂记录",
+            data={"deleted_count": 0})
+
+    count = len(sessions)
+    total_deleted_files = 0
+    errors: list[str] = []
+
+    for session in sessions:
+        audio_path = session.audio_file_path
+        sid = session.id
+
+        # 删除上传目录
+        session_dir = UPLOAD_DIR / str(sid)
+        if session_dir.exists():
+            try:
+                shutil.rmtree(session_dir)
+                total_deleted_files += 1
+            except Exception as e:
+                errors.append(f"Session {sid} 上传目录删除失败: {e}")
+
+        # 删除音频文件
+        if audio_path:
+            try:
+                af = Path(audio_path)
+                if af.exists():
+                    af.unlink()
+                    total_deleted_files += 1
+            except Exception as e:
+                errors.append(f"Session {sid} 音频文件删除失败: {e}")
+
+        # 级联删除数据库记录
+        await db.delete(session)
+
+    await db.commit()
+
+    return APIResponse(
+        code=200,
+        message=f"已删除 {count} 个课堂记录",
+        data={
+            "deleted_count": count,
+            "deleted_files": total_deleted_files,
+            "errors": errors if errors else None,
+        },
+    )

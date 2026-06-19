@@ -39,8 +39,6 @@ class BaseLLMProvider(ABC):
             model: 模型名称。
             max_tokens: 每次调用最大 token 数。
         """
-        if not api_key:
-            raise ValueError(f"{self.__class__.__name__}: 缺少 API Key")
         self.api_key = api_key
         self.model = model
         self.max_tokens = max_tokens

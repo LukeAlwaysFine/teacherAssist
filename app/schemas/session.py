@@ -110,6 +110,7 @@ class AnalysisReportResponse(BaseModel):
     classroom_performance: InteractionAnalysis | None = None
     reinforcement_plan: list[ReinforcementItem] | None = None
     parent_report: str | None = None
+    teacher_feedback: str | None = None
     processing_time_seconds: float | None = None
     created_at: datetime
 
@@ -155,3 +156,62 @@ class APIResponse(BaseModel):
     code: int = 200
     message: str = "成功"
     data: Any | None = None
+
+
+class ParentReportReviseRequest(BaseModel):
+    """家长报告修改建议请求。"""
+    revision_instruction: str = Field(
+        ...,
+        min_length=1,
+        max_length=2000,
+        description="教师的修改建议（自然语言描述）",
+    )
+
+
+# ─── Report Template ───
+
+class ReportTemplateCreate(BaseModel):
+    """上传自定义报告模板。"""
+    name: str = Field(..., min_length=1, max_length=100, description="模板名称")
+    content: str = Field(..., min_length=1, max_length=51200, description="模板内容（纯文本）")
+    set_as_default: bool = Field(default=False, description="是否同时设为默认模板")
+
+
+class ReportTemplateUpdate(BaseModel):
+    """更新模板（设为默认）。"""
+    is_default: bool = Field(..., description="是否设为默认模板")
+
+
+class ReportTemplateResponse(BaseModel):
+    """模板响应。"""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    content: str
+    is_default: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+# ─── User LLM Config ───
+
+class UserLLMConfigUpdate(BaseModel):
+    """更新用户 LLM 配置。"""
+    provider: str = Field(default="", max_length=50, description="提供商名称（如 deepseek / openai / anthropic）")
+    api_key: str = Field(default="", max_length=512, description="API 密钥")
+    model: str = Field(default="", max_length=100, description="模型 ID")
+    max_tokens: int = Field(default=4096, ge=1, le=200000, description="最大输出 token 数")
+    base_url: str = Field(default="", max_length=255, description="API 端点 URL")
+
+
+class UserLLMConfigResponse(BaseModel):
+    """LLM 配置响应。"""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    provider: str
+    api_key: str
+    model: str
+    max_tokens: int
+    base_url: str

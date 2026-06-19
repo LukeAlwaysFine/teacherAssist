@@ -5,6 +5,7 @@ FastAPI 应用入口。
 """
 import logging
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,10 +26,43 @@ async def lifespan(app: FastAPI):
     # 启动时：创建数据库表
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # 自动补齐已有表中缺失的列（SQLite 不支持 ALTER COLUMN ADD IF NOT EXISTS）
+        await _ensure_columns(conn)
     logger.info("Database tables created/verified")
     yield
     # 关闭时：清理资源
     await engine.dispose()
+
+
+async def _ensure_columns(conn: Any) -> None:
+    """为已存在的表补齐模型定义中新增的列。"""
+    from sqlalchemy import text
+
+    # 检测 SQLite 表结构
+    is_sqlite = "sqlite" in str(conn.engine.url)
+    if not is_sqlite:
+        return
+
+    needed = {
+        "analysis_reports": [
+            ("teacher_feedback", "TEXT"),
+        ],
+        "report_templates": [
+            # 未来扩展占位
+        ],
+    }
+
+    for table, columns in needed.items():
+        result = await conn.execute(
+            text(f"PRAGMA table_info({table})")
+        )
+        existing = {row[1] for row in result.fetchall()}
+        for col_name, col_type in columns:
+            if col_name not in existing:
+                await conn.execute(
+                    text(f"ALTER TABLE {table} ADD COLUMN {col_name} {col_type}")
+                )
+                logger.info(f"Auto-migration: added {table}.{col_name}")
 
 
 def create_app() -> FastAPI:

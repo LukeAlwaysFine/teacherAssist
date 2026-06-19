@@ -31,16 +31,36 @@ class AIService:
     """AI 服务 — 课堂反馈总结、习题评分等。
 
     通过工厂函数自动选择 LLM Provider（DeepSeek / Anthropic / ...）。
-    如需自定义 Provider，可显式传入。
+    支持传入用户自定义 LLM 配置覆盖系统默认值。
     """
 
-    def __init__(self, provider: BaseLLMProvider | None = None) -> None:
+    def __init__(
+        self,
+        provider: BaseLLMProvider | None = None,
+        user_config: Any | None = None,
+    ) -> None:
         """初始化 AI 服务。
 
         Args:
             provider: LLM Provider 实例。为 None 时根据配置自动创建。
+            user_config: 用户自定义 LLM 配置（UserLLMConfig 实例），为 None 时使用系统默认。
         """
-        self.provider = provider or create_llm_provider()
+        self._has_valid_key = False
+        if provider:
+            self.provider = provider
+            self._has_valid_key = bool(provider.api_key and provider.api_key != "sk-placeholder")
+        elif user_config and user_config.is_configured():
+            self.provider = create_llm_provider(
+                provider=user_config.provider or None,
+                api_key=user_config.api_key or None,
+                model=user_config.model or None,
+                max_tokens=user_config.max_tokens or None,
+                base_url=user_config.base_url or None,
+            )
+            self._has_valid_key = True
+        else:
+            self.provider = create_llm_provider()
+            self._has_valid_key = False
 
     @retry(
         stop=stop_after_attempt(3),
@@ -68,6 +88,12 @@ class AIService:
         Raises:
             AIServiceError: 调用失败时抛出。
         """
+        # 检查 API Key 是否已配置
+        if not self._has_valid_key:
+            raise AIServiceError(
+                "未配置 LLM API Key。请点击右上角 ⚙️ 设置，填入你的 API Key 后重试。"
+            )
+
         messages = [
             ChatMessage(role="system", content=system_prompt),
             ChatMessage(role="user", content=user_message),
@@ -294,6 +320,9 @@ class AIService:
         subject: str = "",
         class_date: str = "",
         class_time: str = "",
+        student_name: str = "",
+        custom_template: str | None = None,
+        teacher_feedback: str = "",
     ) -> str:
         """将课堂分析结果转化为家长友好的学习反馈报告。
 
@@ -302,6 +331,9 @@ class AIService:
             subject: 学科名称（如"地理""数学"）。
             class_date: 上课日期（如"2026年6月6日"）。
             class_time: 上课时间（如"16:30-18:30"）。
+            student_name: 学生姓名。
+            custom_template: 用户自定义模板全文，None 时使用系统默认模板。
+            teacher_feedback: 教师对学生表现的定性观察，将作为补充上下文注入报告生成。
 
         Returns:
             纯文本格式的家长反馈报告。
@@ -310,19 +342,101 @@ class AIService:
             AIServiceError: LLM 调用失败时抛出。
         """
         # 提取关键字段，精简 token 消耗
+        kps = analysis_result.get("knowledge_points") or []
+        cp = analysis_result.get("classroom_performance") or {}
+        summary = {
+            "knowledge_points": kps,
+            "classroom_performance": cp,
+            "reinforcement_plan": analysis_result.get("reinforcement_plan") or [],
+        }
+
+        # 加载模板：优先使用自定义模板，否则使用系统默认
+        if custom_template is not None:
+            system_prompt = custom_template
+        else:
+            system_prompt = self._load_prompt("parent_report")
+
+        # 替换占位符变量
+        system_prompt = system_prompt.replace("{subject}", subject or "未指定")
+        system_prompt = system_prompt.replace("{date}", class_date or "未指定")
+        system_prompt = system_prompt.replace("{time}", class_time or "未指定")
+        system_prompt = system_prompt.replace("{student_name}", student_name or "未指定")
+
+        # 便捷聚合变量
+        covered_kps = [k for k in kps if isinstance(k, dict) and k.get("covered")]
+        system_prompt = system_prompt.replace("{total_knowledge_points}", str(len(kps)))
+        system_prompt = system_prompt.replace("{covered_count}", str(len(covered_kps)))
+        mastered_count = len([
+            k for k in covered_kps
+            if k.get("student_understanding") == "已掌握"
+        ])
+        system_prompt = system_prompt.replace("{mastered_count}", str(mastered_count))
+        system_prompt = system_prompt.replace(
+            "{engagement_level}",
+            str(cp.get("engagement_level", "未评估")) if isinstance(cp, dict) else "未评估",
+        )
+
+        # 构建 user message，可选注入教师定性观察
+        user_message_parts = ["请根据以下课堂分析数据，生成家长反馈报告："]
+        if teacher_feedback.strip():
+            user_message_parts.append(
+                "\n## 教师对学生的定性观察（请结合此观察做判断，但勿让其完全覆盖课堂实际数据）\n"
+                + teacher_feedback.strip()
+            )
+        user_message_parts.append(
+            f"\n```json\n{json.dumps(summary, ensure_ascii=False, indent=2)}\n```"
+        )
+        user_message = "\n".join(user_message_parts)
+
+        raw_response = await self._call_llm(
+            system_prompt=system_prompt,
+            user_message=user_message,
+            temperature=0.5,
+            max_tokens=16384,  # 家长报告需要足够篇幅，避免截断
+        )
+        return raw_response.strip()
+
+    async def revise_parent_report(
+        self,
+        existing_report: str,
+        revision_instruction: str,
+        analysis_result: dict[str, Any],
+        subject: str = "",
+        class_date: str = "",
+        class_time: str = "",
+    ) -> str:
+        """根据教师修改建议，修订已有的家长反馈报告。
+
+        Args:
+            existing_report: 现有的家长反馈报告全文。
+            revision_instruction: 教师的修改建议（自然语言）。
+            analysis_result: 原始分析结果字典，供参考。
+            subject: 学科名称。
+            class_date: 上课日期。
+            class_time: 上课时间。
+
+        Returns:
+            修订后的家长反馈报告（纯文本）。
+
+        Raises:
+            AIServiceError: LLM 调用失败时抛出。
+        """
+        # 提取关键字段
         summary = {
             "knowledge_points": analysis_result.get("knowledge_points", []),
             "classroom_performance": analysis_result.get("classroom_performance"),
             "reinforcement_plan": analysis_result.get("reinforcement_plan", []),
         }
 
-        system_prompt = self._load_prompt("parent_report")
+        system_prompt = self._load_prompt("parent_report_revision")
         system_prompt = system_prompt.replace("{subject}", subject or "未指定")
         system_prompt = system_prompt.replace("{date}", class_date or "未指定")
         system_prompt = system_prompt.replace("{time}", class_time or "未指定")
 
         user_message = (
-            f"请根据以下课堂分析数据，生成家长反馈报告：\n\n"
+            f"现有报告：\n\n```\n{existing_report}\n```\n\n"
+            f"修改建议：{revision_instruction}\n\n"
+            f"原始分析数据（仅供核实参考，不要在报告中提未涉及的知识点）：\n\n"
             f"```json\n{json.dumps(summary, ensure_ascii=False, indent=2)}\n```"
         )
 
@@ -330,7 +444,7 @@ class AIService:
             system_prompt=system_prompt,
             user_message=user_message,
             temperature=0.5,
-            max_tokens=16384,  # 家长报告需要足够篇幅，避免截断
+            max_tokens=16384,
         )
         return raw_response.strip()
 

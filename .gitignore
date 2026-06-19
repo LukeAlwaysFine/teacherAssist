@@ -33,3 +33,6 @@ data/
 
 # 日志
 *.log
+
+# Claude Code 本地配置
+.claude/settings.local.json

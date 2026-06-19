@@ -1,148 +1,285 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-version="20250615-v4">
+<html lang="zh-CN" data-version="20250618-v18">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>教师助手</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
-.container{max-width:900px;margin:0 auto;padding:20px}
-header{background:#fff;padding:16px 24px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:24px;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
-header h1{font-size:20px;color:#1a73e8}
-.card{background:#fff;border-radius:8px;padding:24px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.card h2{font-size:16px;margin-bottom:16px;color:#1a73e8;border-bottom:2px solid #e8f0fe;padding-bottom:8px}
-.btn{padding:8px 20px;border:none;border-radius:6px;cursor:pointer;font-size:14px;transition:.2s}
-.btn-primary{background:#1a73e8;color:#fff}
-.btn-primary:hover{background:#1557b0}
-.btn-danger{background:#dc3545;color:#fff}
-.btn-danger:hover{background:#c82333}
-.btn-success{background:#28a745;color:#fff}
-.btn-success:hover{background:#218838}
-.btn-outline{background:#fff;border:1px solid #ddd}
-.btn-outline:hover{background:#f5f5f5}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn-sm{padding:4px 12px;font-size:12px}
-.input,.textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:8px}
-.textarea{min-height:80px;resize:vertical;font-family:inherit}
-.input:focus,.textarea:focus{outline:none;border-color:#1a73e8;box-shadow:0 0 0 3px rgba(26,115,232,.15)}
-.engine-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:12px 0}
-.engine-card{padding:16px;border:2px solid #e0e0e0;border-radius:8px;cursor:pointer;transition:.2s;position:relative}
-.engine-card:hover{border-color:#1a73e8}
-.engine-card.selected{border-color:#1a73e8;background:#e8f0fe}
+/* ═══════════════════════════════ Design Tokens ═══════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --color-primary:#2563eb;
+  --color-primary-hover:#1d4ed8;
+  --color-primary-light:#eff6ff;
+  --color-success:#16a34a;
+  --color-success-hover:#15803d;
+  --color-success-light:#f0fdf4;
+  --color-danger:#dc2626;
+  --color-danger-hover:#b91c1c;
+  --color-danger-light:#fef2f2;
+  --color-warning:#d97706;
+  --color-warning-light:#fffbeb;
+  --gray-50:#f9fafb;
+  --gray-100:#f3f4f6;
+  --gray-200:#e5e7eb;
+  --gray-300:#d1d5db;
+  --gray-400:#9ca3af;
+  --gray-500:#6b7280;
+  --gray-600:#4b5563;
+  --gray-700:#374151;
+  --gray-800:#1f2937;
+  --gray-900:#111827;
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;
+  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-full:9999px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -2px rgba(0,0,0,.05);
+  --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.07);
+  --transition-fast:150ms ease;--transition-base:200ms ease;--transition-slow:300ms ease;
+  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans SC",sans-serif;
+}
+body{font-family:var(--font-sans);background:var(--gray-50);color:var(--gray-800);line-height:1.6;-webkit-font-smoothing:antialiased}
+.container{max-width:900px;margin:0 auto;padding:var(--space-5)}
+h1,h2,h3{line-height:1.3}
+/* ─── Layout Utilities ─── */
+.flex-row{display:flex;align-items:center;gap:var(--space-2)}
+.flex-between{display:flex;justify-content:space-between;align-items:center}
+.flex-wrap{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap}
+.flex-1{flex:1;min-width:0}
+.gap-2{gap:var(--space-2)}.gap-3{gap:var(--space-3)}.gap-4{gap:var(--space-4)}
+.mb-2{margin-bottom:var(--space-2)}.mb-3{margin-bottom:var(--space-3)}.mb-4{margin-bottom:var(--space-4)}
+.mt-2{margin-top:var(--space-2)}.mt-3{margin-top:var(--space-3)}.mt-4{margin-top:var(--space-4)}
+/* ─── Text Utilities ─── */
+.text-xs{font-size:11px}.text-sm{font-size:13px}.text-base{font-size:14px}
+.text-hint{font-size:12px;color:var(--gray-400)}
+.text-muted{color:var(--gray-500)}
+.text-primary{color:var(--color-primary)}
+.font-semibold{font-weight:600}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ─── Header ─── */
+.app-header{background:#fff;padding:var(--space-4) var(--space-6);box-shadow:var(--shadow-sm);margin-bottom:var(--space-6);border-radius:var(--radius-md);display:flex;justify-content:space-between;align-items:center}
+.app-header h1{font-size:20px;font-weight:700;color:var(--color-primary)}
+/* ─── Cards ─── */
+.card{background:#fff;border-radius:var(--radius-md);padding:var(--space-5);margin-bottom:var(--space-5);box-shadow:var(--shadow-sm)}
+.card h2{font-size:16px;margin-bottom:var(--space-4);color:var(--color-primary);border-bottom:2px solid var(--color-primary-light);padding-bottom:var(--space-2)}
+/* ─── Buttons ─── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:8px 18px;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:14px;font-weight:500;line-height:1.4;transition:all var(--transition-base);user-select:none;white-space:nowrap}
+.btn:focus-visible{outline:2px solid var(--color-primary);outline-offset:2px}
+.btn-primary{background:var(--color-primary);color:#fff}
+.btn-primary:hover{background:var(--color-primary-hover);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn-danger{background:var(--color-danger);color:#fff}
+.btn-danger:hover{background:var(--color-danger-hover);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn-success{background:var(--color-success);color:#fff}
+.btn-success:hover{background:var(--color-success-hover);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn-outline{background:#fff;border:1.5px solid var(--gray-300);color:var(--gray-700)}
+.btn-outline:hover{background:var(--gray-50);border-color:var(--gray-400)}
+.btn-ghost{background:transparent;color:var(--gray-600)}
+.btn-ghost:hover{background:var(--gray-100)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+.btn-sm{padding:4px 12px;font-size:12px;border-radius:4px}
+.btn-lg{padding:10px 28px;font-size:15px}
+.btn-block{width:100%}
+.btn-delete{color:var(--color-danger);border:1px solid var(--color-danger);background:#fff;border-radius:var(--radius-sm);cursor:pointer;padding:3px 10px;font-size:12px;transition:all var(--transition-fast);flex-shrink:0}
+.btn-delete:hover{background:var(--color-danger);color:#fff}
+.btn-clear-warning,.btn-clear-danger{padding:12px 16px;background:#fff;border-radius:var(--radius-md);font-size:14px;font-weight:600;cursor:pointer;transition:all var(--transition-fast);text-align:center;flex:1}
+.btn-clear-warning{border:2px solid var(--color-warning);color:var(--color-warning)}
+.btn-clear-warning:hover{background:var(--color-warning-light)}
+.btn-clear-danger{border:2px solid var(--color-danger);color:var(--color-danger)}
+.btn-clear-danger:hover{background:var(--color-danger-light)}
+/* ─── Forms ─── */
+.form-label{font-size:12px;color:var(--gray-500);margin-bottom:2px;display:block}
+.form-input,.form-textarea{width:100%;padding:9px 12px;border:1.5px solid var(--gray-300);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font-sans);transition:all var(--transition-fast);background:#fff}
+.form-input:focus,.form-textarea:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.form-textarea{min-height:80px;resize:vertical}
+.form-input.input-flush{margin-bottom:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)}
+.form-hint{margin-top:2px;font-size:12px;color:var(--gray-400)}
+.input,.textarea{width:100%;padding:9px 12px;border:1.5px solid var(--gray-300);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font-sans);margin-bottom:var(--space-2);transition:all var(--transition-fast)}
+.textarea{min-height:80px;resize:vertical}
+.input:focus,.textarea:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+/* ─── Badges ─── */
+.badge{display:inline-block;padding:2px 10px;border-radius:var(--radius-full);font-size:11px;font-weight:600;line-height:1.5}
+.badge-success{background:var(--color-success);color:#fff}
+.badge-danger{background:var(--color-danger);color:#fff}
+.badge-warning{background:var(--color-warning);color:#fff}
+/* ─── Status Bar ─── */
+.status-bar{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);background:var(--color-warning-light);border-radius:var(--radius-sm);margin:var(--space-2) 0;font-size:13px;color:var(--gray-700)}
+.status-bar.success{background:var(--color-success-light);color:var(--color-success)}
+.status-bar.error{background:var(--color-danger-light);color:var(--color-danger)}
+/* ─── Progress ─── */
+.progress-bar{width:100%;height:6px;background:var(--gray-200);border-radius:3px;overflow:hidden;margin:var(--space-2) 0}
+.progress-bar .fill{height:100%;background:var(--color-primary);transition:width var(--transition-slow);border-radius:3px}
+/* ─── Engine Cards ─── */
+.engine-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--space-3);margin:var(--space-3) 0}
+.engine-card{padding:var(--space-4);border:2px solid var(--gray-200);border-radius:var(--radius-md);cursor:pointer;transition:all var(--transition-base);position:relative}
+.engine-card:hover{border-color:var(--color-primary);box-shadow:var(--shadow-sm)}
+.engine-card.selected{border-color:var(--color-primary);background:var(--color-primary-light)}
 .engine-card .name{font-size:16px;font-weight:600;margin-bottom:4px}
-.engine-card .meta{font-size:12px;color:#666;margin-bottom:8px}
+.engine-card .meta{font-size:12px;color:var(--gray-500);margin-bottom:var(--space-2)}
 .engine-card ul{list-style:none;font-size:13px}
-.engine-card ul li{margin:3px 0}
-.engine-card .badge{position:absolute;top:8px;right:8px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
-.badge-rec{background:#28a745;color:#fff}
-.status-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff3cd;border-radius:6px;margin:8px 0;font-size:13px}
-.status-bar.success{background:#d4edda}
-.status-bar.error{background:#f8d7da}
-.progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden;margin:8px 0}
-.progress-bar .fill{height:100%;background:#1a73e8;transition:width .3s}
-.transcript-box{background:#f8f9fa;border-radius:6px;padding:12px;max-height:300px;overflow-y:auto;font-size:13px;white-space:pre-wrap}
-.report-section{margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;border-left:3px solid #1a73e8}
-.report-section h3{font-size:14px;margin-bottom:8px}
-.kp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-.kp-item{padding:12px;background:#fff;border-radius:8px;border:1px solid #e0e0e0;transition:box-shadow .2s}
-.kp-item:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.kp-item .kp-name{font-weight:600;font-size:15px;margin-bottom:6px}
-.kp-item .kp-status{font-size:13px;font-weight:500;line-height:1.6}
-.kp-covered{color:#188038}
-.kp-mastered{color:#188038}
-.kp-uncertain{color:#e65100}
-.kp-not-mastered{color:#d93025}
-.kp-unknown{color:#888}
-.kp-uncovered{color:#999}
-.tabs{display:flex;gap:0;margin-bottom:16px}
-.tab{padding:8px 20px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:14px}
-.tab:first-child{border-radius:6px 0 0 6px}
-.tab:last-child{border-radius:0 6px 6px 0}
-.tab.active{background:#1a73e8;color:#fff;border-color:#1a73e8}
-.hidden{display:none!important}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(40,167,69,.4)}50%{box-shadow:0 0 0 8px rgba(40,167,69,0)}}
-.session-list-item{padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-.session-list-item:hover{background:#f8f9fa}
-/* Auth */
+.engine-card ul li{margin:3px 0;color:var(--gray-600)}
+.engine-card.disabled{opacity:.55;cursor:not-allowed;border-color:var(--gray-100);background:var(--gray-50)}
+.engine-card.disabled:hover{border-color:var(--gray-100)}
+/* ─── Transcript ─── */
+.transcript-box{background:var(--gray-50);border-radius:var(--radius-sm);padding:var(--space-3);max-height:300px;overflow-y:auto;font-size:13px;white-space:pre-wrap;color:var(--gray-700)}
+.transcript-method{border:1.5px solid var(--gray-200);border-radius:var(--radius-md);margin-bottom:var(--space-2);overflow:hidden}
+.transcript-method-header{padding:var(--space-3) var(--space-4);cursor:pointer;display:flex;align-items:center;gap:var(--space-2);user-select:none;background:var(--gray-50);transition:background var(--transition-fast)}
+.transcript-method-header:hover{background:var(--color-primary-light)}
+.transcript-method-header .method-arrow{font-size:10px;color:var(--gray-400);transition:transform var(--transition-base);display:inline-block;width:16px;text-align:center}
+.transcript-method-header.open .method-arrow{transform:rotate(90deg)}
+.transcript-method-body{padding:var(--space-4);border-top:1px solid var(--gray-100);background:#fff}
+.transcript-method-body.hidden{display:none}
+/* ─── Report ─── */
+.report-section{margin:var(--space-3) 0;padding:var(--space-3);background:var(--gray-50);border-radius:var(--radius-sm);border-left:3px solid var(--color-primary)}
+.report-section h3{font-size:14px;margin-bottom:var(--space-2);color:var(--gray-700)}
+.editable-report{width:100%;min-height:600px;font-size:14px;line-height:1.8;padding:var(--space-5);border-radius:var(--radius-md);border:1.5px solid var(--gray-200);background:var(--gray-50);font-family:var(--font-sans);resize:none}
+.editable-report:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(37,99,235,.1);background:#fff}
+/* ─── Knowledge Points ─── */
+.kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.kp-item{padding:8px 10px;background:#fff;border-radius:var(--radius-sm);border:1px solid var(--gray-200);transition:box-shadow var(--transition-base)}
+.kp-item:hover{box-shadow:var(--shadow-sm)}
+.kp-item .kp-name{font-weight:600;font-size:13px;margin-bottom:2px}
+.kp-item .kp-status{font-size:12px;font-weight:500;line-height:1.4}
+.kp-covered,.kp-mastered{color:var(--color-success)}
+.kp-uncertain{color:var(--color-warning)}
+.kp-not-mastered{color:var(--color-danger)}
+.kp-unknown{color:var(--gray-500)}
+.kp-uncovered{color:var(--gray-400)}
+/* ─── Tabs ─── */
+.tabs{display:flex;margin-bottom:var(--space-4)}
+.tab{padding:9px 24px;border:1.5px solid var(--gray-300);background:#fff;cursor:pointer;font-size:14px;font-weight:500;margin-left:-1px;transition:all var(--transition-fast);color:var(--gray-600)}
+.tab:first-child{margin-left:0;border-radius:var(--radius-sm) 0 0 var(--radius-sm)}
+.tab:last-child{border-radius:0 var(--radius-sm) var(--radius-sm) 0}
+.tab:hover{background:var(--gray-50)}
+.tab.active{background:var(--color-primary);color:#fff;border-color:var(--color-primary);z-index:1;position:relative}
+/* ─── Step Indicator ─── */
+.step-indicator{display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-6);gap:0}
+.step-item{display:flex;align-items:center;gap:var(--space-2);padding:8px 18px;border-radius:var(--radius-full);font-size:13px;font-weight:600;cursor:pointer;transition:all var(--transition-base);user-select:none;background:var(--gray-100);color:var(--gray-400);border:2px solid transparent}
+.step-item:hover:not(.active){background:var(--gray-200);color:var(--gray-600)}
+.step-item.active{background:var(--color-primary);color:#fff;border-color:var(--color-primary);cursor:default}
+.step-item.done{background:var(--color-success-light);color:var(--color-success);cursor:pointer;border-color:var(--color-success)}
+.step-item.locked{cursor:pointer;opacity:.7}
+.step-item.locked:hover{opacity:1;background:var(--color-warning-light);border-color:var(--color-warning);color:var(--color-warning)}
+.step-item .step-num{display:inline-flex;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:rgba(0,0,0,.08);flex-shrink:0}
+.step-item.active .step-num{background:rgba(255,255,255,.25)}
+.step-item.done .step-num{background:rgba(22,163,74,.15)}
+.step-label{line-height:1.2}
+.step-hint{font-size:10px;font-weight:400;opacity:.7;line-height:1.3;max-width:120px}
+.step-arrow{color:var(--gray-300);font-size:14px;margin:0 4px}
+.step-content{padding:0}
+.step-content.hidden{display:none!important}
+/* ─── Toast ─── */
+.toast-container{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:var(--gray-800);color:#fff;padding:10px 20px;border-radius:var(--radius-full);font-size:13px;box-shadow:var(--shadow-lg);animation:toastIn .3s ease,toastOut .3s ease 2.2s forwards;max-width:400px;text-align:center;pointer-events:none}
+.toast.warning{background:var(--color-warning);color:#fff}
+@keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-10px)}}
+/* ─── Analyzing ─── */
+.analyzing-box{display:flex;flex-direction:column;gap:var(--space-2);padding:var(--space-4) var(--space-5);background:var(--color-warning-light);border-radius:var(--radius-md);border-left:4px solid var(--color-warning);margin:var(--space-3) 0}
+.analyzing-box .analyzing-row{display:flex;align-items:center;gap:var(--space-3)}
+.analyzing-box .spinner{border-width:3px;width:24px;height:24px;border-top-color:var(--color-warning)}
+.analyzing-box .analyzing-text{font-size:14px;color:var(--color-warning);font-weight:500}
+.analyzing-box .analyzing-progress{height:6px;background:rgba(217,119,6,.15);border-radius:3px;overflow:hidden}
+.analyzing-box .analyzing-progress .fill{height:100%;background:var(--color-warning);transition:width .5s ease;border-radius:3px}
+.analyzing-box .analyzing-pct{font-size:11px;color:var(--gray-400);text-align:right;margin-top:2px}
+/* ─── File Upload ─── */
+.file-upload-wrapper{position:relative;margin-top:var(--space-2)}
+.file-upload-wrapper input[type=file]{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2}
+.file-upload-trigger{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;background:#fff;border:2px dashed var(--color-primary);border-radius:var(--radius-md);color:var(--color-primary);font-size:14px;font-weight:600;cursor:pointer;transition:all var(--transition-base)}
+.file-upload-trigger:hover{background:var(--color-primary-light);border-style:solid}
+.file-name{display:inline-block;margin-left:10px;padding:6px 12px;background:var(--color-success-light);color:var(--color-success);border-radius:var(--radius-sm);font-size:13px;font-weight:500;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+/* ─── Session List ─── */
+.session-list-item{padding:10px 12px;border-bottom:1px solid var(--gray-100);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background var(--transition-fast)}
+.session-list-item:hover{background:var(--gray-50)}
+/* Existing Transcript Card */
+.transcript-item-card{padding:10px 14px;margin:4px 0;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition-fast)}
+.transcript-item-card:hover{background:var(--color-primary-light);border-color:var(--color-primary)}
+/* ─── Auth ─── */
 .auth-container{max-width:400px;margin:60px auto}
-.auth-tabs{display:flex;margin-bottom:0}
-.auth-tab{flex:1;padding:12px;text-align:center;background:#f0f0f0;border:1px solid #ddd;cursor:pointer;font-size:14px}
-.auth-tab:first-child{border-radius:6px 0 0 0}
-.auth-tab:last-child{border-radius:0 6px 0 0}
-.auth-tab.active{background:#fff;border-bottom-color:#fff}
-.auth-form{padding:24px;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 6px 6px}
-.auth-form .input{margin-bottom:12px}
-.error-msg{color:#dc3545;font-size:13px;margin:4px 0}
-/* Knowledge Outline Selector */
-.outline-selector{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.outline-selector select{padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px}
-.outline-tree{max-height:400px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:6px;background:#fafafa}
-.outline-unit{border-bottom:1px solid #eee}
-.outline-unit-header{padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;user-select:none}
-.outline-unit-header:hover{background:#f0f7ff}
-.outline-unit-header .arrow{font-size:10px;transition:transform .2s;color:#999}
+.auth-tabs{display:flex}
+.auth-tab{flex:1;padding:var(--space-3);text-align:center;background:var(--gray-100);border:1.5px solid var(--gray-300);cursor:pointer;font-size:14px;font-weight:500;color:var(--gray-500);transition:all var(--transition-fast)}
+.auth-tab:first-child{border-radius:var(--radius-sm) 0 0 0}
+.auth-tab:last-child{border-radius:0 var(--radius-sm) 0 0}
+.auth-tab.active{background:#fff;border-bottom-color:#fff;color:var(--gray-800);font-weight:600}
+.auth-form{padding:var(--space-6);background:#fff;border:1.5px solid var(--gray-300);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm)}
+.auth-form .input,.auth-form .form-input{margin-bottom:var(--space-3)}
+.error-msg{color:var(--color-danger);font-size:13px;margin:4px 0}
+/* ─── Knowledge Outline ─── */
+.outline-selector{display:flex;gap:var(--space-2);flex-wrap:wrap;margin-bottom:var(--space-3)}
+.outline-selector select{padding:6px 10px;border:1.5px solid var(--gray-300);border-radius:4px;font-size:13px;background:#fff;cursor:pointer}
+.outline-tree{max-height:400px;overflow-y:auto;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);background:var(--gray-50)}
+.outline-volume-header{padding:8px 12px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;user-select:none;background:var(--color-primary-light);color:var(--color-primary);border-bottom:1px solid rgba(37,99,235,.12);transition:background var(--transition-fast)}
+.outline-volume-header:hover{background:#dbeafe}
+.outline-volume-header .arrow{font-size:10px;transition:transform var(--transition-base);color:var(--color-primary)}
+.outline-volume-header.open .arrow{transform:rotate(90deg)}
+.outline-volume-body{display:none}
+.outline-volume-header.open+.outline-volume-body{display:block}
+.outline-unit{border-bottom:1px solid var(--gray-100)}
+.outline-unit-header{padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:var(--space-2);user-select:none;transition:background var(--transition-fast)}
+.outline-unit-header:hover{background:var(--color-primary-light)}
+.outline-unit-header .arrow{font-size:10px;transition:transform var(--transition-base);color:var(--gray-400)}
 .outline-unit-header.open .arrow{transform:rotate(90deg)}
-.outline-unit-header .outline-point{font-size:13px;cursor:pointer;user-select:none}
 .outline-unit-body{padding:0 12px 8px 24px;display:none}
 .outline-unit-header.open+.outline-unit-body{display:block}
-.outline-section{border-top:1px solid #f0f0f0}
-.outline-section-header{padding:6px 0;cursor:pointer;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;user-select:none;color:#555}
-.outline-section-header:hover{background:#f5f9ff}
-.outline-section-header .arrow{font-size:9px;transition:transform .2s;color:#aaa}
+.outline-section{border-top:1px solid var(--gray-100)}
+.outline-section-header{padding:6px 0;cursor:pointer;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;user-select:none;color:var(--gray-600);transition:background var(--transition-fast)}
+.outline-section-header:hover{background:var(--color-primary-light)}
+.outline-section-header .arrow{font-size:9px;transition:transform var(--transition-base);color:var(--gray-400)}
 .outline-section-header.open .arrow{transform:rotate(90deg)}
 .outline-section-body{padding:0 8px 4px 18px;display:none}
 .outline-section-header.open+.outline-section-body{display:block}
-.outline-point{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:13px;cursor:pointer}
-.outline-point:hover{color:#1a73e8}
-.outline-point input[type=checkbox]{cursor:pointer;accent-color:#1a73e8}
-.selected-count{font-size:12px;color:#1a73e8;font-weight:600;margin-left:4px}
-.outline-actions{display:flex;gap:8px;margin-top:10px;align-items:center}
-.engine-card.disabled{opacity:.55;cursor:not-allowed;border-color:#eee;background:#f9f9f9}
-.engine-card.disabled:hover{border-color:#eee}
-.badge-unavailable{position:absolute;top:8px;right:8px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#dc3545;color:#fff}
-.unavailable-reason{font-size:12px;color:#dc3545;margin-top:8px;padding:6px 10px;background:#fff5f5;border-radius:4px;border-left:3px solid #dc3545;line-height:1.5}
-/* Step indicator */
-.step-indicator{display:flex;align-items:center;justify-content:center;margin-bottom:20px;gap:0}
-.step-item{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;user-select:none;background:#f0f0f0;color:#999}
-.step-item.active{background:#1a73e8;color:#fff}
-.step-item.done{background:#e8f5e9;color:#2e7d32;cursor:pointer}
-.step-item .step-num{display:inline-flex;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:rgba(0,0,0,.1)}
-.step-item.active .step-num{background:rgba(255,255,255,.3)}
-.step-item.done .step-num{background:#c8e6c9}
-.step-arrow{color:#ccc;font-size:14px;margin:0 2px}
-.step-content{padding:0}
-.step-content.hidden{display:none!important}
-/* Analyzing spinner */
-.analyzing-box{display:flex;align-items:center;gap:12px;padding:16px 20px;background:#fff8e1;border-radius:8px;border-left:4px solid #f9a825;margin:12px 0}
-.analyzing-box .spinner{border-width:3px;width:24px;height:24px;border-top-color:#f9a825}
-.analyzing-box .analyzing-text{font-size:14px;color:#e65100;font-weight:500}
-/* File upload */
-.file-upload-wrapper{position:relative;margin-top:8px}
-.file-upload-wrapper input[type=file]{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2}
-.file-upload-trigger{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:#fff;border:2px dashed #1a73e8;border-radius:8px;color:#1a73e8;font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
-.file-upload-trigger:hover{background:#e8f0fe;border-style:solid}
-.file-name{display:inline-block;margin-left:10px;padding:6px 12px;background:#e8f5e9;color:#2e7d32;border-radius:6px;font-size:13px;font-weight:500;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
-/* Editable report */
-.editable-report{width:100%;min-height:600px;font-size:14px;line-height:1.8;padding:20px;border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;font-family:inherit;resize:none}
-.editable-report:focus{outline:none;border-color:#1a73e8;box-shadow:0 0 0 3px rgba(26,115,232,.1);background:#fff}
-/* Transcript method cards */
-.transcript-method{border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;overflow:hidden}
-.transcript-method-header{padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none;background:#fafafa;transition:background .15s}
-.transcript-method-header:hover{background:#e8f0fe}
-.transcript-method-header .method-arrow{font-size:10px;color:#999;transition:transform .2s;display:inline-block;width:16px;text-align:center}
-.transcript-method-header.open .method-arrow{transform:rotate(90deg)}
-.transcript-method-body{padding:16px;border-top:1px solid #eee;background:#fff}
-.transcript-method-body.hidden{display:none}
-.confirm-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:999;display:flex;align-items:center;justify-content:center}
-.confirm-dialog{background:#fff;border-radius:12px;padding:28px 32px;max-width:440px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
-.confirm-dialog h3{font-size:17px;margin-bottom:12px;color:#d84315}
-.confirm-dialog p{font-size:13px;line-height:1.7;color:#555;margin-bottom:10px}
-.confirm-dialog .confirm-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
-.confirm-dialog .confirm-input{width:100%;padding:8px 12px;border:2px solid #dc3545;border-radius:6px;font-size:14px;margin-top:8px}
-.confirm-dialog .confirm-input:focus{outline:none;box-shadow:0 0 0 3px rgba(220,53,69,.15)}
+.outline-point{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:13px;cursor:pointer;color:var(--gray-700)}
+.outline-point:hover{color:var(--color-primary)}
+.outline-point input[type=checkbox]{cursor:pointer;accent-color:var(--color-primary)}
+.selected-count{font-size:12px;color:var(--color-primary);font-weight:600;margin-left:4px}
+.outline-actions{display:flex;gap:var(--space-2);margin-top:10px;align-items:center}
+/* ─── Engine Card badges ─── */
+.engine-card .badge{position:absolute;top:8px;right:8px;padding:2px 8px;border-radius:var(--radius-full);font-size:11px;font-weight:600}
+.badge-rec{background:var(--color-success);color:#fff}
+.badge-unavailable{position:absolute;top:8px;right:8px;padding:2px 8px;border-radius:var(--radius-full);font-size:11px;font-weight:600;background:var(--color-danger);color:#fff}
+.unavailable-reason{font-size:12px;color:var(--color-danger);margin-top:var(--space-2);padding:6px 10px;background:var(--color-danger-light);border-radius:4px;border-left:3px solid var(--color-danger);line-height:1.5}
+/* ─── Confirm Dialog ─── */
+.confirm-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:999;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.confirm-dialog{background:#fff;border-radius:var(--radius-lg);padding:28px 32px;max-width:440px;width:90%;box-shadow:var(--shadow-lg);animation:slideUp .2s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.confirm-dialog h3{font-size:17px;margin-bottom:var(--space-3);color:var(--gray-800)}
+.confirm-dialog p{font-size:13px;line-height:1.7;color:var(--gray-600);margin-bottom:10px}
+.confirm-dialog .confirm-actions{display:flex;gap:10px;margin-top:var(--space-4);justify-content:flex-end}
+.confirm-dialog .confirm-input{width:100%;padding:8px 12px;border:2px solid var(--color-danger);border-radius:var(--radius-sm);font-size:14px;margin-top:var(--space-2)}
+.confirm-dialog .confirm-input:focus{outline:none;box-shadow:0 0 0 3px rgba(220,38,38,.15)}
+/* ─── Revision ─── */
+.revise-area{display:flex;gap:var(--space-2);align-items:flex-start;margin-bottom:var(--space-2)}
+.revise-input{flex:1;margin-bottom:0;font-size:13px;padding:8px 12px;border:1.5px solid var(--gray-300);border-radius:var(--radius-sm);font-family:var(--font-sans);transition:all var(--transition-fast)}
+.revise-input:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.revise-status{font-size:12px;color:var(--gray-500);margin-bottom:4px}
+/* ─── History Info Table ─── */
+.info-label{padding:8px 12px;color:var(--gray-500);width:80px;font-size:13px;vertical-align:top}
+.info-value{padding:8px 0;font-size:14px}
+/* ─── History Detail Transcript ─── */
+.transcript-display{max-height:400px;overflow-y:auto;font-size:14px;line-height:1.8;white-space:pre-wrap;background:var(--gray-50);padding:var(--space-4);border-radius:var(--radius-md);color:var(--gray-700)}
+/* ─── Time Input ─── */
+input[type="time"]{font-family:var(--font-sans);padding:9px 36px 9px 12px;cursor:pointer}
+input[type="time"]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:1;width:22px;height:22px;filter:invert(35%) sepia(99%) saturate(1500%) hue-rotate(210deg)}
+input[type="time"]:focus::-webkit-calendar-picker-indicator{filter:invert(35%) sepia(99%) saturate(3000%) hue-rotate(210deg)}
+/* ─── Misc ─── */
+.hidden{display:none!important}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,.4)}50%{box-shadow:0 0 0 8px rgba(22,163,74,0)}}
+.action-bar{display:flex;gap:var(--space-2);margin-bottom:var(--space-2);align-items:center;flex-wrap:wrap}
+.session-info-card{border-left:4px solid var(--color-primary)}
+.session-info-title{font-size:16px;font-weight:700;color:var(--color-primary)}
+.session-info-meta{font-size:14px;color:var(--gray-600)}
+.session-info-time{font-size:13px;color:var(--gray-500)}
+/* ─── Modal ─── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal-card{background:#fff;border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-lg);width:100%;max-height:90vh;overflow-y:auto}
+.tmpl-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border:1px solid var(--gray-200);border-radius:6px;margin-bottom:6px;font-size:13px;transition:all var(--transition-fast)}
+.tmpl-item:hover{border-color:var(--color-primary);background:var(--color-primary-light)}
+.tmpl-item.default{border-color:var(--color-primary);background:#eff6ff}
+.tmpl-badge{font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600}
+.tmpl-badge.default{background:var(--color-primary);color:#fff}
+
 </style>
 </head>
 <body>
@@ -159,7 +296,7 @@ header h1{font-size:20px;color:#1a73e8}
     <input class="input" id="loginEmail" placeholder="邮箱" type="email">
     <input class="input" id="loginPassword" placeholder="密码" type="password">
     <div id="loginError" class="error-msg hidden"></div>
-    <button class="btn btn-primary" style="width:100%" onclick="handleLogin()">登录</button>
+    <button class="btn btn-primary btn-block" onclick="handleLogin()">登录</button>
   </div>
   <!-- Register form -->
   <div class="auth-form hidden" id="registerForm">
@@ -171,17 +308,18 @@ header h1{font-size:20px;color:#1a73e8}
       <option value="student">学生</option>
     </select>
     <div id="regError" class="error-msg hidden"></div>
-    <button class="btn btn-primary" style="width:100%" onclick="handleRegister()">注册</button>
+    <button class="btn btn-primary btn-block" onclick="handleRegister()">注册</button>
   </div>
 </div>
 
 <!-- ========== Main App (when logged in) ========== -->
 <div id="appPage" class="container hidden">
-<header>
+<header class="app-header">
   <h1>📚 教师助手</h1>
-  <div>
-    <span id="userInfo" style="margin-right:12px;font-size:13px;color:#666"></span>
-    <button class="btn btn-outline btn-sm" onclick="logout()">退出</button>
+  <div class="flex-row">
+    <span id="userInfo" class="text-sm text-muted" style="margin-right:12px"></span>
+    <button class="btn btn-outline btn-sm" onclick="openLLMSettings()" title="配置你的 LLM API" style="margin-right:6px">⚙️ API</button>
+    <button class="btn btn-danger btn-sm" onclick="logout()" title="退出登录">🚪 退出</button>
   </div>
 </header>
 
@@ -194,25 +332,37 @@ header h1{font-size:20px;color:#1a73e8}
 <div id="tab-new">
   <!-- Step indicator -->
   <div class="step-indicator" style="margin-bottom:24px">
-    <div class="step-item active" id="stepItem1" onclick="goToStep(1)">
-      <span class="step-num">1</span> 课堂信息
+    <div class="step-item active" id="stepItem1" onclick="goToStep(1)" title="第1步：填写课堂基本信息（标题、学生、学科、知识点大纲）">
+      <span class="step-num">1</span>
+      <div>
+        <div class="step-label">课堂信息</div>
+        <div class="step-hint" id="stepHint1">填写基本信息</div>
+      </div>
     </div>
     <span class="step-arrow">▸</span>
-    <div class="step-item" id="stepItem2" onclick="goToStep(2)">
-      <span class="step-num">2</span> 录制转录
+    <div class="step-item" id="stepItem2" onclick="goToStep(2)" title="第2步：录制或上传音频，完成语音转文字">
+      <span class="step-num">2</span>
+      <div>
+        <div class="step-label">录制转录</div>
+        <div class="step-hint" id="stepHint2">请先完成第1步</div>
+      </div>
     </div>
     <span class="step-arrow">▸</span>
-    <div class="step-item" id="stepItem3" onclick="goToStep(3)">
-      <span class="step-num">3</span> 分析报告
+    <div class="step-item" id="stepItem3" onclick="goToStep(3)" title="第3步：AI 分析课堂并生成家长反馈报告">
+      <span class="step-num">3</span>
+      <div>
+        <div class="step-label">分析报告</div>
+        <div class="step-hint" id="stepHint3">请先完成第2步</div>
+      </div>
     </div>
   </div>
 
   <!-- 课堂信息摘要（历史记录查看 / 新建课堂均显示） -->
-  <div id="sessionInfoCard" class="card hidden" style="border-left:4px solid #1a73e8">
+  <div id="sessionInfoCard" class="card hidden session-info-card">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <span style="font-size:16px;font-weight:700;color:#1a73e8" id="infoTitle"></span>
-      <span style="font-size:14px;color:#555" id="infoStudent"></span>
-      <span style="font-size:13px;color:#888" id="infoTime"></span>
+      <span class="session-info-title" id="infoTitle"></span>
+      <span class="session-info-meta" id="infoStudent"></span>
+      <span class="session-info-time" id="infoTime"></span>
     </div>
     <div style="margin-top:8px;font-size:13px;color:#666">
       <strong>知识点大纲：</strong><span id="infoOutline"></span>
@@ -226,27 +376,28 @@ header h1{font-size:20px;color:#1a73e8}
       <div class="transcript-method-header open" onclick="toggleMethod('classInfo')">
         <span class="method-arrow" id="methodArrowClassInfo">▶</span>
         <strong>📋 课堂信息</strong>
-        <span style="font-size:12px;color:#888">填写学生、标题和时间</span>
+        <span class="text-hint">填写学生、标题和时间</span>
       </div>
       <div class="transcript-method-body" id="methodBodyClassInfo">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div>
-            <label style="font-size:12px;color:#666">学生姓名</label>
-            <input class="input" id="studentName" placeholder="学生姓名" maxlength="50" style="margin-bottom:0">
+            <label class="form-label">学生姓名</label>
+            <input class="input input-flush" id="studentName" placeholder="学生姓名" maxlength="50" list="studentNames" autocomplete="off" oninput="filterStudentNames()" onchange="onStudentNameChange()">
+            <datalist id="studentNames"></datalist>
           </div>
           <div>
-            <label style="font-size:12px;color:#666">课堂标题</label>
-            <input class="input" id="sessionTitle" placeholder="课堂标题（可选）" maxlength="200" style="margin-bottom:0">
+            <label class="form-label">课堂标题</label>
+            <input class="input input-flush" id="sessionTitle" placeholder="课堂标题（可选）" maxlength="200">
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
           <div>
-            <label style="font-size:12px;color:#666">上课开始时间</label>
-            <input class="input" id="classStartTime" placeholder="如 16:30" maxlength="20" style="margin-bottom:0">
+            <label class="form-label">上课开始时间</label>
+            <input type="time" class="input input-flush" id="classStartTime">
           </div>
           <div>
-            <label style="font-size:12px;color:#666">上课结束时间</label>
-            <input class="input" id="classEndTime" placeholder="如 18:30" maxlength="20" style="margin-bottom:0">
+            <label class="form-label">上课结束时间</label>
+            <input type="time" class="input input-flush" id="classEndTime">
           </div>
         </div>
       </div>
@@ -257,7 +408,7 @@ header h1{font-size:20px;color:#1a73e8}
       <div class="transcript-method-header" onclick="toggleMethod('outline')">
         <span class="method-arrow" id="methodArrowOutline">▶</span>
         <strong>📖 知识点大纲</strong>
-        <span style="font-size:12px;color:#888">从教材中选择知识点</span>
+        <span class="text-hint">从教材中选择知识点</span>
       </div>
       <div class="transcript-method-body hidden" id="methodBodyOutline">
         <div class="outline-selector" id="outlineSelector"></div>
@@ -272,33 +423,50 @@ header h1{font-size:20px;color:#1a73e8}
       </div>
     </div>
 
-    <!-- 已选知识点（可折叠，默认展开） -->
+    <!-- 已选知识点（可折叠，有选择时才展开） -->
     <div class="transcript-method" style="margin-top:8px">
-      <div class="transcript-method-header open" onclick="toggleMethod('selectedPoints')">
+      <div class="transcript-method-header" onclick="toggleMethod('selectedPoints')">
         <span class="method-arrow" id="methodArrowSelectedPoints">▶</span>
         <strong>📝 已选知识点</strong>
-        <span style="font-size:12px;color:#888">从上方大纲选择或手动输入</span>
+        <span class="text-hint" id="selectedPointsHint">从上方大纲选择或手动输入</span>
       </div>
-      <div class="transcript-method-body" id="methodBodySelectedPoints">
+      <div class="transcript-method-body hidden" id="methodBodySelectedPoints">
         <textarea class="textarea" id="manualSupplement" placeholder="从上方大纲选择知识点，或直接在此手动输入（每行一个）" style="min-height:240px;font-size:13px;margin-bottom:0" oninput="syncToTextarea()"></textarea>
       </div>
     </div>
 
-    <button class="btn btn-primary" id="btnCreateSession" onclick="createSession()" style="font-size:15px;padding:10px 32px;margin-top:20px">创建课堂 → 进入下一步</button>
+    <button class="btn btn-primary btn-lg btn-block" id="btnCreateSession" onclick="createSession()" style="margin-top:20px">创建课堂 → 进入下一步</button>
     <div id="createError" class="error-msg hidden" style="margin-top:8px"></div>
   </div>
 
   <!-- Step 2: 录制与转录 -->
   <div id="step2" class="step-content hidden">
-    <!-- 转录状态 -->
+    <!-- 转录状态 + 统一转录显示 -->
     <div class="card" id="statusCard">
       <h2>📡 转录状态</h2>
       <div id="statusDisplay" class="status-bar">
         📝 状态：<strong id="sessionStatus">等待开始</strong>
       </div>
-      <div style="font-size:12px;color:#666;margin-top:4px">
+      <!-- 上传转录进度条 -->
+      <div id="statusProgressArea" class="hidden" style="margin-top:8px">
+        <div class="progress-bar"><div class="fill" id="statusProgressFill" style="width:0%"></div></div>
+        <div class="text-xs text-muted" id="statusProgressLabel"></div>
+      </div>
+      <div style="font-size:12px;color:var(--gray-500);margin-top:4px">
         课堂 <strong id="sessionIdDisplay"></strong>
-        <span id="step2StudentInfo" style="margin-left:8px"></span>
+        <span id="step2StudentInfo" class="text-hint" style="margin-left:8px"></span>
+      </div>
+      <!-- 统一的转录文本显示框（三种方式共用） -->
+      <div id="sharedTranscriptArea" class="hidden" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:12px;font-weight:600;color:var(--gray-600)">
+            📝 转录文字 <span id="transcriptSource" style="font-weight:400;color:var(--gray-400);font-size:11px"></span>
+          </span>
+          <span style="font-size:11px;color:var(--gray-400)" id="transcriptStats"></span>
+        </div>
+        <div class="transcript-box" id="liveTranscript" style="height:220px;overflow-y:scroll">
+          尚未开始录制...
+        </div>
       </div>
     </div>
 
@@ -311,21 +479,42 @@ header h1{font-size:20px;color:#1a73e8}
         <div class="transcript-method-header" onclick="toggleMethod('record')">
           <span class="method-arrow" id="methodArrowRecord">▶</span>
           <strong>🎤 实时录制</strong>
-          <span style="font-size:12px;color:#888">使用浏览器麦克风实时录音并转文字</span>
+          <span class="text-hint">使用浏览器麦克风实时录音并转文字</span>
         </div>
         <div class="transcript-method-body hidden" id="methodBodyRecord">
+          <!-- Chunk 时长选择 -->
+          <div style="margin-bottom:10px;padding:10px 12px;background:var(--gray-50);border-radius:var(--radius-sm);font-size:12px;line-height:1.7">
+            <label style="font-weight:600">📦 音频切片时长：</label>
+            <select id="chunkDuration" style="margin-left:4px;padding:3px 8px;border:1.5px solid var(--gray-300);border-radius:4px;font-size:12px">
+              <option value="180">3 分钟</option>
+              <option value="300" selected>5 分钟（推荐）</option>
+              <option value="480">8 分钟</option>
+              <option value="600">10 分钟</option>
+            </select>
+            <div class="text-hint" style="margin-top:4px">
+              💡 每隔此时间发送音频到服务器转写。<strong>相邻片段有 5 秒重叠</strong>，确保边界不丢词。
+              一节课约 45-60 分钟：选 5 分钟约切 9-12 段，段数适中、反馈及时。网络好可选手 8-10 分钟减少请求。
+            </div>
+          </div>
           <button class="btn btn-primary" onclick="startRecording()" id="btnStartRecord">
             🎤 开始录制
           </button>
-          <button class="btn btn-danger hidden" onclick="stopRecording()" id="btnStopRecord" style="margin-left:8px">
-            ⏹ 停止录制
-          </button>
-          <div style="margin-top:8px;font-size:13px;color:#666">
+          <span id="recordControls" class="hidden">
+            <button class="btn btn-outline btn-sm" onclick="togglePauseRecording()" id="btnPauseRecord" style="margin-left:8px">
+              ⏸ 暂停
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="stopRecording()" id="btnStopRecord" style="margin-left:4px">
+              ⏹ 停止
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="cancelRecording()" id="btnCancelRecord" style="margin-left:4px">
+              ✕ 取消
+            </button>
+          </span>
+          <div style="margin-top:8px;font-size:13px;color:#666" id="recordDurationRow">
             录制时长：<strong id="recordDuration">00:00</strong>
+            <span id="recordPausedLabel" class="hidden" style="color:#d97706;margin-left:8px">⏸ 已暂停</span>
           </div>
           <div class="progress-bar"><div class="fill" id="recordProgress" style="width:0%"></div></div>
-          <h3 style="font-size:14px;margin-top:12px">实时转录结果：</h3>
-          <div class="transcript-box" id="liveTranscript">尚未开始录制...</div>
         </div>
       </div>
 
@@ -334,7 +523,7 @@ header h1{font-size:20px;color:#1a73e8}
         <div class="transcript-method-header" onclick="toggleMethod('upload')">
           <span class="method-arrow" id="methodArrowUpload">▶</span>
           <strong>📁 上传音频文件</strong>
-          <span style="font-size:12px;color:#888">上传已录制的音频文件进行转录</span>
+          <span class="text-hint">上传已录制的音频文件进行转录</span>
         </div>
         <div class="transcript-method-body hidden" id="methodBodyUpload">
           <div class="file-upload-wrapper">
@@ -344,7 +533,7 @@ header h1{font-size:20px;color:#1a73e8}
           <span id="selectedFileName" class="file-name" style="display:none"></span>
           <h3 style="font-size:14px;margin:12px 0 8px">选择转录引擎</h3>
           <div class="engine-cards" id="engineCards"></div>
-          <button class="btn btn-primary" onclick="uploadFile()" id="btnUpload" style="margin-top:8px;font-size:14px;padding:10px 24px">🚀 上传并开始转录</button>
+          <button class="btn btn-primary btn-lg" onclick="uploadFile()" id="btnUpload" style="margin-top:8px">🚀 上传并开始转录</button>
           <div id="uploadProgress" class="hidden" style="margin-top:8px">
             <div class="progress-bar"><div class="fill" id="uploadFill" style="width:0%"></div></div>
             <div style="font-size:12px;color:#666" id="uploadStatus"></div>
@@ -357,7 +546,7 @@ header h1{font-size:20px;color:#1a73e8}
         <div class="transcript-method-header" onclick="toggleMethod('existing')">
           <span class="method-arrow" id="methodArrowExisting">▶</span>
           <strong>📄 复用已有文档</strong>
-          <span style="font-size:12px;color:#888">从历史课堂中选择已转录完成的文档直接使用</span>
+          <span class="text-hint">从历史课堂中选择已转录完成的文档直接使用</span>
         </div>
         <div class="transcript-method-body hidden" id="methodBodyExisting">
           <div id="existingTranscriptsList" style="max-height:300px;overflow-y:auto">
@@ -366,6 +555,10 @@ header h1{font-size:20px;color:#1a73e8}
         </div>
       </div>
     </div>
+
+    <button class="btn btn-primary btn-lg btn-block" id="btnGoToStep3" onclick="goToStep(3)" style="margin-top:20px" disabled>
+      🔒 请先完成转录 → 进入分析报告
+    </button>
   </div>
 
   <!-- Step 3: 分析与报告 -->
@@ -378,11 +571,27 @@ header h1{font-size:20px;color:#1a73e8}
         <div class="transcript-method-header" onclick="toggleMethod('outlinePreview')">
           <span class="method-arrow" id="methodArrowOutlinePreview">▶</span>
           <strong>📖 知识点大纲预览</strong>
-          <span style="font-size:12px;color:#888">分析前可再次编辑</span>
+          <span class="text-hint">分析前可再次编辑</span>
         </div>
         <div class="transcript-method-body hidden" id="methodBodyOutlinePreview">
           <textarea class="textarea" id="updateOutline" placeholder="请先在第一步选择教材知识点大纲" readonly style="background:#f8f9fa;font-size:12px;margin-bottom:0"></textarea>
           <button class="btn btn-outline btn-sm" onclick="enableEditOutline()" style="margin-top:4px">✏️ 解锁编辑</button>
+        </div>
+      </div>
+
+      <!-- 教师定性观察 -->
+      <div class="transcript-method" style="margin-bottom:12px">
+        <div class="transcript-method-header" onclick="toggleMethod('teacherFeedback')">
+          <span class="method-arrow" id="methodArrowTeacherFeedback">▶</span>
+          <strong>💬 教师定性观察</strong>
+          <span class="text-hint">可选：输入对学生的课堂观察，AI 将结合此信息生成家长报告</span>
+        </div>
+        <div class="transcript-method-body hidden" id="methodBodyTeacherFeedback">
+          <textarea class="textarea" id="teacherFeedbackInput"
+                    placeholder="例如：注意力集中、反应快但容易粗心、今天状态不太好、对XX知识点特别感兴趣…"
+                    maxlength="500"
+                    oninput="localStorage.setItem('ta_fb_'+(currentSessionId||0),this.value)"
+                    style="font-size:13px;min-height:80px;margin-bottom:0"></textarea>
         </div>
       </div>
 
@@ -398,7 +607,7 @@ header h1{font-size:20px;color:#1a73e8}
           <div id="analyzingStage" style="font-size:14px;color:#e65100;font-weight:500">准备分析...</div>
         </div>
         <div class="progress-bar" style="height:8px;background:#ffe0b2">
-          <div class="fill" id="analyzeFill" style="width:0%;background:#f9a825;transition:width .5s"></div>
+          <div class="fill" id="analyzeFill" style="width:0%"></div>
         </div>
         <div style="font-size:11px;color:#999;margin-top:4px;text-align:right" id="analyzePct">0%</div>
       </div>
@@ -411,17 +620,103 @@ header h1{font-size:20px;color:#1a73e8}
 
     <div id="parentReportArea" class="hidden card">
       <h2>📨 家长反馈报告</h2>
+      <!-- 模板选择器 -->
+      <div class="template-selector" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <label style="font-size:12px;color:#666;white-space:nowrap">报告模板：</label>
+        <select id="templateSelect" onchange="onTemplateChange()" style="flex:1;min-width:140px;padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;background:#fff">
+          <option value="0">学达默认模板</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="showTemplateManager()" style="white-space:nowrap">📂 管理模板</button>
+      </div>
       <div id="parentReportGenerating" class="analyzing-box hidden">
         <div class="spinner"></div>
         <div class="analyzing-text">正在生成家长报告...</div>
       </div>
-      <div id="parentReportActions" class="hidden" style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-        <button class="btn btn-outline btn-sm" onclick="generateParentReport(true)" id="btnRegenReport">🔄 重新生成</button>
+      <div id="parentReportActions" class="hidden action-bar">
         <button class="btn btn-primary btn-sm" onclick="saveReportEdits()" id="btnSaveReport">💾 保存修改</button>
         <button class="btn btn-primary btn-sm" onclick="downloadReportImage()" id="btnDownloadImage">📷 生成图片</button>
         <span style="font-size:11px;color:#888">报告可双击直接编辑</span>
       </div>
+      <!-- 修改建议 + 重新生成（合并） -->
+      <div id="parentReportReviseArea" class="hidden revise-area">
+        <input class="revise-input" id="revisionInstruction" placeholder="输入修改建议后重新生成，留空则全文重新生成…"
+               onkeydown="if(event.key==='Enter') regenerateWithFeedback()">
+        <button class="btn btn-primary btn-sm" onclick="regenerateWithFeedback()" id="btnRegenWithFeedback" style="white-space:nowrap">
+          🤖 重新生成
+        </button>
+      </div>
       <textarea id="parentReportContent" class="editable-report hidden" placeholder="报告内容..." style="resize:none;overflow-y:auto"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Toast Container ─── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ─── LLM Settings Modal ─── -->
+<div id="llmSettingsModal" class="modal-overlay hidden" onclick="if(event.target===this)closeLLMSettings()">
+  <div class="modal-card" style="max-width:520px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="margin:0">⚙️ 配置你的 AI 大模型</h3>
+      <button class="btn btn-outline btn-sm" onclick="closeLLMSettings()">✕ 关闭</button>
+    </div>
+    <div class="card" style="background:#f9fafb;margin-bottom:16px">
+      <div style="font-size:13px;color:#d97706;background:#fffbeb;padding:10px 14px;border-radius:6px;margin-bottom:14px;line-height:1.6">
+        ⚠️ <strong>系统未预设 AI 服务。</strong>你需要提供自己的 API Key，所有 AI 功能（分析课堂、生成报告）才能使用。
+      </div>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">提供商名称</label>
+      <input class="input" id="llmProvider" placeholder="如 deepseek / openai / anthropic / groq / ollama …" style="margin-bottom:10px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">API Key（必填）</label>
+      <input class="input" id="llmApiKey" type="password" placeholder="sk-..." style="margin-bottom:10px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">模型 ID</label>
+      <input class="input" id="llmModel" placeholder="如 deepseek-chat / claude-sonnet-4-6 / gpt-4o" style="margin-bottom:10px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">最大 Token 数</label>
+      <input class="input" id="llmMaxTokens" type="number" placeholder="4096" style="margin-bottom:10px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">API 地址</label>
+      <input class="input" id="llmBaseUrl" placeholder="如 https://api.deepseek.com 或 http://localhost:11434/v1" style="margin-bottom:12px">
+      <div style="font-size:11px;color:#888;margin-bottom:12px">
+        💡 Anthropic 填 "anthropic"；OpenAI 兼容服务（DeepSeek/OpenAI/Groq/Ollama 等）填任意名称并配上 API 地址即可。
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-lg" onclick="saveLLMSettings()" id="btnSaveLLM" style="width:100%">💾 保存配置，启用 AI 功能</button>
+      </div>
+      <div id="llmSettingsMsg" class="hidden" style="font-size:12px;margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Template Manager Modal ─── -->
+<div id="templateManagerModal" class="modal-overlay hidden" onclick="if(event.target===this)hideTemplateManager()">
+  <div class="modal-card" style="max-width:640px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="margin:0">📂 模板管理</h3>
+      <button class="btn btn-outline btn-sm" onclick="hideTemplateManager()">✕ 关闭</button>
+    </div>
+
+    <!-- 上传区域 -->
+    <div class="card" style="background:#f9fafb;margin-bottom:16px">
+      <h4 style="margin:0 0 10px 0;font-size:14px">上传新模板</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="tmplName" class="input" placeholder="模板名称（如：数学报告模板）" style="flex:1;min-width:160px;margin:0">
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;margin:0;white-space:nowrap">
+          📎 选择文件 <input type="file" id="tmplFile" accept=".txt" onchange="onTmplFileSelected()" style="display:none">
+        </label>
+        <span id="tmplFileName" style="font-size:12px;color:#888;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+        <button class="btn btn-primary btn-sm" onclick="uploadTemplate()" id="btnUploadTmpl" style="white-space:nowrap">⬆️ 上传</button>
+      </div>
+      <div id="tmplUploadError" class="hidden" style="font-size:12px;color:#dc2626;margin-top:6px"></div>
+      <div style="font-size:11px;color:#888;margin-top:8px;line-height:1.5">
+        📝 可用占位符：<code>{subject}</code> <code>{date}</code> <code>{time}</code> <code>{student_name}</code><br>
+        📊 便捷变量：<code>{total_knowledge_points}</code> <code>{covered_count}</code> <code>{mastered_count}</code> <code>{engagement_level}</code>
+      </div>
+    </div>
+
+    <!-- 模板列表 -->
+    <div>
+      <h4 style="margin:0 0 8px 0;font-size:14px">我的模板（<span id="tmplCount">0</span>）</h4>
+      <div id="tmplList" style="max-height:300px;overflow-y:auto">
+        <div style="color:#999;font-size:13px;text-align:center;padding:20px">暂无自定义模板</div>
+      </div>
     </div>
   </div>
 </div>
@@ -430,24 +725,25 @@ header h1{font-size:20px;color:#1a73e8}
 <div id="tab-history" class="hidden">
   <!-- 列表 -->
   <div id="historyListPane">
-    <button class="btn" style="width:100%;padding:12px 20px;background:#fff;border:2px solid #dc3545;border-radius:8px;color:#dc3545;font-size:15px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:8px"
-            onclick="showClearConfirm()"
-            onmouseenter="this.style.background='#fff5f5'"
-            onmouseleave="this.style.background='#fff'">
-      🗑️ 清空上传音频
-    </button>
+    <!-- 两个清空按钮并列 -->
+    <div style="display:flex;gap:12px;margin-bottom:12px">
+      <button class="btn-clear-warning" onclick="showClearConfirm()">
+        🗑️ 清空所有上传音频
+      </button>
+      <button class="btn-clear-danger" onclick="showClearAllSessionsConfirm()">
+        🗑️ 清空所有课堂记录
+      </button>
+    </div>
     <div style="font-size:11px;color:#999;margin-bottom:16px;line-height:1.6">
-      ⚠️ 操作不可逆，删除后音频文件无法恢复。仅删除音频，不影响转录文本和分析报告。
-      <span style="cursor:pointer;color:#1a73e8" onclick="this.nextElementSibling.classList.toggle('hidden')">更多 ›</span>
-      <span class="hidden" style="display:block;margin-top:4px;color:#888">
-        如课堂正在转录中，删除音频会导致转录失败。建议确认所有课堂已完成分析后再执行。
-      </span>
+      ⚠️ 清空上传音频：仅删除音频文件，不影响转录文本和分析报告。
+      清空课堂记录：删除所有课堂的转录、报告和音频，不可逆。
     </div>
 
     <div class="card">
       <h2>历史课堂记录</h2>
       <div id="sessionList"></div>
     </div>
+  </div><!-- #historyListPane -->
 
   <!-- 详情（点击某条记录后显示） -->
   <div id="historyDetailPane" class="hidden">
@@ -460,13 +756,13 @@ header h1{font-size:20px;color:#1a73e8}
     <div class="card">
       <h2>📋 课堂信息</h2>
       <table style="width:100%;border-collapse:collapse;font-size:14px">
-        <tr><td style="padding:6px 12px;color:#888;width:80px">标题</td><td style="padding:6px 0" id="hTitle"></td></tr>
-        <tr><td style="padding:6px 12px;color:#888">学生</td><td style="padding:6px 0" id="hStudent"></td></tr>
-        <tr><td style="padding:6px 12px;color:#888">时间</td><td style="padding:6px 0" id="hTime"></td></tr>
-        <tr><td style="padding:6px 12px;color:#888">科目</td><td style="padding:6px 0" id="hSubject"></td></tr>
-        <tr><td style="padding:6px 12px;color:#888">教材</td><td style="padding:6px 0" id="hTextbook"></td></tr>
-        <tr><td style="padding:6px 12px;color:#888">年级</td><td style="padding:6px 0" id="hGrade"></td></tr>
-        <tr><td style="padding:6px 12px;color:#888">状态</td><td style="padding:6px 0" id="hStatus"></td></tr>
+        <tr><td class="info-label">标题</td><td class="info-value" id="hTitle"></td></tr>
+        <tr><td class="info-label">学生</td><td class="info-value" id="hStudent"></td></tr>
+        <tr><td class="info-label">时间</td><td class="info-value" id="hTime"></td></tr>
+        <tr><td class="info-label">科目</td><td class="info-value" id="hSubject"></td></tr>
+        <tr><td class="info-label">教材</td><td class="info-value" id="hTextbook"></td></tr>
+        <tr><td class="info-label">年级</td><td class="info-value" id="hGrade"></td></tr>
+        <tr><td class="info-label">状态</td><td class="info-value" id="hStatus"></td></tr>
       </table>
     </div>
 
@@ -479,7 +775,7 @@ header h1{font-size:20px;color:#1a73e8}
     <!-- 转录文本 -->
     <div class="card" id="hTranscriptCard">
       <h2>📝 转录文本</h2>
-      <div style="max-height:400px;overflow-y:auto;font-size:14px;line-height:1.8;white-space:pre-wrap;background:#f9f9f9;padding:16px;border-radius:8px" id="hTranscript"></div>
+      <div class="transcript-display" id="hTranscript"></div>
     </div>
 
     <!-- 分析报告 -->
@@ -495,10 +791,17 @@ header h1{font-size:20px;color:#1a73e8}
         <div class="spinner"></div>
         <div class="analyzing-text">正在生成家长报告...</div>
       </div>
-      <div id="hParentActions" style="display:flex;gap:8px;margin-bottom:8px">
+      <div id="hParentActions" class="action-bar">
         <button class="btn btn-primary btn-sm" id="hBtnGenerate" onclick="generateHistoryParentReport(false)">📝 生成报告</button>
-        <button class="btn btn-outline btn-sm" id="hBtnRegen" onclick="regenerateHistoryReport()" style="display:none">🔄 重新生成</button>
         <button class="btn btn-primary btn-sm" onclick="downloadHistoryReportImage()">📷 生成图片</button>
+      </div>
+      <!-- 修改建议 + 重新生成（合并） -->
+      <div id="hReportReviseArea" class="hidden revise-area">
+        <input class="revise-input" id="hRevisionInstruction" placeholder="输入修改建议后重新生成，留空则全文重新生成…"
+               onkeydown="if(event.key==='Enter') regenerateHistoryWithFeedback()">
+        <button class="btn btn-primary btn-sm" onclick="regenerateHistoryWithFeedback()" id="hBtnRegenWithFeedback" style="white-space:nowrap">
+          🤖 重新生成
+        </button>
       </div>
       <textarea id="hParentContent" class="editable-report" placeholder="报告内容..." style="resize:none;overflow-y:auto"></textarea>
     </div>
@@ -603,12 +906,19 @@ function logout() {
   currentSessionId = null;
   // 清理所有状态
   stepsCompleted = {1: false, 2: false, 3: false};
+  updateStepHints();
   _parentReportGenerated = false;
   _historyData = null;
   selectedPoints = [];
   currentSubject = null;
   currentTextbook = null;
   currentGrade = null;
+  // 清理模板管理器模态框
+  const tmplModal = document.getElementById('templateManagerModal');
+  if (tmplModal) tmplModal.classList.add('hidden');
+  // 重置模板选择器
+  const tmplSel = document.getElementById('templateSelect');
+  if (tmplSel) tmplSel.innerHTML = '<option value=\"0\">学达默认模板</option>';
   document.getElementById('appPage').classList.add('hidden');
   document.getElementById('authPage').classList.remove('hidden');
   document.getElementById('loginEmail').value = '';
@@ -621,6 +931,7 @@ function showApp() {
   const user = JSON.parse(localStorage.getItem('ta_user') || '{}');
   document.getElementById('userInfo').textContent = user.email || '';
   loadHistory();
+  loadTemplates();
   startStatusPolling();
 }
 
@@ -658,30 +969,121 @@ let mediaRecorder = null;
 let recordTimer = null;
 let recordStartTime = null;
 let chunkIndex = 0;
+let _recordingPaused = false;
+let _pausedElapsed = 0;
 let currentStep = 1;  // 1=课堂信息, 2=录制转录, 3=分析报告
 let stepsCompleted = {1: false, 2: false, 3: false};
 let _statusPollTimer = null;  // 历史记录状态轮询
 let _parentReportGenerated = false;  // 家长报告是否已自动生成
 
-function goToStep(n) {
-  // 只允许跳转到已解锁的步骤
-  if (n === 1 || stepsCompleted[1]) {
-    // Step 1 始终可访问
+function showToast(msg, type) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (type === 'warning' ? ' warning' : '');
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 2600);
+}
+
+// ═══ 知识点大纲预览 — 有内容自动展开，无内容默认折叠 ═══
+function autoExpandOutline() {
+  const textarea = document.getElementById('updateOutline');
+  const body = document.getElementById('methodBodyOutlinePreview');
+  const arrow = document.getElementById('methodArrowOutlinePreview');
+  if (!textarea || !body || !arrow) return;
+  const hasContent = textarea.value.trim().length > 0;
+  if (hasContent) {
+    body.classList.remove('hidden');
+    arrow.parentElement.classList.add('open');
+  } else {
+    body.classList.add('hidden');
+    arrow.parentElement.classList.remove('open');
   }
-  if (n === 2 && !stepsCompleted[1]) return;
-  if (n === 3 && !stepsCompleted[2]) return;
+}
+
+// ═══ 已选知识点 — 有选择才展开，无选择默认折叠 ═══
+function autoExpandSelectedPoints() {
+  const textarea = document.getElementById('manualSupplement');
+  const body = document.getElementById('methodBodySelectedPoints');
+  const arrow = document.getElementById('methodArrowSelectedPoints');
+  const hint = document.getElementById('selectedPointsHint');
+  if (!textarea || !body || !arrow) return;
+  const hasContent = textarea.value.trim().length > 0;
+  if (hasContent) {
+    body.classList.remove('hidden');
+    arrow.parentElement.classList.add('open');
+    if (hint) hint.textContent = '已选 ' + textarea.value.trim().split('\n').filter(l => l.trim()).length + ' 条';
+  } else {
+    body.classList.add('hidden');
+    arrow.parentElement.classList.remove('open');
+    if (hint) hint.textContent = '从上方大纲选择或手动输入';
+  }
+}
+
+// ═══ Step 2 底部按钮 — 与 analyze 按钮联动 ═══
+function syncStep2Button() {
+  const btnAnalyze = document.getElementById('btnAnalyze');
+  const btnGo = document.getElementById('btnGoToStep3');
+  if (!btnGo) return;
+  const ready = btnAnalyze && !btnAnalyze.disabled && btnAnalyze.textContent.includes('开始 AI 分析');
+  btnGo.disabled = !ready;
+  btnGo.textContent = ready ? '转录完成 → 进入分析报告' : '🔒 请先完成转录 → 进入分析报告';
+}
+
+// ═══ 统一转录文字显示 ═══
+function showSharedTranscript(text, source) {
+  const area = document.getElementById('sharedTranscriptArea');
+  const box = document.getElementById('liveTranscript');
+  const srcLabel = document.getElementById('transcriptSource');
+  const stats = document.getElementById('transcriptStats');
+  if (!area || !box) return;
+  if (text) {
+    box.textContent = text;
+    area.classList.remove('hidden');
+    if (srcLabel) srcLabel.textContent = source ? '— ' + source : '';
+    if (stats) {
+      const len = text.length;
+      stats.textContent = len > 0 ? len + ' 字' : '';
+    }
+  } else {
+    box.textContent = '尚未开始录制...';
+    area.classList.add('hidden');
+    if (srcLabel) srcLabel.textContent = '';
+    if (stats) stats.textContent = '';
+  }
+}
+
+function hideSharedTranscript() {
+  const area = document.getElementById('sharedTranscriptArea');
+  const box = document.getElementById('liveTranscript');
+  if (area) area.classList.add('hidden');
+  if (box) box.textContent = '尚未开始录制...';
+}
+
+function goToStep(n) {
+  // 检查步骤是否已解锁，未解锁时显示提示
+  if (n === 2 && !stepsCompleted[1]) {
+    showToast('⚠️ 请先在「课堂信息」中填写基本信息并创建课堂', 'warning');
+    // 闪烁提示 step 1
+    const el = document.getElementById('stepItem1');
+    el.style.transform = 'scale(1.05)';
+    setTimeout(() => el.style.transform = '', 300);
+    return;
+  }
+  if (n === 3 && !stepsCompleted[2]) {
+    showToast('⚠️ 请先在「录制转录」中完成音频录制和语音转文字', 'warning');
+    const el = document.getElementById('stepItem2');
+    el.style.transform = 'scale(1.05)';
+    setTimeout(() => el.style.transform = '', 300);
+    return;
+  }
 
   currentStep = n;
   document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
   document.getElementById('step' + n).classList.remove('hidden');
 
-  // 更新步骤指示器：保留已解锁步骤的 done 状态
-  document.querySelectorAll('.step-item').forEach((el, i) => {
-    el.classList.remove('active');
-    const stepNum = i + 1;
-    if (stepsCompleted[stepNum]) el.classList.add('done');
-    if (stepNum === n) { el.classList.add('active'); el.classList.remove('done'); }
-  });
+  // 更新步骤指示器
+  updateStepIndicator(n);
 
   // 进入 step 2 时加载引擎列表 + 已转录文档
   if (n === 2 && currentSessionId) {
@@ -690,11 +1092,47 @@ function goToStep(n) {
   }
   // 进入 step 3 时加载 transcript + 自动生成家长报告
   if (n === 3 && currentSessionId) {
+    // 从 localStorage 恢复教师定性观察
+    const fbInput = document.getElementById('teacherFeedbackInput');
+    const savedFb = localStorage.getItem('ta_fb_' + currentSessionId);
+    if (fbInput && !fbInput.value && savedFb) fbInput.value = savedFb;
     if (!stepsCompleted[2]) pollSessionStatus();
     const hasAnalysis = !document.getElementById('analysisResults').classList.contains('hidden');
     if (!_parentReportGenerated && hasAnalysis) {
       generateParentReport();
     }
+  }
+}
+
+function updateStepIndicator(activeN) {
+  document.querySelectorAll('.step-item').forEach((el, i) => {
+    el.classList.remove('active', 'done', 'locked');
+    const stepNum = i + 1;
+    if (stepNum === activeN) {
+      el.classList.add('active');
+    } else if (stepsCompleted[stepNum]) {
+      el.classList.add('done');
+    }
+    // 标记锁定状态（未完成且非当前步骤）
+    if (!stepsCompleted[stepNum] && stepNum !== activeN && stepNum > 1) {
+      // 检查前置步骤是否完成
+      const prevDone = stepNum === 2 ? stepsCompleted[1] : stepsCompleted[2];
+      if (!prevDone) el.classList.add('locked');
+    }
+  });
+  // 更新提示文字
+  updateStepHints();
+}
+
+function updateStepHints() {
+  const hints = {
+    1: stepsCompleted[1] ? '✅ 已完成' : '填写基本信息',
+    2: stepsCompleted[2] ? '✅ 已完成' : (stepsCompleted[1] ? '录制或上传音频' : '🔒 请先完成第1步'),
+    3: stepsCompleted[2] ? (document.getElementById('analysisResults') && !document.getElementById('analysisResults').classList.contains('hidden') ? '✅ 已完成' : '点击 AI 分析') : '🔒 请先完成第2步',
+  };
+  for (const [n, text] of Object.entries(hints)) {
+    const el = document.getElementById('stepHint' + n);
+    if (el) el.textContent = text;
   }
 }
 
@@ -705,6 +1143,14 @@ function unlockStep(n) {
   }
   if (n >= 2) {
     document.getElementById('stepItem3').classList.add('done');
+  }
+  updateStepHints();
+  // 更新当前步骤指示器
+  const activeEl = document.querySelector('.step-item.active');
+  if (activeEl) {
+    const activeN = Array.from(activeEl.parentElement.children).indexOf(activeEl);
+    // 重新刷新指示器状态
+    updateStepIndicator(currentStep || 1);
   }
 }
 
@@ -722,8 +1168,44 @@ function switchTab(tab) {
     loadHistory();
   }
   if (tab === 'new') {
+    // 重置为全新课堂创建状态
+    currentSessionId = null;
+    localStorage.removeItem('ta_session_id');
+    _parentReportGenerated = false;
+    selectedPoints = [];
+    // 重置表单
+    document.getElementById('sessionTitle').value = '';
+    document.getElementById('studentName').value = '';
+    document.getElementById('classStartTime').value = '';
+    document.getElementById('classEndTime').value = '';
+    document.getElementById('updateOutline').value = '';
+    document.getElementById('manualSupplement').value = '';
+    autoExpandOutline(); autoExpandSelectedPoints();
+    hideSharedTranscript();
+    document.getElementById('recordDuration').textContent = '00:00';
+    document.getElementById('sessionIdDisplay').textContent = '';
+    document.getElementById('sessionStatus').textContent = '等待开始';
+    document.getElementById('statusDisplay').className = 'status-bar';
+    // 隐藏分析结果
+    document.getElementById('analysisResults').classList.add('hidden');
+    document.getElementById('reportContent').innerHTML = '';
+    document.getElementById('parentReportArea').classList.add('hidden');
+    document.getElementById('parentReportContent').classList.add('hidden');
+    document.getElementById('parentReportActions').classList.add('hidden');
+    document.getElementById('parentReportReviseArea').classList.add('hidden');
+    document.getElementById('analyzingBox').classList.add('hidden');
     document.getElementById('sessionInfoCard').classList.add('hidden');
     document.getElementById('btnCreateSession').classList.remove('hidden');
+    document.getElementById('btnAnalyze').disabled = true;
+    document.getElementById('btnAnalyze').textContent = '🤖 开始 AI 分析（请先完成转录）';
+    document.getElementById('btnAnalyze').style.display = '';
+    document.getElementById('btnReAnalyze').style.display = 'none';
+    // 重置步骤
+    stepsCompleted = {1: false, 2: false, 3: false};
+    updateStepHints();
+    goToStep(1);
+    // 恢复表单记忆
+    restoreFormMemory();
   }
 }
 
@@ -748,7 +1230,7 @@ async function loadEngines() {
       <div class="meta">⚡ ${e.speed} &nbsp;|&nbsp; 💰 ${e.cost}</div>
       <ul>${e.pros.map(p => `<li>✅ ${p}</li>`).join('')}</ul>
       <ul>${e.cons.map(c => `<li>⚠️ ${c}</li>`).join('')}</ul>
-      <div style="font-size:11px;color:#999;margin-top:4px">硬件：${e.hardware_requirements}</div>
+      <div class="text-xs text-muted" style="margin-top:4px">硬件：${e.hardware_requirements}</div>
       ${reasonHtml}
     </div>`;
   }).join('');
@@ -783,21 +1265,19 @@ async function loadExistingTranscripts() {
     list.innerHTML = transcripts.map(t => {
       const idInfo = [];
       if (t.student_name) idInfo.push('学生：' + e(t.student_name));
-      if (t.subject) idInfo.push('科目：' + e(t.subject));
-      if (t.grade) idInfo.push('年级：' + e(t.grade));
+      if (t.subject) idInfo.push('科目：' + e(getOutlineDisplayName('subject', t.subject)));
+      if (t.textbook) idInfo.push('教材：' + e(getOutlineDisplayName('textbook', t.textbook, t.subject)));
+      if (t.grade) idInfo.push('年级：' + e(getOutlineDisplayName('grade', t.grade, t.subject, t.textbook)));
       if (t.class_start_time && t.class_end_time) idInfo.push('时间：' + e(t.class_start_time) + '~' + e(t.class_end_time));
       const textLen = t.text_length ? (t.text_length > 500 ? Math.round(t.text_length/500) + ' 页' : t.text_length + ' 字') : '';
       const duration = t.audio_duration_seconds ? Math.round(t.audio_duration_seconds/60) + ' 分钟' : '';
-      const date = t.created_at ? t.created_at.substring(0, 10) : '';
-      return `<div class="transcript-item" onclick="useExistingTranscript(${t.session_id})"
-        style="padding:10px 12px;margin:4px 0;background:#f9f9f9;border-radius:6px;cursor:pointer;border:1px solid #e0e0e0;transition:.15s"
-        onmouseover="this.style.background='#e8f0fe';this.style.borderColor='#1a73e8'"
-        onmouseout="this.style.background='#f9f9f9';this.style.borderColor='#e0e0e0'">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+      const date = t.created_at ? formatChineseDate(t.created_at) : '';
+      return `<div class="transcript-item-card" onclick="useExistingTranscript(${t.session_id})">
+        <div class="flex-between">
           <strong style="font-size:14px">${e(t.session_title || '未命名课堂')}</strong>
-          <span style="font-size:11px;color:#888">${date} · ${textLen}${duration ? ' · ' + duration : ''}</span>
+          <span class="text-xs text-muted">${date} · ${textLen}${duration ? ' · ' + duration : ''}</span>
         </div>
-        <div style="font-size:12px;color:#666;margin-top:3px">${idInfo.join(' ｜ ')}</div>
+        <div class="text-sm text-muted" style="margin-top:3px">${idInfo.join(' ｜ ')}</div>
       </div>`;
     }).join('');
   } catch (e) {
@@ -837,13 +1317,19 @@ async function useExistingTranscript(sessionId) {
       const btn = document.getElementById('btnAnalyze');
       btn.disabled = false;
       btn.textContent = '🤖 开始 AI 分析';
+      syncStep2Button();
       // 更新状态
       document.getElementById('sessionStatus').textContent = '转录完成';
       document.getElementById('statusDisplay').className = 'status-bar success';
       // 展开录制区域显示导入的文本
       toggleMethod('record');
-      document.getElementById('liveTranscript').textContent = text;
-      alert('转录文本已导入，可以开始分析');
+      showSharedTranscript(text, '已导入文档');
+      // 解锁 Step 3（与录制/上传完成行为一致）
+      unlockStep(2);
+      document.getElementById('stepItem3').classList.add('done');
+      document.getElementById('stepItem2').classList.add('done');
+      // 自动跳转到 step 3
+      setTimeout(() => goToStep(3), 1200);
     } else {
       const err = await r.json();
       alert('导入失败: ' + (err.detail || err.message));
@@ -887,10 +1373,17 @@ async function startRecording() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({audio: {channelCount: 1, sampleRate: 16000}});
     mediaRecorder = new MediaRecorder(stream, {mimeType: 'audio/webm;codecs=opus'});
+    _recordingPaused = false;
     chunkIndex = 0;
     recordStartTime = Date.now();
-    toggleMethod('record');
+    _pausedElapsed = 0;
+    // 确保实时录制区域展开（不自动收起）
+    document.getElementById('methodBodyRecord').classList.remove('hidden');
+    document.getElementById('methodArrowRecord').parentElement.classList.add('open');
     document.getElementById('liveTranscript').textContent = '';
+    document.getElementById('sharedTranscriptArea').classList.remove('hidden');
+    document.getElementById('transcriptSource').textContent = '— 实时录制';
+    document.getElementById('recordPausedLabel').classList.add('hidden');
 
     mediaRecorder.ondataavailable = async (e) => {
       if (e.data.size > 0) {
@@ -905,32 +1398,105 @@ async function startRecording() {
           const el = document.getElementById('liveTranscript');
           el.textContent += data.data.text + ' ';
           el.scrollTop = el.scrollHeight;
+          // 更新字数统计
+          const stats = document.getElementById('transcriptStats');
+          if (stats) stats.textContent = el.textContent.length + ' 字';
         }
         chunkIndex++;
       }
     };
 
-    mediaRecorder.start(300000);
-    document.getElementById('btnStartRecord').disabled = true;
+    const chunkMs = parseInt(document.getElementById('chunkDuration').value) * 1000;
+    mediaRecorder.start(chunkMs);
+    document.getElementById('btnStartRecord').classList.add('hidden');
+    document.getElementById('recordControls').classList.remove('hidden');
+    document.getElementById('btnPauseRecord').textContent = '⏸ 暂停';
     document.getElementById('sessionStatus').textContent = '录制中...';
     document.getElementById('statusDisplay').className = 'status-bar';
     recordTimer = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - recordStartTime) / 1000);
+      if (_recordingPaused) return;
+      const elapsed = Math.floor((Date.now() - recordStartTime) / 1000) - _pausedElapsed;
       document.getElementById('recordDuration').textContent =
         `${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(elapsed%60).padStart(2,'0')}`;
     }, 1000);
   } catch (err) {
-    alert('无法访问麦克风: ' + err.message);
+    // 根据错误类型提供具体的中文提示
+    let hint = '';
+    if (err.name === 'NotAllowedError') {
+      hint = '麦克风权限被拒绝。请在浏览器地址栏左侧点击锁图标，开启麦克风权限后刷新页面重试。';
+    } else if (err.name === 'NotFoundError') {
+      hint = '未检测到麦克风设备。请确认麦克风已正确连接，然后在系统设置中检查。';
+    } else if (err.name === 'NotReadableError') {
+      hint = '麦克风被其他程序占用。请关闭其他正在使用麦克风的程序（如腾讯会议、微信通话、其他浏览器标签页等），然后刷新页面重试。';
+    } else {
+      hint = '无法访问麦克风：' + err.message;
+    }
+    document.getElementById('liveTranscript').innerHTML =
+      '<span style="color:#dc3545;font-weight:500">❌ ' + hint + '</span>';
+    document.getElementById('sharedTranscriptArea').classList.remove('hidden');
+    document.getElementById('sessionStatus').textContent = '录制失败';
+    document.getElementById('statusDisplay').className = 'status-bar error';
+    // 恢复按钮，允许用户解决问题后重试
+    document.getElementById('btnStartRecord').disabled = false;
+  }
+}
+
+function togglePauseRecording() {
+  if (!mediaRecorder) return;
+  const btn = document.getElementById('btnPauseRecord');
+  if (_recordingPaused) {
+    // 继续录制
+    mediaRecorder.resume();
+    _recordingPaused = false;
+    _pausedElapsed += Math.floor((Date.now() - _pauseStartTime) / 1000);
+    btn.textContent = '⏸ 暂停';
+    document.getElementById('recordPausedLabel').classList.add('hidden');
+    document.getElementById('sessionStatus').textContent = '录制中...';
+  } else {
+    // 暂停录制
+    mediaRecorder.pause();
+    _recordingPaused = true;
+    _pauseStartTime = Date.now();
+    btn.textContent = '▶ 继续';
+    document.getElementById('recordPausedLabel').classList.remove('hidden');
+    document.getElementById('sessionStatus').textContent = '录制已暂停';
   }
 }
 
 async function stopRecording() {
-  if (mediaRecorder) { mediaRecorder.stop(); mediaRecorder.stream.getTracks().forEach(t => t.stop()); }
+  if (mediaRecorder) {
+    if (_recordingPaused) mediaRecorder.resume();
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+  }
   clearInterval(recordTimer);
-  document.getElementById('btnStartRecord').disabled = false;
+  _recordingPaused = false;
+  document.getElementById('btnStartRecord').classList.remove('hidden');
+  document.getElementById('recordControls').classList.add('hidden');
+  document.getElementById('recordPausedLabel').classList.add('hidden');
   document.getElementById('sessionStatus').textContent = '录制完成';
   document.getElementById('statusDisplay').className = 'status-bar success';
   if (currentSessionId) await api('POST', `/sessions/${currentSessionId}/finish`);
+}
+
+function cancelRecording() {
+  if (!confirm('确定要取消本次录制吗？已录制的音频将被丢弃。')) return;
+  if (mediaRecorder) {
+    if (_recordingPaused) mediaRecorder.resume();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    // 不触发 ondataavailable，丢弃已录制数据
+    mediaRecorder.ondataavailable = null;
+    mediaRecorder.stop();
+  }
+  clearInterval(recordTimer);
+  _recordingPaused = false;
+  document.getElementById('btnStartRecord').classList.remove('hidden');
+  document.getElementById('recordControls').classList.add('hidden');
+  document.getElementById('recordPausedLabel').classList.add('hidden');
+  hideSharedTranscript();
+  document.getElementById('recordDuration').textContent = '00:00';
+  document.getElementById('sessionStatus').textContent = '等待开始';
+  document.getElementById('statusDisplay').className = 'status-bar';
 }
 
 // ═══ Path B/C/D: Upload ═══
@@ -979,6 +1545,14 @@ async function pollTranscriptionProgress() {
       const pct = (p.progress_pct || 0).toFixed(1);
 
       fill.style.width = pct + '%';
+      // 同步到转录状态卡片
+      const statusFill = document.getElementById('statusProgressFill');
+      const statusArea = document.getElementById('statusProgressArea');
+      if (statusFill && statusArea) {
+        statusArea.classList.remove('hidden');
+        statusFill.style.width = pct + '%';
+        document.getElementById('statusProgressLabel').textContent = `进度: ${pct}%`;
+      }
 
       let html = `进度: ${pct}%`;
       if (p.elapsed_seconds != null) {
@@ -1041,13 +1615,21 @@ function formatDuration(seconds) {
 
 // ═══ Completion notice ═══
 function showTranscriptionCompleteNotice() {
-  // 显示醒目的完成提示
+  // 在转录状态卡片中显示醒目的完成提示
+  const statusDisplay = document.getElementById('statusDisplay');
+  if (statusDisplay) {
+    statusDisplay.innerHTML += '<br><span style=\"font-size:14px;font-weight:600;color:#28a745\">✅ 转录完成！点击上方「分析报告」进入下一步</span>';
+  }
+  // 上传区域状态也显示
   const statusEl = document.getElementById('uploadStatus');
-  statusEl.innerHTML += '<br><span style="font-size:14px;font-weight:600;color:#28a745">✅ 转录完成！点击上方"分析报告"进入下一步</span>';
+  if (statusEl) {
+    statusEl.innerHTML += '<br><span style=\"font-size:14px;font-weight:600;color:#28a745\">✅ 转录完成！点击上方\"分析报告\"进入下一步</span>';
+  }
   // 高亮分析按钮
   const btn = document.getElementById('btnAnalyze');
   btn.disabled = false;
   btn.textContent = '🤖 开始 AI 分析';
+  syncStep2Button();
   // 解锁 step 3
   unlockStep(2);
   // 更新 step indicator
@@ -1067,11 +1649,12 @@ async function pollSessionStatus() {
     document.getElementById('sessionStatus').textContent =
       statusLabelPlain(s.status);
     if (s.transcript) {
-      document.getElementById('liveTranscript').textContent = s.transcript.full_text || '';
+      showSharedTranscript(s.transcript.full_text || '', '已转录');
       // 转录已就绪，启用分析按钮
       const btn = document.getElementById('btnAnalyze');
       btn.disabled = false;
       btn.textContent = '🤖 开始 AI 分析';
+      syncStep2Button();
     }
     if (s.analysis) { showAnalysis(s.analysis); return; }
     if (s.status === 'completed' || s.status === 'failed') return;
@@ -1090,6 +1673,7 @@ async function triggerAnalysis() {
   btn.textContent = '⏳ 分析中...';
   btn.style.display = 'none';
   btnRe.style.display = 'none';
+  syncStep2Button();
   // 清空旧结果
   _parentReportGenerated = false;
   document.getElementById('analysisResults').classList.add('hidden');
@@ -1097,21 +1681,31 @@ async function triggerAnalysis() {
   document.getElementById('parentReportArea').classList.add('hidden');
   document.getElementById('parentReportContent').classList.add('hidden');
   document.getElementById('parentReportActions').classList.add('hidden');
+  document.getElementById('parentReportReviseArea').classList.add('hidden');
+  const revisionStatus = document.getElementById('revisionStatus');
+  if (revisionStatus) revisionStatus.classList.add('hidden');
   box.classList.remove('hidden');
   document.getElementById('analyzeFill').style.width = '0%';
-  document.getElementById('analyzeFill').style.background = '#f9a825';
+  document.getElementById('analyzeFill').style.background = '#d97706';
   document.getElementById('analyzePct').textContent = '0%';
   document.getElementById('analyzingStage').textContent = '准备分析...';
   document.getElementById('sessionStatus').textContent = '分析中...';
   document.getElementById('statusDisplay').className = 'status-bar';
   const res = await api('POST', `/sessions/${currentSessionId}/analyze`);
-  if (res.code === 200) { pollAnalysisProgress(); }
-  else {
-    alert('分析触发失败: ' + (res.detail || res.message));
+  if (res.code === 200) {
+    pollAnalysisProgress();
+  } else {
+    // 显示错误在分析卡片中，不弹窗
+    document.getElementById('analyzingStage').textContent = '❌ 触发失败';
+    document.getElementById('analyzePct').textContent = '失败';
+    document.getElementById('reportContent').innerHTML =
+      '<div class="status-bar error">❌ 分析触发失败: ' + e(res.detail || res.message || '未知错误') + '</div>';
+    document.getElementById('analysisResults').classList.remove('hidden');
     btn.style.display = '';
+    btn.className = 'btn btn-danger';
+    btn.textContent = '❌ 失败，重试';
     btn.disabled = false;
-    btn.textContent = '🤖 开始 AI 分析';
-    box.classList.add('hidden');
+    setTimeout(() => { box.classList.add('hidden'); }, 2000);
   }
 }
 
@@ -1145,7 +1739,7 @@ async function pollAnalysisProgress() {
     if (res.data && res.data.analysis) {
       // 完成
       document.getElementById('analyzeFill').style.width = '100%';
-      document.getElementById('analyzeFill').style.background = '#28a745';
+      document.getElementById('analyzeFill').style.background = '#16a34a';
       document.getElementById('analyzePct').textContent = '100%';
       document.getElementById('analyzingStage').textContent = '✅ 分析完成';
       setTimeout(() => { box.classList.add('hidden'); }, 800);
@@ -1153,12 +1747,19 @@ async function pollAnalysisProgress() {
       btn.textContent = '✅ 分析完成';
       btn.disabled = true;
       document.getElementById('btnReAnalyze').style.display = 'inline-block';
-      showAnalysis(res.data.analysis);
+      try {
+        showAnalysis(res.data.analysis);
+      } catch(e) {
+        document.getElementById('reportContent').innerHTML =
+          '<div class="status-bar error">❌ 渲染分析结果失败: ' + e.message + '</div>';
+        document.getElementById('analysisResults').classList.remove('hidden');
+      }
       document.getElementById('sessionStatus').textContent = '已完成';
       document.getElementById('statusDisplay').className = 'status-bar success';
+      updateStepHints();
       generateParentReport();
     } else if (res.data && res.data.status === 'failed') {
-      document.getElementById('analyzeFill').style.background = '#dc3545';
+      document.getElementById('analyzeFill').style.background = '#dc2626';
       document.getElementById('analyzingStage').textContent = '❌ 分析失败';
       box.querySelector('.spinner').style.display = 'none';
       btn.style.display = '';
@@ -1277,64 +1878,85 @@ function showAnalysis(analysis) {
     }</div>`;
   }
   document.getElementById('reportContent').innerHTML = html;
+  // 回填教师定性观察（如果之前保存过）
+  if (analysis.teacher_feedback) {
+    const fbInput = document.getElementById('teacherFeedbackInput');
+    if (fbInput) fbInput.value = analysis.teacher_feedback;
+  }
   // Show parent report area (analysis data now available)
   document.getElementById('parentReportArea').classList.remove('hidden');
 }
 
 // ═══ Parent Report ═══
 async function generateParentReport(forceRegen = false) {
-  if (!currentSessionId) { alert('请先创建课堂并完成分析'); return; }
+  if (!currentSessionId) return;
   _parentReportGenerated = true;
 
-  // 从 session 数据获取 subject/date/time
+  const area = document.getElementById('parentReportArea');
+  const genEl = document.getElementById('parentReportGenerating');
+  const actions = document.getElementById('parentReportActions');
+  const textarea = document.getElementById('parentReportContent');
+  const reviseArea = document.getElementById('parentReportReviseArea');
+
+  // 确保报告区域可见
+  area.classList.remove('hidden');
+  // 显示生成中
+  genEl.classList.remove('hidden');
+  actions.classList.add('hidden');
+  textarea.classList.add('hidden');
+  reviseArea.classList.add('hidden');
+
+  // 从表单获取数据
   const formData = new FormData();
-  // subject 默认用学生姓名
-  const subject = document.getElementById('studentName').value.trim();
-  formData.append('subject', subject || '');
-  // date 用今天
+  formData.append('subject', document.getElementById('studentName').value.trim());
   const today = new Date();
   formData.append('class_date', today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日');
-  // time 从 session 时间字段获取
-  const startTime = document.getElementById('classStartTime').value.trim();
-  const endTime = document.getElementById('classEndTime').value.trim();
+  const startTime = document.getElementById('classStartTime').value;
+  const endTime = document.getElementById('classEndTime').value;
   formData.append('class_time', (startTime && endTime) ? startTime + '-' + endTime : '');
-
-  // 显示生成中
-  document.getElementById('parentReportGenerating').classList.remove('hidden');
-  document.getElementById('parentReportActions').classList.add('hidden');
-  document.getElementById('parentReportContent').classList.add('hidden');
+  const feedback = (document.getElementById('teacherFeedbackInput')?.value || '').trim();
+  if (feedback) formData.append('teacher_feedback', feedback);
 
   try {
     const opts = { method: 'POST', headers: {} };
-    if (authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
+    if (authToken) opts.headers['Authorization'] = 'Bearer ' + authToken;
     opts.body = formData;
-    const url = `${API}/sessions/${currentSessionId}/parent-report${forceRegen ? '?regenerate=true' : ''}`;
+    const templateId = document.getElementById('templateSelect')?.value || '0';
+    const params = new URLSearchParams();
+    if (forceRegen) params.append('regenerate', 'true');
+    if (templateId !== '0') params.append('template_id', templateId);
+    const qs = params.toString();
+    const url = API + '/sessions/' + currentSessionId + '/parent-report' + (qs ? '?' + qs : '');
     const r = await fetch(url, opts);
     if (r.status === 401) { logout(); return; }
     const res = await r.json();
+    genEl.classList.add('hidden');
     if (res.code === 200) {
-      const textarea = document.getElementById('parentReportContent');
       const reportText = (res.data.report || '').trim();
       if (!reportText) {
-        // 报告为空 — 分析数据可能不完整
-        textarea.value = '⚠️ 家长报告生成失败，分析数据不完整。\n\n' +
-          '可能原因：上一次分析时返回被截断。\n' +
-          '请点击上方"🔄 重新分析"按钮，基于已有转录重新生成分析报告。';
-        textarea.style.color = '#dc3545';
+        textarea.value = '⚠️ 家长报告生成失败，分析数据不完整。请点击 🤖 重新生成 重试。';
+        textarea.style.color = '#dc2626';
       } else {
         textarea.value = reportText;
         textarea.style.color = '';
       }
       textarea.classList.remove('hidden');
-      document.getElementById('parentReportActions').classList.remove('hidden');
-      document.getElementById('parentReportGenerating').classList.add('hidden');
+      actions.classList.remove('hidden');
+      reviseArea.classList.remove('hidden');
     } else {
-      alert('生成失败: ' + (res.detail || res.message));
-      document.getElementById('parentReportGenerating').classList.add('hidden');
+      textarea.value = '❌ 生成失败: ' + (res.detail || res.message || '未知错误');
+      textarea.style.color = '#dc2626';
+      textarea.classList.remove('hidden');
+      actions.classList.remove('hidden');
+      reviseArea.classList.remove('hidden');
     }
   } catch (e) {
-    alert('生成失败: ' + e.message);
-    document.getElementById('parentReportGenerating').classList.add('hidden');
+    genEl.classList.add('hidden');
+    textarea.value = '❌ 网络错误: ' + e.message;
+    textarea.style.color = '#dc2626';
+    textarea.classList.remove('hidden');
+    actions.classList.remove('hidden');
+    reviseArea.classList.remove('hidden');
   }
 }
 
@@ -1353,6 +1975,316 @@ function saveReportEdits() {
     btn.style.background = '';
     btn.style.color = '';
   }, 1500);
+}
+
+// ═══ Parent Report Regenerate (unified: full regen or revision) ═══
+async function regenerateWithFeedback() {
+  if (!currentSessionId) { alert('请先创建课堂并完成分析'); return; }
+  const input = document.getElementById('revisionInstruction');
+  const instruction = input.value.trim();
+  const btn = document.getElementById('btnRegenWithFeedback');
+  const textarea = document.getElementById('parentReportContent');
+
+  const origText = btn.textContent;
+  btn.textContent = '⏳ 生成中...';
+  btn.disabled = true;
+  input.disabled = true;
+
+  try {
+    let reportText = '';
+    if (instruction) {
+      // 有修改建议 → 调用修订接口
+      const res = await api('POST', `/sessions/${currentSessionId}/parent-report/revise`, {
+        revision_instruction: instruction
+      });
+      if (res.code === 200) {
+        reportText = res.data.report;
+        input.value = '';
+        input.placeholder = '✅ 已修改，可继续输入建议…';
+      } else throw new Error(res.detail || res.message);
+    } else {
+      // 无修改建议 → 全文重新生成
+      const formData = new FormData();
+      formData.append('subject', document.getElementById('classSubject')?.value || '');
+      formData.append('student_name', document.getElementById('studentName').value.trim());
+      const startTime = document.getElementById('classStartTime').value;
+      const endTime = document.getElementById('classEndTime').value;
+      formData.append('class_time', (startTime && endTime) ? startTime + '-' + endTime : '');
+      const feedback = (document.getElementById('teacherFeedbackInput')?.value || '').trim();
+      if (feedback) formData.append('teacher_feedback', feedback);
+      const opts = { method: 'POST', headers: {} };
+      if (authToken) opts.headers['Authorization'] = 'Bearer ' + authToken;
+      opts.body = formData;
+      const tmplId = document.getElementById('templateSelect')?.value || '0';
+      const r = await fetch(API + '/sessions/' + currentSessionId + '/parent-report?regenerate=true&template_id=' + tmplId, opts);
+      if (r.status === 401) { logout(); return; }
+      const res = await r.json();
+      if (res.code === 200) {
+        reportText = res.data.report;
+        input.placeholder = '✅ 已重新生成，可继续输入建议…';
+      } else throw new Error(res.detail || res.message);
+    }
+    textarea.value = reportText;
+    localStorage.setItem('report_draft_' + currentSessionId, reportText);
+  } catch (e) {
+    input.placeholder = '❌ 失败: ' + e.message;
+  } finally {
+    btn.textContent = origText;
+    btn.disabled = false;
+    input.disabled = false;
+    input.focus();
+    setTimeout(() => {
+      if (input.value === '') {
+        input.placeholder = '输入修改建议后重新生成，留空则全文重新生成…';
+      }
+    }, 3000);
+  }
+}
+
+// ═══ LLM Settings ═══
+async function openLLMSettings() {
+  document.getElementById('llmSettingsModal').classList.remove('hidden');
+  document.getElementById('llmSettingsMsg').classList.add('hidden');
+  try {
+    const res = await api('GET', '/users/me/llm-config');
+    if (res.data) {
+      document.getElementById('llmProvider').value = res.data.provider || '';
+      document.getElementById('llmApiKey').value = res.data.api_key || '';
+      document.getElementById('llmModel').value = res.data.model || '';
+      document.getElementById('llmMaxTokens').value = res.data.max_tokens || 4096;
+      document.getElementById('llmBaseUrl').value = res.data.base_url || '';
+    }
+  } catch(e) {}
+}
+
+function closeLLMSettings() {
+  document.getElementById('llmSettingsModal').classList.add('hidden');
+}
+
+async function saveLLMSettings() {
+  const msg = document.getElementById('llmSettingsMsg');
+  const btn = document.getElementById('btnSaveLLM');
+  msg.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = '⏳ 正在保存...';
+  try {
+    const res = await api('PUT', '/users/me/llm-config', {
+      provider: document.getElementById('llmProvider').value,
+      api_key: document.getElementById('llmApiKey').value.trim(),
+      model: document.getElementById('llmModel').value.trim(),
+      max_tokens: parseInt(document.getElementById('llmMaxTokens').value) || 4096,
+      base_url: document.getElementById('llmBaseUrl').value.trim(),
+    });
+    if (res.code === 200) {
+      msg.textContent = '✅ 配置已保存！现在可以使用 AI 分析课堂和生成报告了';
+      msg.style.color = '#16a34a';
+      msg.classList.remove('hidden');
+    } else {
+      msg.textContent = '❌ ' + (res.detail || res.message || '保存失败');
+      msg.style.color = '#dc2626';
+      msg.classList.remove('hidden');
+    }
+  } catch(e) {
+    msg.textContent = '❌ 网络错误: ' + e.message;
+    msg.style.color = '#dc2626';
+    msg.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 保存配置，启用 AI 功能';
+  }
+}
+
+// ═══ Template Management ═══
+async function loadTemplates() {
+  try {
+    const res = await api('GET', '/templates');
+    if (!res.data) return;
+    const sel = document.getElementById('templateSelect');
+    if (!sel) return;
+    // 记住当前选中值
+    const currentVal = sel.value;
+    // 重建选项
+    sel.innerHTML = '<option value="0">学达默认模板</option>';
+    const defId = res.data.system_default?.is_default ? '0' : null;
+    let firstCustomDefault = null;
+    (res.data.templates || []).forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = (t.is_default ? '⭐ ' : '') + t.name;
+      if (t.is_default) firstCustomDefault = String(t.id);
+      sel.appendChild(opt);
+    });
+    // 恢复选中（优先保留用户选择，否则选默认）
+    if (currentVal && [...sel.options].some(o => o.value === currentVal)) {
+      sel.value = currentVal;
+    } else if (firstCustomDefault) {
+      sel.value = firstCustomDefault;
+    }
+  } catch(e) { /* 模板加载失败不影响主流程 */ }
+}
+
+function onTemplateChange() {
+  // 用户切换模板时无需额外操作，下次生成报告会自动使用选择的模板
+}
+
+function showTemplateManager() {
+  document.getElementById('templateManagerModal').classList.remove('hidden');
+  refreshTemplateList();
+}
+
+function hideTemplateManager() {
+  document.getElementById('templateManagerModal').classList.add('hidden');
+}
+
+function onTmplFileSelected() {
+  const file = document.getElementById('tmplFile').files[0];
+  document.getElementById('tmplFileName').textContent = file ? file.name : '';
+}
+
+async function uploadTemplate() {
+  const nameInput = document.getElementById('tmplName');
+  const fileInput = document.getElementById('tmplFile');
+  const errEl = document.getElementById('tmplUploadError');
+  const name = nameInput.value.trim();
+  const file = fileInput.files[0];
+
+  errEl.classList.add('hidden');
+  if (!name) { errEl.textContent = '请输入模板名称'; errEl.classList.remove('hidden'); return; }
+  if (!file) { errEl.textContent = '请选择 .txt 模板文件'; errEl.classList.remove('hidden'); return; }
+
+  const content = await file.text();
+  if (!content.trim()) { errEl.textContent = '模板文件内容为空'; errEl.classList.remove('hidden'); return; }
+
+  try {
+    const res = await api('POST', '/templates', { name, content, set_as_default: false });
+    if (res.code === 200) {
+      nameInput.value = '';
+      fileInput.value = '';
+      document.getElementById('tmplFileName').textContent = '';
+      refreshTemplateList();
+      loadTemplates();
+    } else {
+      errEl.textContent = res.detail || res.message || '上传失败';
+      errEl.classList.remove('hidden');
+    }
+  } catch(e) {
+    errEl.textContent = '网络错误: ' + e.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function refreshTemplateList() {
+  try {
+    const res = await api('GET', '/templates');
+    if (!res.data) return;
+    const listEl = document.getElementById('tmplList');
+    const countEl = document.getElementById('tmplCount');
+    const templates = res.data.templates || [];
+    countEl.textContent = templates.length;
+
+    if (templates.length === 0) {
+      listEl.innerHTML = '<div style="color:#999;font-size:13px;text-align:center;padding:20px">暂无自定义模板</div>';
+      return;
+    }
+    listEl.innerHTML = templates.map(t => `
+      <div class="tmpl-item${t.is_default ? ' default' : ''}">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:500">${e(t.name)}${t.is_default ? ' <span class="tmpl-badge default">默认</span>' : ''}</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">${e(t.content.slice(0, 60))}${t.content.length > 60 ? '…' : ''}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;margin-left:8px">
+          ${!t.is_default ? `<button class="btn btn-outline btn-sm" onclick="setDefaultTemplate(${t.id})" style="font-size:11px">⭐ 设为默认</button>` : ''}
+          <button class="btn btn-outline btn-sm" onclick="deleteTemplate(${t.id})" style="font-size:11px;color:#dc2626;border-color:#dc2626">🗑️</button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { /* 静默处理 */ }
+}
+
+async function setDefaultTemplate(id) {
+  try {
+    const res = await api('PUT', '/templates/' + id, { is_default: true });
+    if (res.code === 200) {
+      refreshTemplateList();
+      loadTemplates();
+    } else {
+      alert('设置失败: ' + (res.detail || res.message));
+    }
+  } catch(e) { alert('网络错误: ' + e.message); }
+}
+
+async function deleteTemplate(id) {
+  if (!confirm('确定删除此模板？不可恢复。')) return;
+  try {
+    const res = await api('DELETE', '/templates/' + id);
+    if (res.code === 200) {
+      refreshTemplateList();
+      loadTemplates();
+    } else {
+      alert('删除失败: ' + (res.detail || res.message));
+    }
+  } catch(e) { alert('网络错误: ' + e.message); }
+}
+
+async function regenerateHistoryWithFeedback() {
+  if (!_historyData) return;
+  const input = document.getElementById('hRevisionInstruction');
+  const instruction = input.value.trim();
+  const btn = document.getElementById('hBtnRegenWithFeedback');
+  const textarea = document.getElementById('hParentContent');
+
+  const origText = btn.textContent;
+  btn.textContent = '⏳ 生成中...';
+  btn.disabled = true;
+  input.disabled = true;
+
+  try {
+    let reportText = '';
+    if (instruction) {
+      const res = await api('POST', '/sessions/' + _historyData.id + '/parent-report/revise', {
+        revision_instruction: instruction
+      });
+      if (res.code === 200) {
+        reportText = res.data.report;
+        input.value = '';
+        input.placeholder = '✅ 已修改，可继续输入建议…';
+      } else throw new Error(res.detail || res.message);
+    } else {
+      const formData = new FormData();
+      formData.append('subject', _historyData.subject || '');
+      formData.append('student_name', _historyData.student_name || '');
+      formData.append('class_time', (_historyData.class_start_time && _historyData.class_end_time)
+        ? _historyData.class_start_time + '-' + _historyData.class_end_time : '');
+      const feedback = (_historyData.analysis?.teacher_feedback || '').trim();
+      if (feedback) formData.append('teacher_feedback', feedback);
+      const opts = { method: 'POST', headers: {} };
+      if (authToken) opts.headers['Authorization'] = 'Bearer ' + authToken;
+      opts.body = formData;
+      const r = await fetch(API + '/sessions/' + _historyData.id + '/parent-report?regenerate=true', opts);
+      if (r.status === 401) { logout(); return; }
+      const res = await r.json();
+      if (res.code === 200) {
+        reportText = res.data.report;
+        input.placeholder = '✅ 已重新生成，可继续输入建议…';
+      } else throw new Error(res.detail || res.message);
+    }
+    textarea.value = reportText;
+    if (_historyData && _historyData.analysis) {
+      _historyData.analysis.parent_report = reportText;
+    }
+  } catch (e) {
+    input.placeholder = '❌ 失败: ' + e.message;
+  } finally {
+    btn.textContent = origText;
+    btn.disabled = false;
+    input.disabled = false;
+    input.focus();
+    setTimeout(() => {
+      if (input.value === '') {
+        input.placeholder = '输入修改建议后重新生成，留空则全文重新生成…';
+      }
+    }, 3000);
+  }
 }
 
 // ═══ Report Image Download ═══
@@ -1431,23 +2363,24 @@ async function loadHistory() {
       return;
     }
   list.innerHTML = sessions.map(s => {
-    const student = s.student_name ? `<span style="font-size:13px;color:#1a73e8;font-weight:500">${e(s.student_name)}</span>` : '';
-    const time = s.class_start_time ? `<span style="font-size:11px;color:#888">${e(s.class_start_time)}</span>` : '';
-    const date = (s.created_at||'').substring(0,16);
+    const student = s.student_name ? `<span class="text-sm text-primary font-semibold">${e(s.student_name)}</span>` : '';
+    const startTime = s.class_start_time || '';
+    const endTime = s.class_end_time || '';
+    const timeStr = (startTime || endTime) ? (startTime + (endTime ? ' ~ ' + endTime : '')) : '';
+    const date = formatChineseDate(s.created_at);
     const stLabel = statusLabel(s.status);
     const bg = STATUS_COLOR[s.status] || '#fff3cd';
-    return `<div class="session-list-item" onclick="viewHistoryDetail(${s.id})">
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          ${student}
-          <strong>${e(s.title)}</strong>
-        </div>
-        <div style="font-size:11px;color:#999;margin-top:2px">
-          ${date} ${time ? '| ' + time : ''}
-          ${s.class_end_time ? ' - ' + e(s.class_end_time) : ''}
-        </div>
+    return `<div class="session-list-item" data-sid="${s.id}" onclick="viewHistoryDetail(${s.id})">
+      <div style="flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0">
+        <strong style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e(s.title)}</strong>
+        ${student}
+        ${timeStr ? `<span style="font-size:11px;color:#999;white-space:nowrap;flex-shrink:0">${e(timeStr)}</span>` : ''}
+        <span style="font-size:11px;color:#999;white-space:nowrap;flex-shrink:0">创建于 ${date}</span>
+        <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${bg};white-space:nowrap;flex-shrink:0">${stLabel}</span>
       </div>
-      <span style="font-size:12px;padding:3px 10px;border-radius:10px;background:${bg};white-space:nowrap">${stLabel}</span>
+      <button class="btn-delete" style="margin-left:8px"
+              onclick="event.stopPropagation();showDeleteSessionConfirm(${s.id}, '${e(s.title || '未命名课堂').replace(/'/g, "\\'")}')"
+              title="删除此课堂">删除</button>
     </div>`;
   }).join('');
   } catch (e) {
@@ -1478,9 +2411,9 @@ async function viewHistoryDetail(id) {
   document.getElementById('hStudent').textContent = s.student_name || '（未填写）';
   document.getElementById('hTime').textContent = (s.class_start_time && s.class_end_time)
     ? s.class_start_time + ' ~ ' + s.class_end_time : '（未填写）';
-  document.getElementById('hSubject').textContent = s.subject || '（未选择）';
-  document.getElementById('hTextbook').textContent = s.textbook || '（未选择）';
-  document.getElementById('hGrade').textContent = s.grade || '（未选择）';
+  document.getElementById('hSubject').textContent = getOutlineDisplayName('subject', s.subject) || '（未选择）';
+  document.getElementById('hTextbook').textContent = getOutlineDisplayName('textbook', s.textbook, s.subject) || '（未选择）';
+  document.getElementById('hGrade').textContent = getOutlineDisplayName('grade', s.grade, s.subject, s.textbook) || '（未选择）';
   const stLabel = statusLabel(s.status);
   document.getElementById('hStatus').innerHTML = `<span style="padding:2px 10px;border-radius:10px;background:${STATUS_COLOR[s.status]||'#fff3cd'}">${stLabel}</span>`;
 
@@ -1557,16 +2490,18 @@ async function viewHistoryDetail(id) {
       document.getElementById('hParentContent').value = s.analysis.parent_report;
       document.getElementById('hParentContent').classList.remove('hidden');
       document.getElementById('hBtnGenerate').style.display = 'none';
-      document.getElementById('hBtnRegen').style.display = '';
+      document.getElementById('hReportReviseArea').style.display = '';
       document.getElementById('hParentActions').classList.remove('hidden');
+      document.getElementById('hReportReviseArea').classList.remove('hidden');
     } else {
       // 无缓存 → 显示占位，等用户手动点击生成
       document.getElementById('hParentContent').value = '';
       document.getElementById('hParentContent').placeholder = '点击下方「生成报告」按钮生成家长反馈报告';
       document.getElementById('hParentContent').classList.remove('hidden');
       document.getElementById('hBtnGenerate').style.display = '';
-      document.getElementById('hBtnRegen').style.display = 'none';
+      document.getElementById('hReportReviseArea').style.display = 'none';
       document.getElementById('hParentActions').classList.remove('hidden');
+      document.getElementById('hReportReviseArea').classList.add('hidden');
     }
   } else {
     document.getElementById('hParentCard').classList.add('hidden');
@@ -1587,7 +2522,7 @@ async function generateHistoryParentReport(forceRegenerate = false) {
   // 显示生成中
   document.getElementById('hParentContent').classList.add('hidden');
   document.getElementById('hBtnGenerate').style.display = 'none';
-  document.getElementById('hBtnRegen').style.display = 'none';
+  document.getElementById('hReportReviseArea').style.display = 'none';
   document.getElementById('hParentGenerating').classList.remove('hidden');
 
   const formData = new FormData();
@@ -1611,8 +2546,9 @@ async function generateHistoryParentReport(forceRegenerate = false) {
       ta.classList.remove('hidden');
       // 生成成功后切换按钮：隐藏「生成报告」，显示「重新生成」
       document.getElementById('hBtnGenerate').style.display = 'none';
-      document.getElementById('hBtnRegen').style.display = '';
+      document.getElementById('hReportReviseArea').style.display = '';
       document.getElementById('hParentActions').classList.remove('hidden');
+      document.getElementById('hReportReviseArea').classList.remove('hidden');
       document.getElementById('hParentGenerating').classList.add('hidden');
       // 更新本地缓存
       if (_historyData && _historyData.analysis) {
@@ -1633,7 +2569,7 @@ async function generateHistoryParentReport(forceRegenerate = false) {
 async function regenerateHistoryReport() {
   document.getElementById('hParentContent').classList.add('hidden');
   document.getElementById('hBtnGenerate').style.display = 'none';
-  document.getElementById('hBtnRegen').style.display = 'none';
+  document.getElementById('hReportReviseArea').style.display = 'none';
   document.getElementById('hParentGenerating').classList.remove('hidden');
   await generateHistoryParentReport(true);
 }
@@ -1715,6 +2651,7 @@ async function viewSession(id) {
   // 大纲同时填到 step 1 和 step 3 的 textarea
   document.getElementById('updateOutline').value = s.knowledge_outline || '';
   document.getElementById('manualSupplement').value = s.knowledge_outline || '';
+  autoExpandOutline(); autoExpandSelectedPoints();
   document.getElementById('sessionIdDisplay').textContent = id;
   document.getElementById('sessionStatus').textContent =
     statusLabelPlain(s.status);
@@ -1740,11 +2677,12 @@ async function viewSession(id) {
   }
 
   if (s.transcript && s.transcript.full_text) {
-    document.getElementById('liveTranscript').textContent = s.transcript.full_text;
+    showSharedTranscript(s.transcript.full_text, '已转录');
   } else {
     document.getElementById('liveTranscript').textContent = s.status === 'created'
       ? '📝 课堂已创建，尚未上传音频或开始录制'
       : '⏳ 转录尚未完成或未开始';
+    document.getElementById('sharedTranscriptArea').classList.remove('hidden');
   }
   if (s.analysis) showAnalysis(s.analysis);
   document.getElementById('analysisResults').classList.toggle('hidden', !s.analysis);
@@ -1759,6 +2697,7 @@ async function viewSession(id) {
   } else if (s.status === 'transcribed') {
     btn.disabled = false;
     btn.textContent = '🤖 开始 AI 分析';
+    syncStep2Button();
   }
 
   loadEngines();
@@ -1798,7 +2737,36 @@ async function viewSession(id) {
   }
 }
 
-function e(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function e(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/`/g,'&#96;').replace(/\$/g,'&#36;'); }
+function getOutlineDisplayName(type, key, parentKey, grandparentKey) {
+  if (!key || !outlineData) return '';
+  try {
+    if (type === 'subject') {
+      return outlineData.subjects[key]?.name || key;
+    } else if (type === 'textbook' && grandparentKey) {
+      return outlineData.subjects[grandparentKey]?.textbooks[key]?.name || key;
+    } else if (type === 'grade' && grandparentKey && parentKey) {
+      return outlineData.subjects[grandparentKey]?.textbooks[parentKey]?.grades[key]?.name || key;
+    }
+  } catch(e) {}
+  return key;
+}
+function formatChineseDate(iso) {
+  if (!iso) return '';
+  // 使用 Date 对象解析，自动转为浏览器本地时区（中国用户为北京时间 UTC+8）
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) {
+    // 回退：纯日期字符串 "2026-06-16"
+    const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return parseInt(m[2]) + '月' + parseInt(m[3]) + '日';
+    return iso.substring(0, 10);
+  }
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const mins = String(d.getMinutes()).padStart(2, '0');
+  return month + '月' + day + '日 ' + hours + ':' + mins;
+}
 
 // ═══════════════════════════════ Knowledge Outline (5-level) ═══════════════════════════════
 let outlineData = null;
@@ -1809,7 +2777,7 @@ let selectedPoints = [];
 
 async function loadOutline() {
   if (outlineData) return outlineData;
-  const r = await fetch('/knowledge_outline.json?v=4');
+  const r = await fetch('/knowledge_outline.json?v=5');
   outlineData = await r.json();
   return outlineData;
 }
@@ -1890,7 +2858,11 @@ function renderOutlineTree() {
   let html = '';
   const volumes = gradeData.volumes;
   for (const [volKey, volData] of Object.entries(volumes)) {
-    html += `<div style="padding:8px 12px;background:#e8f0fe;font-weight:600;font-size:13px;color:#1a73e8;border-bottom:1px solid #c8ddf8">${e(volData.name)}</div>`;
+    const volumeBodyId = `volBody_${currentSubject}_${currentTextbook}_${currentGrade}_${volKey}`;
+    html += `<div class="outline-volume-header" onclick="toggleVolume(this)" id="volHeader_${volKey}">
+      <span class="arrow">▶</span> <span>${e(volData.name)}</span>
+    </div>`;
+    html += `<div class="outline-volume-body" id="${volumeBodyId}">`;
     volData.units.forEach((unit, ui) => {
       const unitId = `${currentSubject}_${currentTextbook}_${currentGrade}_${volKey}_${ui}`;
       const sections = getSections(unit);
@@ -1913,34 +2885,38 @@ function renderOutlineTree() {
         const hasSectionName = sec.name && sec.name.length > 0;
         const allSecSelected = sec.points.length > 0 && sec.points.every((pt, pi) => selectedPoints.includes(`${sectionId}_${pi}`));
         if (hasSectionName) {
-          html += `<div class="outline-section">
-            <div class="outline-section-header" onclick="toggleSection(this)" id="secHeader_${sectionId}">
-              <label class="outline-point" onclick="event.stopPropagation()" style="margin-right:8px">
-                <input type="checkbox" id="secAll_${sectionId}" ${allSecSelected ? 'checked' : ''} onchange="toggleSectionPoints('${sectionId}', this.checked)">
-              </label>
-              <span class="arrow">▶</span> ${e(sec.name)}
-            </div>
-            <div class="outline-section-body" id="secBody_${sectionId}">`;
-        }
-        sec.points.forEach((pt, pi) => {
-          const ptId = `${sectionId}_${pi}`;
-          const checked = selectedPoints.includes(ptId) ? 'checked' : '';
-          html += `<label class="outline-point" onclick="event.stopPropagation()">
-            <input type="checkbox" id="pt_${ptId}" ${checked} onchange="onPointToggle('${ptId}', this.checked)">
-            ${e(pt)}
+          // 节级别勾选：一个 checkbox 选一整节的所有知识点
+          const pointCount = sec.points.length;
+          html += `<label class="outline-point" onclick="event.stopPropagation()" style="padding:6px 0 6px 12px;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="secAll_${sectionId}" ${allSecSelected ? 'checked' : ''} onchange="toggleSectionPoints('${sectionId}', this.checked)">
+            <span>${e(sec.name)}</span>
+            <span class="text-hint">${pointCount} 个知识点</span>
           </label>`;
-        });
-        if (hasSectionName) {
-          html += '</div></div>';
+        } else {
+          // 无节名兼容：直接显示知识点
+          sec.points.forEach((pt, pi) => {
+            const ptId = `${sectionId}_${pi}`;
+            const checked = selectedPoints.includes(ptId) ? 'checked' : '';
+            html += `<label class="outline-point" onclick="event.stopPropagation()" style="padding-left:12px">
+              <input type="checkbox" id="pt_${ptId}" ${checked} onchange="onPointToggle('${ptId}', this.checked)">
+              ${e(pt)}
+            </label>`;
+          });
         }
       });
       html += '</div></div>';
     });
+    html += '</div>'; // close volume-body
   }
   document.getElementById('outlineTree').innerHTML = html;
   updateSelectedCount();
 }
 
+function toggleVolume(header) {
+  header.classList.toggle('open');
+  const body = header.nextElementSibling;
+  if (body) body.style.display = header.classList.contains('open') ? 'block' : 'none';
+}
 function toggleUnit(header) {
   header.classList.toggle('open');
 }
@@ -1952,28 +2928,52 @@ function toggleSection(header) {
 function toggleUnitPoints(unitId, checked) {
   const body = document.getElementById('unitBody_' + unitId);
   if (!body) return;
-  const checkboxes = body.querySelectorAll('input[type=checkbox]');
-  checkboxes.forEach(cb => {
-    cb.checked = checked;
-    onPointToggle(cb.id.replace('pt_', ''), checked);
+  // 处理节级别 checkbox
+  body.querySelectorAll('[id^="secAll_"]').forEach(secCb => {
+    secCb.checked = checked;
+    const sectionId = secCb.id.replace('secAll_', '');
+    toggleSectionPoints(sectionId, checked);
   });
-  body.querySelectorAll('[id^="secAll_"]').forEach(secCb => { secCb.checked = checked; });
+  // 处理直接知识点 checkbox（旧格式兼容）
+  body.querySelectorAll('[id^="pt_"]').forEach(ptCb => {
+    ptCb.checked = checked;
+    onPointToggle(ptCb.id.replace('pt_', ''), checked);
+  });
   const unitAll = document.getElementById('unitAll_' + unitId);
   if (unitAll) unitAll.checked = checked;
+  updateSelectedCount();
+  syncToTextarea();
 }
 
 function toggleSectionPoints(sectionId, checked) {
-  const body = document.getElementById('secBody_' + sectionId);
-  if (!body) return;
-  const checkboxes = body.querySelectorAll('input[type=checkbox]');
-  checkboxes.forEach(cb => {
-    cb.checked = checked;
-    onPointToggle(cb.id.replace('pt_', ''), checked);
-  });
-  const secAll = document.getElementById('secAll_' + sectionId);
-  if (secAll) secAll.checked = checked;
-  const unitId = sectionId.replace(/_[^_]+$/, '');
+  // 根据 sectionId 格式 unitId_si，找到该节下所有知识点的 ID 并切换
+  const prefix = sectionId + '_';
+  const allPtIds = [];
+  // 从已选列表中找出匹配的，以及从大纲数据中枚举
+  const parts = sectionId.split('_');
+  if (parts.length < 6) return;
+  const sub = parts[0], tb = parts[1], gr = parts[2], volKey = parts[3], ui = parseInt(parts[4]), si = parseInt(parts[5]);
+  try {
+    const sections = getSections(outlineData.subjects[sub].textbooks[tb].grades[gr].volumes[volKey].units[ui]);
+    if (sections[si]) {
+      sections[si].points.forEach((pt, pi) => {
+        const ptId = sectionId + '_' + pi;
+        if (checked) {
+          if (!selectedPoints.includes(ptId)) selectedPoints.push(ptId);
+        } else {
+          selectedPoints = selectedPoints.filter(p => p !== ptId);
+        }
+      });
+    }
+  } catch(e) { /* ignore */ }
+  // 更新 section checkbox
+  const secCb = document.getElementById('secAll_' + sectionId);
+  if (secCb) secCb.checked = checked;
+  // 更新 unit checkbox
+  const unitId = parts.slice(0, 5).join('_');
   updateUnitAllCheckbox(unitId);
+  updateSelectedCount();
+  syncToTextarea();
 }
 
 function updateUnitAllCheckbox(unitId) {
@@ -1983,14 +2983,6 @@ function updateUnitAllCheckbox(unitId) {
   const checkboxes = body.querySelectorAll('input[type=checkbox]');
   const allChecked = checkboxes.length > 0 && Array.from(checkboxes).every(c => c.checked);
   unitAll.checked = allChecked;
-  body.querySelectorAll('[id^="secAll_"]').forEach(secAll => {
-    const secId = secAll.id.replace('secAll_', '');
-    const secBody = document.getElementById('secBody_' + secId);
-    if (secBody) {
-      const secCbs = secBody.querySelectorAll('input[type=checkbox]');
-      secAll.checked = secCbs.length > 0 && Array.from(secCbs).every(c => c.checked);
-    }
-  });
 }
 
 function getPointName(ptId) {
@@ -2028,16 +3020,26 @@ function onPointToggle(ptId, checked) {
   syncToTextarea();
 }
 
+let _syncingFromOutline = false;
 function syncToTextarea() {
+  if (_syncingFromOutline) return;
   // 合并大纲勾选 + 手动补充
   const lines = selectedPoints.map(getPointName).filter(Boolean);
   const supplement = document.getElementById('manualSupplement');
   const manualText = supplement ? supplement.value.trim() : '';
 
+  // 将大纲选中的知识点写入已选知识点 textarea（避免触发 oninput 循环）
+  if (supplement) {
+    _syncingFromOutline = true;
+    supplement.value = lines.join('\n');
+    _syncingFromOutline = false;
+  }
+
   const allLines = [...lines];
   if (manualText) allLines.push(manualText);
 
   document.getElementById('updateOutline').value = allLines.join('\n');
+  autoExpandOutline(); autoExpandSelectedPoints();
 }
 
 function updateSelectedCount() {
@@ -2049,6 +3051,7 @@ function clearOutline() {
   selectedPoints = [];
   document.getElementById('updateOutline').value = '';
   document.getElementById('manualSupplement').value = '';
+  autoExpandOutline(); autoExpandSelectedPoints();
   if (currentGrade) renderOutlineTree();
   updateSelectedCount();
 }
@@ -2087,8 +3090,8 @@ createSession = async function() {
   const title = document.getElementById('sessionTitle').value || '未命名课堂';
   const knowledge = document.getElementById('updateOutline').value;
   const studentName = document.getElementById('studentName').value.trim() || null;
-  const classStartTime = document.getElementById('classStartTime').value.trim() || null;
-  const classEndTime = document.getElementById('classEndTime').value.trim() || null;
+  const classStartTime = document.getElementById('classStartTime').value || null;
+  const classEndTime = document.getElementById('classEndTime').value || null;
   const errEl = document.getElementById('createError');
   try {
     const res = await api('POST', '/sessions', {
@@ -2119,6 +3122,8 @@ createSession = async function() {
       document.getElementById('infoTime').textContent = (classStartTime && classEndTime) ? '🕐 ' + classStartTime + ' ~ ' + classEndTime : '';
       document.getElementById('infoOutline').textContent = knowledge || '（未设置）';
       document.getElementById('sessionInfoCard').classList.remove('hidden');
+      // 保存表单记忆
+      saveFormMemory(studentName, classStartTime, classEndTime);
       // 重置状态（新课堂，清除旧缓存）
       _parentReportGenerated = false;
       selectedPoints = [];
@@ -2149,10 +3154,125 @@ updateOutline = async function() {
   }
 };
 
+// ═══════════════════════════════ Form Memory ═══════════════════════════════
+const STUDENT_MEMORY_KEY = 'ta_student_memory';  // { "张三": { start, end, sub, tb, gr }, ... }
+const STUDENT_LIST_KEY = 'ta_student_list';
+
+function saveFormMemory(studentName, startTime, endTime) {
+  if (!studentName) return;
+  // 按学生姓名保存记忆
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem(STUDENT_MEMORY_KEY) || '{}'); } catch(e) {}
+  all[studentName] = {
+    classStartTime: startTime || '',
+    classEndTime: endTime || '',
+    subject: currentSubject || '',
+    textbook: currentTextbook || '',
+    grade: currentGrade || '',
+  };
+  localStorage.setItem(STUDENT_MEMORY_KEY, JSON.stringify(all));
+  // 加入姓名列表
+  let names = JSON.parse(localStorage.getItem(STUDENT_LIST_KEY) || '[]');
+  names = names.filter(n => n !== studentName);
+  names.unshift(studentName);
+  if (names.length > 20) names.pop();
+  localStorage.setItem(STUDENT_LIST_KEY, JSON.stringify(names));
+  updateStudentDatalist();
+}
+
+function restoreFormMemory() {
+  updateStudentDatalist();
+  // 不自动回填——等用户选择学生后再回填
+}
+
+// 当用户选择了已有学生姓名时，回填该学生的记忆
+function onStudentNameChange() {
+  const name = document.getElementById('studentName').value.trim();
+  if (!name) return;
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem(STUDENT_MEMORY_KEY) || '{}'); } catch(e) {}
+  const mem = all[name];
+  if (mem) {
+    // 有历史 → 回填并展开信息区域
+    if (mem.classStartTime) document.getElementById('classStartTime').value = mem.classStartTime;
+    if (mem.classEndTime) document.getElementById('classEndTime').value = mem.classEndTime;
+    if (mem.subject) currentSubject = mem.subject;
+    if (mem.textbook) currentTextbook = mem.textbook;
+    if (mem.grade) currentGrade = mem.grade;
+    // 展开课堂信息和知识点大纲
+    document.getElementById('methodBodyClassInfo').classList.remove('hidden');
+    document.getElementById('methodArrowClassInfo').parentElement.classList.add('open');
+    document.getElementById('methodBodyOutline').classList.remove('hidden');
+    document.getElementById('methodArrowOutline').parentElement.classList.add('open');
+    document.getElementById('methodBodySelectedPoints').classList.remove('hidden');
+    document.getElementById('methodArrowSelectedPoints').parentElement.classList.add('open');
+    // 重建大纲选择器
+    buildSelector();
+    if (currentSubject) {
+      const selSub = document.getElementById('selSubject');
+      if (selSub) { selSub.value = currentSubject; onSubjectChange(); }
+    }
+    if (currentTextbook) {
+      const selTb = document.getElementById('selTextbook');
+      if (selTb) { selTb.value = currentTextbook; onTextbookChange(); }
+    }
+    if (currentGrade) {
+      const selGr = document.getElementById('selGrade');
+      if (selGr) { selGr.value = currentGrade; onGradeChange(); }
+    }
+  } else {
+    // 新学生 → 保持折叠状态，清空回填
+    document.getElementById('classStartTime').value = '';
+    document.getElementById('classEndTime').value = '';
+    currentSubject = null; currentTextbook = null; currentGrade = null;
+    buildSelector();
+    resetTree();
+  }
+}
+
+// 根据输入过滤推荐名字
+function filterStudentNames() {
+  const input = document.getElementById('studentName');
+  const val = input.value.trim().toLowerCase();
+  const list = document.getElementById('studentNames');
+  if (!list) return;
+  const names = JSON.parse(localStorage.getItem(STUDENT_LIST_KEY) || '[]');
+  if (!val) {
+    list.innerHTML = names.map(n => `<option value="${e(n)}">`).join('');
+    return;
+  }
+  // 前缀匹配优先，包含匹配其次
+  const prefix = names.filter(n => n.toLowerCase().startsWith(val));
+  const contains = names.filter(n => !n.toLowerCase().startsWith(val) && n.toLowerCase().includes(val));
+  const filtered = [...prefix, ...contains];
+  list.innerHTML = filtered.map(n => `<option value="${e(n)}">`).join('');
+}
+
+function updateStudentDatalist() {
+  const list = document.getElementById('studentNames');
+  if (!list) return;
+  const names = JSON.parse(localStorage.getItem(STUDENT_LIST_KEY) || '[]');
+  list.innerHTML = names.map(n => `<option value="${e(n)}">`).join('');
+}
+
 // ═══════════════════════════════ Init Outline on Load ═══════════════════════════════
 (async function initOutline() {
   await loadOutline();
+  restoreFormMemory();  // 先读记忆再建选择器，确保 currentSubject 等已设置
   buildSelector();
+  // 恢复教材大纲下拉选择
+  if (currentSubject) {
+    const selSub = document.getElementById('selSubject');
+    if (selSub) { selSub.value = currentSubject; onSubjectChange(); }
+  }
+  if (currentTextbook) {
+    const selTb = document.getElementById('selTextbook');
+    if (selTb) { selTb.value = currentTextbook; onTextbookChange(); }
+  }
+  if (currentGrade) {
+    const selGr = document.getElementById('selGrade');
+    if (selGr) { selGr.value = currentGrade; onGradeChange(); }
+  }
 })();
 
 // ═══════════════════════════════ 清空上传缓存 ═══════════════════════════════
@@ -2165,7 +3285,7 @@ function showClearConfirm() {
   overlay.className = 'confirm-overlay';
   overlay.innerHTML = `
     <div class="confirm-dialog">
-      <h3>🗑️ 清空上传音频</h3>
+      <h3>🗑️ 清空所有上传音频</h3>
 
       <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:12px 14px;margin:12px 0;font-size:12px;line-height:1.8;color:#795548">
         <strong style="color:#d84315">⚠️ 注意事项：</strong><br>
@@ -2176,7 +3296,7 @@ function showClearConfirm() {
 
       <div class="confirm-actions" style="justify-content:space-between">
         <button class="btn btn-outline btn-sm" onclick="closeConfirm()">取消</button>
-        <button class="btn btn-danger" onclick="executeClear()" id="btnConfirmDelete">🗑️ 确认清空</button>
+        <button class="btn btn-danger" onclick="executeClear()" id="btnConfirmDelete">🗑️ 确认清空音频</button>
       </div>
     </div>
   `;
@@ -2214,7 +3334,153 @@ async function executeClear() {
     alert('请求 ' + url + ' 异常: ' + e.message);
   } finally {
     confirmBtn.disabled = false;
-    confirmBtn.textContent = '🗑️ 确认清空';
+    confirmBtn.textContent = '🗑️ 确认清空音频';
+  }
+}
+
+// ═══ 删除单个课堂记录 ═══
+function showDeleteSessionConfirm(sessionId, title) {
+  const existing = document.querySelector('.confirm-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-overlay';
+  overlay.innerHTML = `
+    <div class="confirm-dialog">
+      <h3>🗑️ 删除课堂记录</h3>
+      <p>确定要删除课堂 <strong>「${title}」</strong> 吗？</p>
+      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:12px 14px;margin:12px 0;font-size:12px;line-height:1.8;color:#795548">
+        <strong style="color:#d84315">⚠️ 此操作不可逆</strong><br>
+        将同时删除：<br>
+        ① 该课堂的<strong>转录文本</strong><br>
+        ② 该课堂的<strong>分析报告</strong><br>
+        ③ 该课堂的<strong>音频文件</strong>
+      </div>
+      <div class="confirm-actions" style="justify-content:space-between">
+        <button class="btn btn-outline btn-sm" onclick="closeConfirm()">取消</button>
+        <button class="btn btn-danger" onclick="executeDeleteSession(${sessionId})" id="btnConfirmDeleteSession">🗑️ 确认删除</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.remove();
+  });
+}
+
+async function executeDeleteSession(sessionId) {
+  const confirmBtn = document.getElementById('btnConfirmDeleteSession');
+  confirmBtn.disabled = true;
+  confirmBtn.innerHTML = '<span class="spinner" style="margin-right:4px"></span>删除中...';
+
+  try {
+    const headers = {};
+    if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
+    const resp = await fetch(API + '/sessions/' + sessionId, { method: 'DELETE', headers });
+    const res = await resp.json();
+    if (res.code === 200) {
+      closeConfirm();
+      // 如果正在查看被删除的课堂，返回列表
+      if (currentSessionId === sessionId) {
+        currentSessionId = null;
+        localStorage.removeItem('ta_session_id');
+        _parentReportGenerated = false;
+        document.getElementById('sessionInfoCard').classList.add('hidden');
+        document.getElementById('btnCreateSession').classList.remove('hidden');
+        document.getElementById('btnAnalyze').disabled = true;
+        document.getElementById('btnAnalyze').textContent = '🤖 开始 AI 分析（请先完成转录）';
+        document.getElementById('btnAnalyze').style.display = '';
+        document.getElementById('btnReAnalyze').style.display = 'none';
+        document.getElementById('analysisResults').classList.add('hidden');
+        document.getElementById('parentReportArea').classList.add('hidden');
+      }
+      if (_historyData && _historyData.id === sessionId) {
+        backToHistoryList();
+      }
+      // 乐观移除 DOM 中的该条记录，并刷新列表以同步后端
+      const item = document.querySelector(`.session-list-item[data-sid="${sessionId}"]`);
+      if (item) item.remove();
+      loadHistory();
+    } else {
+      alert('删除失败 [' + resp.status + ']: ' + (res.detail || res.message || '未知错误'));
+    }
+  } catch (e) {
+    alert('删除异常: ' + e.message);
+  } finally {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = '🗑️ 确认删除';
+  }
+}
+
+// ═══ 清空所有课堂记录 ═══
+function showClearAllSessionsConfirm() {
+  const existing = document.querySelector('.confirm-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-overlay';
+  overlay.innerHTML = `
+    <div class="confirm-dialog">
+      <h3>🗑️ 清空所有课堂记录</h3>
+      <p>确定要删除当前账号下的<strong>所有</strong>课堂记录吗？</p>
+      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:12px 14px;margin:12px 0;font-size:12px;line-height:1.8;color:#795548">
+        <strong style="color:#d84315">⚠️ 此操作不可逆</strong><br>
+        将删除：<br>
+        ① <strong>所有</strong>课堂的转录文本<br>
+        ② <strong>所有</strong>课堂的分析报告<br>
+        ③ <strong>所有</strong>课堂的音频文件
+      </div>
+      <div class="confirm-actions" style="justify-content:space-between">
+        <button class="btn btn-outline btn-sm" onclick="closeConfirm()">取消</button>
+        <button class="btn btn-danger" onclick="executeClearAllSessions()" id="btnConfirmClearAll">🗑️ 确认清空全部</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.remove();
+  });
+}
+
+async function executeClearAllSessions() {
+  const confirmBtn = document.getElementById('btnConfirmClearAll');
+  confirmBtn.disabled = true;
+  confirmBtn.innerHTML = '<span class="spinner" style="margin-right:4px"></span>删除中...';
+
+  try {
+    const headers = {};
+    if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
+    const resp = await fetch(API + '/sessions', { method: 'DELETE', headers });
+    const res = await resp.json();
+    if (res.code === 200) {
+      closeConfirm();
+      // 重置所有状态
+      currentSessionId = null;
+      localStorage.removeItem('ta_session_id');
+      _parentReportGenerated = false;
+      _historyData = null;
+      document.getElementById('sessionInfoCard').classList.add('hidden');
+      document.getElementById('btnCreateSession').classList.remove('hidden');
+      document.getElementById('btnAnalyze').disabled = true;
+      document.getElementById('btnAnalyze').textContent = '🤖 开始 AI 分析（请先完成转录）';
+      document.getElementById('btnAnalyze').style.display = '';
+      document.getElementById('btnReAnalyze').style.display = 'none';
+      document.getElementById('analysisResults').classList.add('hidden');
+      document.getElementById('parentReportArea').classList.add('hidden');
+      document.getElementById('historyDetailPane').classList.add('hidden');
+      document.getElementById('historyListPane').classList.remove('hidden');
+      document.getElementById('tab-new').classList.remove('hidden');
+      document.getElementById('tab-history').classList.add('hidden');
+      loadHistory();
+      alert(res.message);
+    } else {
+      alert('清空失败 [' + resp.status + ']: ' + (res.detail || res.message || '未知错误'));
+    }
+  } catch (e) {
+    alert('清空异常: ' + e.message);
+  } finally {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = '🗑️ 确认清空全部';
   }
 }
 

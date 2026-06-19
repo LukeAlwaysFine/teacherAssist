@@ -32,7 +32,7 @@ class Settings(BaseSettings):
 
     # JWT
     SECRET_KEY: str = "change-me-in-production"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30 days
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     ALGORITHM: str = "HS256"
 
@@ -42,8 +42,8 @@ class Settings(BaseSettings):
         "http://localhost:5173",
     ]
 
-    # ─── LLM 通用 ───
-    LLM_PROVIDER: str = "deepseek"  # deepseek | anthropic
+    # ─── LLM 通用（留空 = 需用户在 UI 中自行配置）───
+    LLM_PROVIDER: str = ""
     LLM_DEFAULT_MAX_TOKENS: int = 4096
 
     # DeepSeek Provider
