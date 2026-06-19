@@ -672,8 +672,8 @@ input[type="time"]:focus::-webkit-calendar-picker-indicator{filter:invert(35%) s
       <input class="input" id="llmModel" placeholder="如 deepseek-chat / claude-sonnet-4-6 / gpt-4o" style="margin-bottom:10px">
       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">最大 Token 数 <span style="color:#888;font-weight:400">（选填，最大 1000000）</span></label>
       <input class="input" id="llmMaxTokens" type="number" min="1" max="1000000" placeholder="4096" style="margin-bottom:10px">
-      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">API 地址 <span style="color:#888;font-weight:400">（选填）</span></label>
-      <input class="input" id="llmBaseUrl" placeholder="如 https://api.deepseek.com 或 http://localhost:11434/v1" style="margin-bottom:12px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">API 地址 <span style="color:#dc2626;font-weight:400">（必填）</span></label>
+      <input class="input" id="llmBaseUrl" type="url" placeholder="https://api.deepseek.com" required style="margin-bottom:12px;border-color:#dc2626">
       <div style="font-size:11px;color:#888;margin-bottom:12px">
         💡 Anthropic 填 "anthropic"；OpenAI 兼容服务（DeepSeek/OpenAI/Groq/Ollama 等）填任意名称并配上 API 地址即可。
       </div>
@@ -2079,11 +2079,19 @@ async function saveLLMSettings() {
   const btn = document.getElementById('btnSaveLLM');
   msg.classList.add('hidden');
   const apiKey = document.getElementById('llmApiKey').value.trim();
+  const baseUrl = document.getElementById('llmBaseUrl').value.trim();
   if (!apiKey) {
     msg.textContent = '❌ API Key 是必填项，请填入后再保存';
     msg.style.color = '#dc2626';
     msg.classList.remove('hidden');
     document.getElementById('llmApiKey').focus();
+    return;
+  }
+  if (!baseUrl) {
+    msg.textContent = '❌ API 地址是必填项，请填入后再保存';
+    msg.style.color = '#dc2626';
+    msg.classList.remove('hidden');
+    document.getElementById('llmBaseUrl').focus();
     return;
   }
   btn.disabled = true;
@@ -2094,7 +2102,7 @@ async function saveLLMSettings() {
       api_key: document.getElementById('llmApiKey').value.trim(),
       model: document.getElementById('llmModel').value.trim(),
       max_tokens: parseInt(document.getElementById('llmMaxTokens').value) || 4096,
-      base_url: document.getElementById('llmBaseUrl').value.trim(),
+      base_url: baseUrl,
     });
     if (res.code === 200) {
       msg.textContent = '✅ 配置已保存！现在可以使用 AI 分析课堂和生成报告了';

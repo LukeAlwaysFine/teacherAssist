@@ -100,7 +100,11 @@ def ensure_config():
 
     print("首次运行 — 需要配置 AI 服务")
     print()
-    api_key = input("请输入 DeepSeek API Key（获取: https://platform.deepseek.com/api_keys）: ").strip()
+    api_key = input("请输入 API Key: ").strip()
+    if api_key:
+        api_url = input("请输入 API 地址（如 https://api.deepseek.com）: ").strip()
+    else:
+        api_url = ""
 
     if not api_key:
         print("跳过配置，稍后可在 .env 文件中手动设置")
@@ -116,12 +120,12 @@ DATABASE_URL=sqlite+aiosqlite:///./data/teacher_assist.db
 SECRET_KEY={secret}
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_EXPIRE_DAYS=7
-LLM_PROVIDER=deepseek
+LLM_PROVIDER=
 LLM_DEFAULT_MAX_TOKENS=4096
 DEEPSEEK_API_KEY={api_key}
 DEEPSEEK_MODEL=deepseek-chat
 DEEPSEEK_MAX_TOKENS=4096
-DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_BASE_URL={api_url}
 ANTHROPIC_API_KEY=
 CLAUDE_MODEL=claude-sonnet-4-6
 CLAUDE_MAX_TOKENS=4096

@@ -63,9 +63,9 @@ def create_llm_provider(
             "如果连接失败，请检查 provider 名称是否正确",
             provider_name,
         )
-    # DEEPSEEK_BASE_URL 作为所有 OpenAI 兼容 provider 的默认 endpoint
+    # 使用系统级默认 URL（通过 .env 配置），不硬编码特定厂商
     if not effective_url:
-        effective_url = settings.DEEPSEEK_BASE_URL or "https://api.deepseek.com"
+        effective_url = settings.DEEPSEEK_BASE_URL
 
     # AsyncOpenAI SDK 不允许空字符串 api_key，用占位符绕过初始化检查
     # 真正调用时 AIService._call_llm 会先检查 api_key 是否已配置

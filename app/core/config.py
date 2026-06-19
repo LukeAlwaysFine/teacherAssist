@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     DEEPSEEK_API_KEY: str = ""
     DEEPSEEK_MODEL: str = "deepseek-chat"
     DEEPSEEK_MAX_TOKENS: int = 4096
-    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
+    DEEPSEEK_BASE_URL: str = ""
 
     # Anthropic Provider
     ANTHROPIC_API_KEY: str = ""
