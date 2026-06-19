@@ -4,7 +4,7 @@
 ; ═══════════════════════════════════════════════════
 
 #define AppName       "教师助手"
-#define AppVersion    "0.2.0"
+#define AppVersion    "0.2.1"
 #define AppPublisher  "teacherAssist"
 #define AppURL        "http://localhost:8000"
 #define OutputDir     "..\dist"

@@ -6,7 +6,7 @@
   python scripts/build_installer.py --lite   # 轻量构建（不含模型，安装后下载）
   python scripts/build_installer.py --skip-download  # 跳过下载，仅编译
 
-产出: dist/teacherAssist-setup-0.2.0.exe
+产出: dist/teacherAssist-setup-0.2.1.exe
 """
 import argparse
 import os
@@ -208,9 +208,10 @@ def step5_copy_code():
         # 排除 __pycache__
         shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
 
-    # 复制 .env.example（安装后用户改名为 .env）
+    # 复制文档和配置
     shutil.copy2(PROJECT_DIR / ".env.example", INSTALLER_SRC / ".env.example")
     shutil.copy2(PROJECT_DIR / "launcher.py", INSTALLER_SRC / "launcher.py")
+    shutil.copy2(PROJECT_DIR / "USER_GUIDE.md", INSTALLER_SRC / "USER_GUIDE.md")
 
     # 创建空的 data 目录占位
     (INSTALLER_SRC / "data").mkdir(parents=True, exist_ok=True)
