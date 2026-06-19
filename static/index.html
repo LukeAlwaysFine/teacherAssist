@@ -822,6 +822,19 @@ function getHeaders() {
   return h;
 }
 
+function getErrorMsg(res) {
+  // 从 API 响应中提取可读的错误信息
+  let detail = res.detail;
+  if (!detail) return '';
+  // FastAPI 校验错误：detail 是数组 [{loc, msg, type}, ...]
+  if (Array.isArray(detail)) {
+    return detail.map(d => (d.loc ? d.loc.join('.') + ': ' : '') + d.msg).join('; ');
+  }
+  // detail 是对象或其他类型
+  if (typeof detail !== 'string') return JSON.stringify(detail);
+  return detail;
+}
+
 async function api(method, path, body, isForm) {
   const opts = {method, headers: isForm ? {} : getHeaders()};
   if (isForm && authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
@@ -1699,7 +1712,7 @@ async function triggerAnalysis() {
     document.getElementById('analyzingStage').textContent = '❌ 触发失败';
     document.getElementById('analyzePct').textContent = '失败';
     document.getElementById('reportContent').innerHTML =
-      '<div class="status-bar error">❌ 分析触发失败: ' + e(res.detail || res.message || '未知错误') + '</div>';
+      '<div class="status-bar error">❌ 分析触发失败: ' + e(getErrorMsg(res) || res.message || '未知错误') + '</div>';
     document.getElementById('analysisResults').classList.remove('hidden');
     btn.style.display = '';
     btn.className = 'btn btn-danger';
@@ -1944,7 +1957,7 @@ async function generateParentReport(forceRegen = false) {
       actions.classList.remove('hidden');
       reviseArea.classList.remove('hidden');
     } else {
-      textarea.value = '❌ 生成失败: ' + (res.detail || res.message || '未知错误');
+      textarea.value = '❌ 生成失败: ' + (getErrorMsg(res) || res.message || '未知错误');
       textarea.style.color = '#dc2626';
       textarea.classList.remove('hidden');
       actions.classList.remove('hidden');
@@ -2001,7 +2014,7 @@ async function regenerateWithFeedback() {
         reportText = res.data.report;
         input.value = '';
         input.placeholder = '✅ 已修改，可继续输入建议…';
-      } else throw new Error(res.detail || res.message);
+      } else throw new Error(getErrorMsg(res) || res.message);
     } else {
       // 无修改建议 → 全文重新生成
       const formData = new FormData();
@@ -2022,7 +2035,7 @@ async function regenerateWithFeedback() {
       if (res.code === 200) {
         reportText = res.data.report;
         input.placeholder = '✅ 已重新生成，可继续输入建议…';
-      } else throw new Error(res.detail || res.message);
+      } else throw new Error(getErrorMsg(res) || res.message);
     }
     textarea.value = reportText;
     localStorage.setItem('report_draft_' + currentSessionId, reportText);
@@ -2080,7 +2093,7 @@ async function saveLLMSettings() {
       msg.style.color = '#16a34a';
       msg.classList.remove('hidden');
     } else {
-      msg.textContent = '❌ ' + (res.detail || res.message || '保存失败');
+      msg.textContent = '❌ ' + (getErrorMsg(res) || res.message || '保存失败');
       msg.style.color = '#dc2626';
       msg.classList.remove('hidden');
     }
@@ -2164,7 +2177,7 @@ async function uploadTemplate() {
       refreshTemplateList();
       loadTemplates();
     } else {
-      errEl.textContent = res.detail || res.message || '上传失败';
+      errEl.textContent = getErrorMsg(res) || res.message || '上传失败';
       errEl.classList.remove('hidden');
     }
   } catch(e) {
@@ -2208,7 +2221,7 @@ async function setDefaultTemplate(id) {
       refreshTemplateList();
       loadTemplates();
     } else {
-      alert('设置失败: ' + (res.detail || res.message));
+      alert('设置失败: ' + (getErrorMsg(res) || res.message));
     }
   } catch(e) { alert('网络错误: ' + e.message); }
 }
@@ -2221,7 +2234,7 @@ async function deleteTemplate(id) {
       refreshTemplateList();
       loadTemplates();
     } else {
-      alert('删除失败: ' + (res.detail || res.message));
+      alert('删除失败: ' + (getErrorMsg(res) || res.message));
     }
   } catch(e) { alert('网络错误: ' + e.message); }
 }
@@ -2248,7 +2261,7 @@ async function regenerateHistoryWithFeedback() {
         reportText = res.data.report;
         input.value = '';
         input.placeholder = '✅ 已修改，可继续输入建议…';
-      } else throw new Error(res.detail || res.message);
+      } else throw new Error(getErrorMsg(res) || res.message);
     } else {
       const formData = new FormData();
       formData.append('subject', _historyData.subject || '');
@@ -2266,7 +2279,7 @@ async function regenerateHistoryWithFeedback() {
       if (res.code === 200) {
         reportText = res.data.report;
         input.placeholder = '✅ 已重新生成，可继续输入建议…';
-      } else throw new Error(res.detail || res.message);
+      } else throw new Error(getErrorMsg(res) || res.message);
     }
     textarea.value = reportText;
     if (_historyData && _historyData.analysis) {
@@ -2557,7 +2570,7 @@ async function generateHistoryParentReport(forceRegenerate = false) {
     } else {
       document.getElementById('hParentGenerating').classList.add('hidden');
       document.getElementById('hParentContent').classList.remove('hidden');
-      document.getElementById('hParentContent').value = '生成失败: ' + (res.detail || res.message);
+      document.getElementById('hParentContent').value = '生成失败: ' + (getErrorMsg(res) || res.message);
     }
   } catch (e) {
     document.getElementById('hParentGenerating').classList.add('hidden');
@@ -3402,7 +3415,7 @@ async function executeDeleteSession(sessionId) {
       if (item) item.remove();
       loadHistory();
     } else {
-      alert('删除失败 [' + resp.status + ']: ' + (res.detail || res.message || '未知错误'));
+      alert('删除失败 [' + resp.status + ']: ' + (getErrorMsg(res) || res.message || '未知错误'));
     }
   } catch (e) {
     alert('删除异常: ' + e.message);
@@ -3474,7 +3487,7 @@ async function executeClearAllSessions() {
       loadHistory();
       alert(res.message);
     } else {
-      alert('清空失败 [' + resp.status + ']: ' + (res.detail || res.message || '未知错误'));
+      alert('清空失败 [' + resp.status + ']: ' + (getErrorMsg(res) || res.message || '未知错误'));
     }
   } catch (e) {
     alert('清空异常: ' + e.message);

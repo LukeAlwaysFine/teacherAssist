@@ -62,6 +62,23 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["sessions"])
 
 
+def _unwrap_retry_error(exc: Exception) -> str:
+    """提取 RetryError 中的原始错误信息，避免展示给用户看不懂的堆栈。
+
+    tenacity 的 RetryError 包装了最后一次失败的异常，
+    直接 str() 会显示为 "RetryError[<Future at 0x...>]" 难以理解。
+    """
+    try:
+        from tenacity import RetryError
+        if isinstance(exc, RetryError):
+            last = exc.last_attempt.exception() if exc.last_attempt else None
+            if last:
+                return str(last)
+    except Exception:
+        pass
+    return str(exc)
+
+
 async def _create_ai_service(db: AsyncSession, user_id: int) -> "AIService":
     """创建 AIService，自动加载用户 LLM 配置。"""
     from sqlalchemy import select as _select
@@ -901,17 +918,19 @@ async def trigger_analysis(
                         f"Session {session_id} analysis complete in {elapsed:.1f}s"
                     )
                 except Exception as e:
-                    logger.error(f"Session {session_id} analysis failed: {e}")
+                    # 如果是 tenacity RetryError，提取原始异常信息
+                    raw_error = _unwrap_retry_error(e)
+                    logger.error(f"Session {session_id} analysis failed: {raw_error}")
                     if session_id in _analysis_progress:
                         _analysis_progress[session_id]["status"] = "failed"
-                        _analysis_progress[session_id]["stage"] = f"分析失败: {e}"
+                        _analysis_progress[session_id]["stage"] = f"分析失败: {raw_error}"
                     try:
                         result_session = await bg_db.execute(
                             select(Session).where(Session.id == session_id)
                         )
                         s = result_session.scalar_one()
                         s.status = "failed"
-                        s.error_message = str(e)
+                        s.error_message = raw_error
                         await bg_db.commit()
                     except Exception as db_err:
                         logger.error(f"Failed to update session status: {db_err}")

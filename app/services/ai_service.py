@@ -23,7 +23,12 @@ logger = logging.getLogger(__name__)
 
 
 class AIServiceError(Exception):
-    """AI 服务调用异常。"""
+    """AI 服务调用异常（可重试：网络抖动、服务限流等）。"""
+    pass
+
+
+class AIServiceConfigError(AIServiceError):
+    """AI 服务配置异常（不可重试：缺少 API Key、空输入等）。"""
     pass
 
 
@@ -90,7 +95,7 @@ class AIService:
         """
         # 检查 API Key 是否已配置
         if not self._has_valid_key:
-            raise AIServiceError(
+            raise AIServiceConfigError(
                 "未配置 LLM API Key。请点击右上角 ⚙️ 设置，填入你的 API Key 后重试。"
             )
 
@@ -183,9 +188,9 @@ class AIService:
                 - reinforcement_plan: list 仅针对大纲薄弱点的巩固建议
         """
         if not transcript:
-            raise AIServiceError("转录文本为空，无法分析")
+            raise AIServiceConfigError("转录文本为空，无法分析")
         if not knowledge_outline:
-            raise AIServiceError("知识点大纲为空，无法分析")
+            raise AIServiceConfigError("知识点大纲为空，无法分析")
 
         system_prompt = self._load_prompt("classroom_analysis")
         user_message = (
