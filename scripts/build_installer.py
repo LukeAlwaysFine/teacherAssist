@@ -35,12 +35,16 @@ MODEL_FILE = CACHE_DIR / "ggml-medium.bin"
 
 REQUIREMENTS = PROJECT_DIR / "requirements.txt"
 SETUP_ISS = PROJECT_DIR / "scripts" / "setup.iss"
-ISCC = Path(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")) / "Inno Setup 6" / "ISCC.exe"
-
-# Also check D drive custom install
+# 按优先级查找 ISCC.exe: D 盘自定义 → Inno Setup 7 → Inno Setup 6
 _ISCC_D = Path("D:/teacherAssist-build/InnoSetup/ISCC.exe")
-if not ISCC.exists() and _ISCC_D.exists():
-    ISCC = _ISCC_D
+_ISCC_7 = Path(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")) / "Inno Setup 7" / "ISCC.exe"
+_ISCC_6 = Path(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")) / "Inno Setup 6" / "ISCC.exe"
+
+ISCC = None
+for candidate in (_ISCC_D, _ISCC_7, _ISCC_6):
+    if candidate.exists():
+        ISCC = candidate
+        break
 
 
 def step(msg: str):
@@ -264,13 +268,13 @@ def step6_compile():
     """Step 6: 编译 Inno Setup 安装包。"""
     step("6/6 编译安装包")
 
-    if not ISCC.exists():
+    if not ISCC or not ISCC.exists():
         print(f"  [错误] 未找到 Inno Setup 编译器")
-        print(f"  预期路径: {ISCC}")
+        print(f"  已搜索: D:/teacherAssist-build/InnoSetup/ISCC.exe")
+        print(f"         Inno Setup 7 / Inno Setup 6 (Program Files)")
         print(f"  请下载安装: https://jrsoftware.org/isdl.php")
         print()
-        print(f"  手动编译命令:")
-        print(f'  "{ISCC}" "{SETUP_ISS}"')
+        print(f"  手动编译命令: ISCC.exe {SETUP_ISS}")
         return False
 
     print(f"  编译器: {ISCC}")
