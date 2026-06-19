@@ -19,7 +19,7 @@ DefaultDirName={autopf}\TeacherAssist
 DefaultGroupName={#AppName}
 OutputDir={#OutputDir}
 OutputBaseFilename=teacherAssist-setup-{#AppVersion}
-SetupIconFile=..\static\favicon.ico
+; SetupIconFile=..\static\favicon.ico  ; 待添加图标文件
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
@@ -38,7 +38,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0
 
 [Languages]
-Name: "chinese"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: "快捷方式:"; Flags: checkedonce
