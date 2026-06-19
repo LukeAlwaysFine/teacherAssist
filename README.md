@@ -65,7 +65,7 @@ python launcher.py
 | 提供商名称 | 如 deepseek / openai / anthropic / groq / ollama |
 | API Key | 你的 API 密钥（必填） |
 | 模型 ID | 如 deepseek-chat / gpt-4o / claude-sonnet-4-6 |
-| API 地址 | OpenAI 兼容端点 URL（Anthropic 可留空） |
+| API 地址 | OpenAI 兼容端点 URL（必填） |
 
 支持所有 OpenAI 兼容协议的 API 服务。
 
@@ -89,11 +89,12 @@ python launcher.py
 
 ```
 teacherAssist/
-├── app/                    # FastAPI + SQLAlchemy + AI 服务（7 个模型）
+├── app/                    # FastAPI + SQLAlchemy + AI 服务（6 个模型）
 ├── static/                 # SPA + 知识点大纲 JSON（v4.1）
 ├── tests/                  # pytest（12 个）
 ├── launcher.py             # 开发启动器
-└── docs/                   # USER_GUIDE / README / ROADMAP / INSTALL / CLAUDE
+├── ARCHITECTURE.md         # 架构文档
+└── *.md                    # 项目文档
 ```
 
 ## 配置项

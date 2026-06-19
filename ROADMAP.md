@@ -40,8 +40,18 @@
 ### 知识点大纲 v4.1
 - [x] 新增浙教版初中科学（24 单元 150 节 529 知识点）
 
+### v0.2.1 — 代码审查修复 + 基础设施（2026-06-19）
+- [x] 代码审查修复（参数互换、遗漏字段、死代码、类型注解）
+- [x] API 地址改为必填，移除 DeepSeek 硬编码默认值
+- [x] LLM 配置 UI 增强（必填项标记、保存验证、max_tokens 上限 1000000）
+- [x] 错误信息优化（getErrorMsg 处理 FastAPI 校验错误数组）
+- [x] AIServiceConfigError（配置错误不重试）+ RetryError 拆包
+- [x] 教师定性观察区域默认展开
+- [x] 分支重构（master→dev + main 稳定线）
+
 ### 文档
 - [x] USER_GUIDE.md 用户手册（2026-06-18 新增）
+- [x] ARCHITECTURE.md 架构文档（2026-06-19 新增）
 - [x] README.md / ROADMAP.md / CLAUDE.md / INSTALL.md
 
 ### 测试
@@ -72,6 +82,10 @@
 
 | 日期 | 问题 | 修复 |
 |------|------|------|
+| 2026-06-19 | API 地址不是必填、硬编码 DeepSeek | 改为必填 + 移除默认值 + 前端校验 |
+| 2026-06-19 | 错误信息显示 [object Object] | 新增 getErrorMsg() 处理 FastAPI 校验数组 |
+| 2026-06-19 | 未配置 Key 时重试 3 次 + RetryError 不可读 | AIServiceConfigError（不重试）+ 拆包 |
+| 2026-06-19 | 代码审查发现多处 bug | v0.2.1 修复（详见 git log） |
 | 2026-06-18 | 分析失败 no such column teacher_feedback | ALTER TABLE 补齐 + 启动自动迁移机制 |
 | 2026-06-18 | 复用已有文档后无法进入 Step 3 | 补齐 unlockStep(2) + 自动跳转逻辑 |
 | 2026-06-17 | 分析按钮点击无反应 | 修复 `revisionStatus` 元素缺失导致 JS TypeError |

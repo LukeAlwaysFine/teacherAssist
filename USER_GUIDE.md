@@ -54,10 +54,12 @@
 | **提供商名称** | 填写你使用的服务名，如 `deepseek`、`openai`、`anthropic`、`groq`、`ollama` |
 | **API Key** | 你的 API 密钥。从服务商后台获取，通常以 `sk-` 开头 |
 | **模型 ID** | 要使用的模型名称，如 `deepseek-chat`、`gpt-4o`、`claude-sonnet-4-6` |
-| **最大 Token 数** | 每次生成的最大字数限制，默认 4096 即可 |
-| **API 地址** | OpenAI 兼容服务的端点 URL，如 `https://api.deepseek.com`。注：Anthropic 留空 |
+| **最大 Token 数** | 每次生成的最大字数限制。默认 4096，最大 1000000 |
+| **API 地址** | OpenAI 兼容服务的端点 URL，如 `https://api.deepseek.com`。必填，不可留空 |
 
 3. 点击 **💾 保存配置，启用 AI 功能**
+
+   > 系统会验证 API Key 和 API 地址是否已填写，为空时无法保存。
 
 ### 各服务商配置示例
 
@@ -65,13 +67,13 @@
 |------|-----------|---------|-------------|
 | DeepSeek | `deepseek` | `https://api.deepseek.com` | `deepseek-chat` |
 | OpenAI | `openai` | `https://api.openai.com/v1` | `gpt-4o` |
-| Anthropic | `anthropic` | 留空 | `claude-sonnet-4-6` |
+| Anthropic | `anthropic` | `https://api.anthropic.com` | `claude-sonnet-4-6` |
 | Groq | `groq` | `https://api.groq.com/openai/v1` | `llama-3.1-70b-versatile` |
 | 本地 Ollama | `ollama` | `http://localhost:11434/v1` | `qwen2:7b` |
 
 ### 说明
 
-- Anthropic 填写 `anthropic` 时使用官方 SDK，其他名称均走 OpenAI 兼容协议
+- Anthropic 填写 `anthropic` 时使用官方 SDK（API 地址可填任意值），其他名称均走 OpenAI 兼容协议
 - 配置保存在你的账号下，不会与其他用户共享
 - 修改配置后**立即生效**，无需重启
 
@@ -130,7 +132,7 @@
 
 #### 可选：输入教师定性观察
 
-在知识点大纲预览下方，有一个 **💬 教师定性观察** 折叠面板。你可以在此输入对学生的观察，例如：
+在知识点大纲预览下方，有一个 **💬 教师定性观察** 面板（默认展开）。你可以在此输入对学生的观察，例如：
 
 - "注意力集中，反应快"
 - "今天状态不太好，容易分心"
