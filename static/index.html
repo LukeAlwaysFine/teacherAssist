@@ -581,12 +581,12 @@ input[type="time"]:focus::-webkit-calendar-picker-indicator{filter:invert(35%) s
 
       <!-- 教师定性观察 -->
       <div class="transcript-method" style="margin-bottom:12px">
-        <div class="transcript-method-header" onclick="toggleMethod('teacherFeedback')">
-          <span class="method-arrow" id="methodArrowTeacherFeedback">▶</span>
+        <div class="transcript-method-header open" onclick="toggleMethod('teacherFeedback')">
+          <span class="method-arrow" id="methodArrowTeacherFeedback">▼</span>
           <strong>💬 教师定性观察</strong>
           <span class="text-hint">可选：输入对学生的课堂观察，AI 将结合此信息生成家长报告</span>
         </div>
-        <div class="transcript-method-body hidden" id="methodBodyTeacherFeedback">
+        <div class="transcript-method-body" id="methodBodyTeacherFeedback">
           <textarea class="textarea" id="teacherFeedbackInput"
                     placeholder="例如：注意力集中、反应快但容易粗心、今天状态不太好、对XX知识点特别感兴趣…"
                     maxlength="500"
