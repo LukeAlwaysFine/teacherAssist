@@ -664,15 +664,15 @@ input[type="time"]:focus::-webkit-calendar-picker-indicator{filter:invert(35%) s
       <div style="font-size:13px;color:#d97706;background:#fffbeb;padding:10px 14px;border-radius:6px;margin-bottom:14px;line-height:1.6">
         ⚠️ <strong>系统未预设 AI 服务。</strong>你需要提供自己的 API Key，所有 AI 功能（分析课堂、生成报告）才能使用。
       </div>
-      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">提供商名称</label>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">提供商名称 <span style="color:#888;font-weight:400">（选填）</span></label>
       <input class="input" id="llmProvider" placeholder="如 deepseek / openai / anthropic / groq / ollama …" style="margin-bottom:10px">
-      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">API Key（必填）</label>
-      <input class="input" id="llmApiKey" type="password" placeholder="sk-..." style="margin-bottom:10px">
-      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">模型 ID</label>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">API Key <span style="color:#dc2626;font-weight:400">（必填）</span></label>
+      <input class="input" id="llmApiKey" type="password" placeholder="sk-..." required style="margin-bottom:10px;border-color:#dc2626">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">模型 ID <span style="color:#888;font-weight:400">（选填）</span></label>
       <input class="input" id="llmModel" placeholder="如 deepseek-chat / claude-sonnet-4-6 / gpt-4o" style="margin-bottom:10px">
-      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">最大 Token 数</label>
-      <input class="input" id="llmMaxTokens" type="number" placeholder="4096" style="margin-bottom:10px">
-      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">API 地址</label>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">最大 Token 数 <span style="color:#888;font-weight:400">（选填，最大 1000000）</span></label>
+      <input class="input" id="llmMaxTokens" type="number" min="1" max="1000000" placeholder="4096" style="margin-bottom:10px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">API 地址 <span style="color:#888;font-weight:400">（选填）</span></label>
       <input class="input" id="llmBaseUrl" placeholder="如 https://api.deepseek.com 或 http://localhost:11434/v1" style="margin-bottom:12px">
       <div style="font-size:11px;color:#888;margin-bottom:12px">
         💡 Anthropic 填 "anthropic"；OpenAI 兼容服务（DeepSeek/OpenAI/Groq/Ollama 等）填任意名称并配上 API 地址即可。
@@ -2078,6 +2078,14 @@ async function saveLLMSettings() {
   const msg = document.getElementById('llmSettingsMsg');
   const btn = document.getElementById('btnSaveLLM');
   msg.classList.add('hidden');
+  const apiKey = document.getElementById('llmApiKey').value.trim();
+  if (!apiKey) {
+    msg.textContent = '❌ API Key 是必填项，请填入后再保存';
+    msg.style.color = '#dc2626';
+    msg.classList.remove('hidden');
+    document.getElementById('llmApiKey').focus();
+    return;
+  }
   btn.disabled = true;
   btn.textContent = '⏳ 正在保存...';
   try {
