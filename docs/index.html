@@ -142,6 +142,9 @@ section{padding:80px 24px;max-width:960px;margin:0 auto}
 .dev-links a{color:#F59E0B;font-weight:600;margin:0 12px;transition:color .2s}
 .dev-links a:hover{color:#D97706}
 
+/* ═══ Feedback ═══ */
+.feedback-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:540px;margin:0 auto}
+
 /* ═══ Footer ═══ */
 footer{
   text-align:center;padding:32px 24px;
@@ -159,6 +162,7 @@ footer span{color:#F59E0B}
   .features-grid{grid-template-columns:1fr}
   .screenshots-grid{grid-template-columns:1fr}
   .download-cards{grid-template-columns:1fr}
+  .feedback-grid{grid-template-columns:1fr}
   section{padding:48px 16px}
 }
 @media(max-width:480px){
@@ -177,6 +181,7 @@ footer span{color:#F59E0B}
     <a href="#screenshots">截图</a>
     <a href="#download">下载</a>
     <a href="#dev">开发者</a>
+    <a href="#feedback">反馈</a>
   </div>
   <a href="#download" class="nav-cta">免费下载</a>
 </nav>
@@ -345,6 +350,30 @@ footer span{color:#F59E0B}
       <a href="https://github.com/LukeAlwaysFine/teacherAssist/blob/main/USER_GUIDE.md" target="_blank">📘 用户手册</a>
       <a href="https://github.com/LukeAlwaysFine/teacherAssist/blob/main/LICENSE" target="_blank">📜 MIT License</a>
     </div>
+    <div style="text-align:center;margin-top:20px;font-size:14px;color:#94A3B8">
+      👨‍💻 开发者：<strong style="color:#F8FAFC">Luke</strong> ·
+      📧 <a href="mailto:lukeliu222@163.com" style="color:#F59E0B">lukeliu222@163.com</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Feedback ═══ -->
+<section id="feedback">
+  <div class="section-title">
+    <h2>💬 留言反馈</h2>
+    <p>有问题、建议或想聊聊？欢迎联系我</p>
+  </div>
+  <div class="feedback-grid">
+    <a href="mailto:lukeliu222@163.com?subject=%E3%80%90%E6%95%99%E5%B8%88%E5%8A%A9%E6%89%8B%E5%8F%8D%E9%A6%88%E3%80%91" class="feature-card" style="text-align:center;display:block">
+      <div class="f-icon">📧</div>
+      <h4>邮件联系</h4>
+      <p style="font-size:13px;color:#64748B">lukeliu222@163.com<br>工作日 24 小时内回复</p>
+    </a>
+    <a href="https://github.com/LukeAlwaysFine/teacherAssist/issues" target="_blank" class="feature-card" style="text-align:center;display:block">
+      <div class="f-icon">🐛</div>
+      <h4>GitHub Issues</h4>
+      <p style="font-size:13px;color:#64748B">提交 Bug 或功能建议<br>公开讨论，一起完善</p>
+    </a>
   </div>
 </section>
 
