@@ -89,7 +89,7 @@ TeacherAssit/
 │       └── parent_report_revision.txt #    报告修订 prompt
 │
 ├── docs/                              # 项目落地页
-│   ├── index.html                    #    中文落地页（Hero + 功能 + 截图 + 下载）
+│   ├── index.html                    #    中文落地页（Hero + 功能 + 截图 + 下载 + 反馈）
 │   └── images/                       #    应用截图 (5 张)
 │
 ├── static/                           # 前端 (SPA)
