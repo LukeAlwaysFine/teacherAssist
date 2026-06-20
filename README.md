@@ -2,8 +2,8 @@
 
 面向教育机构老师的桌面软件，提供 **课堂录制分析** 和 **家长反馈报告** 两大核心能力。
 
-🌐 **项目主页**: [person-luke.github.io/teacherAssist](https://person-luke.github.io/teacherAssist/)  
-📥 **下载**: [夸克网盘（国内高速）](#) | [GitHub Release](https://github.com/Person-Luke/teacherAssist/releases/tag/v0.2.1) (154 MB, Windows 10/11)
+🌐 **项目主页**: [lukealwaysfine.github.io/teacherAssist](https://lukealwaysfine.github.io/teacherAssist/)  
+📥 **下载**: [夸克网盘（国内高速）](https://pan.quark.cn/s/3014cec4fcef) | [GitHub Release](https://github.com/LukeAlwaysFine/teacherAssist/releases/tag/v0.2.1) (154 MB, Windows 10/11)
 
 ## 功能概览
 
