@@ -17,6 +17,7 @@ def create_llm_provider(
     model: str = "",
     max_tokens: int = 4096,
     base_url: str = "",
+    reasoning_effort: str = "high",
 ) -> BaseLLMProvider:
     """工厂函数：根据配置创建对应的 LLM Provider。
 
@@ -49,6 +50,7 @@ def create_llm_provider(
             api_key=effective_key,
             model=effective_model or "claude-sonnet-4-6",
             max_tokens=effective_tokens,
+            reasoning_effort=reasoning_effort,
         )
 
     # 所有其他厂商：OpenAI 兼容协议
@@ -74,4 +76,5 @@ def create_llm_provider(
         model=effective_model or "deepseek-chat",
         max_tokens=effective_tokens,
         base_url=effective_url,
+        reasoning_effort=reasoning_effort,
     )

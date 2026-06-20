@@ -172,7 +172,7 @@ User (1) ──────< (N) Session (1) ──────< (N) Transcript
 | **Transcript** | `transcripts` | id, session_id(FK), full_text, raw_segments(JSON) |
 | **AnalysisReport** | `analysis_reports` | id, session_id(FK), knowledge_points(JSON), classroom_performance(JSON), reinforcement_plan(JSON), parent_report, teacher_feedback |
 | **ReportTemplate** | `report_templates` | id, user_id(FK), name, content, is_default |
-| **UserLLMConfig** | `user_llm_configs` | id, user_id(FK, unique), provider, api_key, model, max_tokens, base_url |
+| **UserLLMConfig** | `user_llm_configs` | id, user_id(FK, unique), provider, api_key, model, max_tokens, base_url, reasoning_effort |
 
 ### Session 状态机
 
@@ -250,6 +250,7 @@ BaseLLMProvider (ABC)
 └── DeepSeekProvider
     └── OpenAI 兼容协议 (openai.AsyncOpenAI)
         覆盖: DeepSeek / OpenAI / 通义千问 / 智谱 / Groq / Ollama / ...
+        支持 reasoning_effort 控制思考链深度
 ```
 
 ### 工厂函数
@@ -261,6 +262,7 @@ create_llm_provider(
     model="deepseek-chat",
     max_tokens=4096,
     base_url="https://api.deepseek.com",
+    reasoning_effort="high",  # none / low / medium / high / max
 ) → BaseLLMProvider
 
 决策逻辑：

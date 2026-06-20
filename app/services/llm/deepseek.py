@@ -31,8 +31,9 @@ class DeepSeekProvider(BaseLLMProvider):
         model: str = "deepseek-chat",
         max_tokens: int = 4096,
         base_url: str = "https://api.deepseek.com",
+        reasoning_effort: str = "high",
     ) -> None:
-        super().__init__(api_key, model, max_tokens)
+        super().__init__(api_key, model, max_tokens, reasoning_effort)
         self._client = AsyncOpenAI(
             api_key=api_key,
             base_url=base_url,
@@ -57,12 +58,16 @@ class DeepSeekProvider(BaseLLMProvider):
         ]
 
         try:
-            response = await self._client.chat.completions.create(
-                model=self.model,
-                messages=formatted,  # type: ignore[arg-type]
-                max_tokens=max_tokens if max_tokens is not None else self.max_tokens,
-                temperature=temperature,
-            )
+            create_kwargs: dict = {
+                "model": self.model,
+                "messages": formatted,
+                "max_tokens": max_tokens if max_tokens is not None else self.max_tokens,
+                "temperature": temperature,
+            }
+            # 思考模式：none 表示不思考，其他值传给 API
+            if self.reasoning_effort and self.reasoning_effort != "none":
+                create_kwargs["extra_body"] = {"reasoning_effort": self.reasoning_effort}
+            response = await self._client.chat.completions.create(**create_kwargs)
             choice = response.choices[0]
             return ChatResponse(
                 content=choice.message.content or "",

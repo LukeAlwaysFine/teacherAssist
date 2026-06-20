@@ -31,17 +31,19 @@ class BaseLLMProvider(ABC):
     所有厂商实现必须提供 chat() 方法。
     """
 
-    def __init__(self, api_key: str, model: str, max_tokens: int = 4096) -> None:
+    def __init__(self, api_key: str, model: str, max_tokens: int = 4096, reasoning_effort: str = "high") -> None:
         """初始化 Provider。
 
         Args:
             api_key: API 密钥。
             model: 模型名称。
             max_tokens: 每次调用最大 token 数。
+            reasoning_effort: 思考模式 (none / low / medium / high / max)。
         """
         self.api_key = api_key
         self.model = model
         self.max_tokens = max_tokens
+        self.reasoning_effort = reasoning_effort
 
     @abstractmethod
     async def chat(

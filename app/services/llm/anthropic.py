@@ -28,8 +28,9 @@ class AnthropicProvider(BaseLLMProvider):
         api_key: str,
         model: str = "claude-sonnet-4-6",
         max_tokens: int = 4096,
+        reasoning_effort: str = "high",
     ) -> None:
-        super().__init__(api_key, model, max_tokens)
+        super().__init__(api_key, model, max_tokens, reasoning_effort)
         self._client = AsyncAnthropic(api_key=api_key)
 
     @property

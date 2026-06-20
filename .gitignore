@@ -28,7 +28,7 @@ build/
 dist/
 
 # 运行时数据
-models/
+/models/
 data/
 
 # 日志

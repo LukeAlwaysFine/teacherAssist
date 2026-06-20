@@ -61,6 +61,7 @@ class AIService:
                 model=user_config.model or None,
                 max_tokens=user_config.max_tokens or None,
                 base_url=user_config.base_url or None,
+                reasoning_effort=user_config.reasoning_effort or "high",
             )
             self._has_valid_key = True
         else:

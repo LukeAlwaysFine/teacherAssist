@@ -58,6 +58,7 @@ async def get_llm_config(
             "model": "",
             "max_tokens": 4096,
             "base_url": "",
+            "reasoning_effort": "high",
         })
 
 
@@ -79,6 +80,7 @@ async def update_llm_config(
         config.model = request.model
         config.max_tokens = request.max_tokens
         config.base_url = request.base_url
+        config.reasoning_effort = request.reasoning_effort
     else:
         config = UserLLMConfig(
             user_id=current_user.id,
@@ -87,6 +89,7 @@ async def update_llm_config(
             model=request.model,
             max_tokens=request.max_tokens,
             base_url=request.base_url,
+            reasoning_effort=request.reasoning_effort,
         )
         db.add(config)
 

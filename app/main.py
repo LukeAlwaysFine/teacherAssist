@@ -50,6 +50,9 @@ async def _ensure_columns(conn: Any) -> None:
         "report_templates": [
             # 未来扩展占位
         ],
+        "user_llm_configs": [
+            ("reasoning_effort", "TEXT"),
+        ],
     }
 
     for table, columns in needed.items():

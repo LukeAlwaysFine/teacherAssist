@@ -672,6 +672,14 @@ input[type="time"]:focus::-webkit-calendar-picker-indicator{filter:invert(35%) s
       <input class="input" id="llmModel" placeholder="如 deepseek-chat / claude-sonnet-4-6 / gpt-4o" style="margin-bottom:10px">
       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">最大 Token 数 <span style="color:#888;font-weight:400">（选填，最大 1000000）</span></label>
       <input class="input" id="llmMaxTokens" type="number" min="1" max="1000000" placeholder="4096" style="margin-bottom:10px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">思考模式 <span style="color:#888;font-weight:400">（选填，默认 high）</span></label>
+      <select class="input" id="llmReasoningEffort" style="margin-bottom:10px">
+        <option value="none">无 — 不启用思考链</option>
+        <option value="low">Low — 最低深度</option>
+        <option value="medium">Medium — 中等深度</option>
+        <option value="high" selected>High — 高深度（推荐）</option>
+        <option value="max">Max — 最大深度</option>
+      </select>
       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">API 地址 <span style="color:#dc2626;font-weight:400">（必填）</span></label>
       <input class="input" id="llmBaseUrl" type="url" placeholder="https://api.deepseek.com" required style="margin-bottom:12px;border-color:#dc2626">
       <div style="font-size:11px;color:#888;margin-bottom:12px">
@@ -2066,6 +2074,7 @@ async function openLLMSettings() {
       document.getElementById('llmModel').value = res.data.model || '';
       document.getElementById('llmMaxTokens').value = res.data.max_tokens || 4096;
       document.getElementById('llmBaseUrl').value = res.data.base_url || '';
+      document.getElementById('llmReasoningEffort').value = res.data.reasoning_effort || 'high';
     }
   } catch(e) {}
 }
@@ -2103,6 +2112,7 @@ async function saveLLMSettings() {
       model: document.getElementById('llmModel').value.trim(),
       max_tokens: parseInt(document.getElementById('llmMaxTokens').value) || 4096,
       base_url: baseUrl,
+      reasoning_effort: document.getElementById('llmReasoningEffort').value,
     });
     if (res.code === 200) {
       msg.textContent = '✅ 配置已保存！现在可以使用 AI 分析课堂和生成报告了';

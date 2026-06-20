@@ -80,7 +80,7 @@ teacherAssist/
 ### AI 多 Provider
 - 抽象基类 `BaseLLMProvider.chat()`
 - 系统不预设 Provider（`LLM_PROVIDER=""`）；用户通过 ⚙️ 按钮自行配置
-- `create_llm_provider()` 工厂函数接受可选覆盖参数（provider / api_key / model / max_tokens / base_url）
+- `create_llm_provider()` 工厂函数接受可选覆盖参数（provider / api_key / model / max_tokens / base_url / reasoning_effort）
 - Anthropic 走官方 SDK（`AnthropicProvider`）；其他所有厂商通过 OpenAI 兼容协议（`DeepSeekProvider`，底层为 `openai.AsyncOpenAI`）
 - API Key 校验延迟到 `AIService._call_llm()` 调用时；未配置返回明确中文提示
 - JSON 截断三道防线：max_tokens 扩容 + 三级自修复
@@ -88,7 +88,7 @@ teacherAssist/
 ### LLM 用户配置
 - 配置存于 `user_llm_configs` 表（per-user，unique on user_id）
 - 端点：`GET/PUT /users/me/llm-config`；首次 PUT 自动创建记录
-- 支持字段：provider / api_key / model / max_tokens / base_url
+- 支持字段：provider / api_key / model / max_tokens / base_url / reasoning_effort
 - `AIService.__init__()` 接受 `user_config` 参数，自动加载用户配置覆盖系统默认
 - Session 路由通过 `_create_ai_service()` 辅助函数统一注入用户 LLM 配置
 

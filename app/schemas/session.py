@@ -203,6 +203,7 @@ class UserLLMConfigUpdate(BaseModel):
     model: str = Field(default="", max_length=100, description="模型 ID")
     max_tokens: int = Field(default=4096, ge=1, le=1000000, description="最大输出 token 数")
     base_url: str = Field(default="", max_length=255, description="API 端点 URL")
+    reasoning_effort: str = Field(default="high", max_length=20, description="思考模式: none / low / medium / high / max")
 
 
 class UserLLMConfigResponse(BaseModel):
@@ -215,3 +216,4 @@ class UserLLMConfigResponse(BaseModel):
     model: str
     max_tokens: int
     base_url: str
+    reasoning_effort: str
