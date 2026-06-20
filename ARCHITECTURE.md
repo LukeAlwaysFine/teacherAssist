@@ -88,6 +88,10 @@ TeacherAssit/
 │       ├── parent_report.txt         #     家长报告 prompt（系统默认模板）
 │       └── parent_report_revision.txt #    报告修订 prompt
 │
+├── docs/                              # 项目落地页
+│   ├── index.html                    #    中文落地页（Hero + 功能 + 截图 + 下载）
+│   └── images/                       #    应用截图 (5 张)
+│
 ├── static/                           # 前端 (SPA)
 │   ├── index.html                    #    ~3000 行单页应用 (v18)，纯 JS，零框架
 │   └── knowledge_outline.json       #    知识点大纲 (v4.1, 4 科目 2171 知识点)

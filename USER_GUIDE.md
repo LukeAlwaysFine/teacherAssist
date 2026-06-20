@@ -1,5 +1,7 @@
 # teacherAssist 用户使用手册
 
+> 🌐 **项目主页**: [Gitee Pages（国内访问）](https://lukealwaysfine.gitee.io/teacher-assistant) | [GitHub](https://github.com/LukeAlwaysFine/teacherAssist)
+
 ## 目录
 
 1. [快速开始](#快速开始)

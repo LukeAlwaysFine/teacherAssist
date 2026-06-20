@@ -31,6 +31,9 @@ teacherAssist/
 │   │   ├── stt/             # whisper_cpu, whisper_cuda, whisper_api
 │   │   └── llm/             # Anthropic SDK + OpenAI 兼容协议（用户自配置，不限厂商）
 │   └── prompts/             # classroom_analysis / parent_report / parent_report_revision / exercise_scoring / feedback_summary
+├── docs/
+│   ├── index.html           # 项目落地页（面向国内用户）
+│   └── images/              # 应用截图
 ├── static/
 │   ├── index.html           # SPA (20250618-v18)，含 LLM 配置、模板管理、报告修订 UI
 │   └── knowledge_outline.json  # v4.1 — 4 科目 2171 知识点

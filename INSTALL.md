@@ -2,13 +2,22 @@
 
 > 版本 0.2.1
 
+🌐 **项目主页**: [Gitee Pages（国内快）](https://lukealwaysfine.gitee.io/teacher-assistant) | [GitHub Pages](https://lukealwaysfine.github.io/teacherAssist/)
+
+## 从哪里下载
+
+| 下载方式 | 说明 |
+|----------|------|
+| 🚀 **夸克网盘**（推荐） | [下载安装包](https://pan.quark.cn/s/3014cec4fcef)，国内高速，无需登录 |
+| 📦 **GitHub Release** | [v0.2.1 下载](https://github.com/LukeAlwaysFine/teacherAssist/releases/tag/v0.2.1)，海外用户 / 备用 |
+
 ## 你需要准备什么
 
 | 准备项 | 说明 |
 |--------|------|
 | Windows 电脑 | Windows 10/11（64 位），建议 8GB+ 内存，10GB+ 磁盘空间 |
 | LLM API Key | 支持 DeepSeek/OpenAI/Anthropic/Groq/Ollama 等厂商（[获取 DeepSeek Key](https://platform.deepseek.com/api_keys) 注册即送额度） |
-| 安装包 | `teacherAssist-setup-0.2.1.exe` |
+| 安装包 | `teacherAssist-setup-0.2.1.exe`（上方链接下载） |
 
 > **不需要**安装 Python 或任何其他软件——安装包已包含全部运行环境。
 

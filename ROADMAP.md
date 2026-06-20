@@ -49,6 +49,8 @@
 - [x] 教师定性观察区域默认展开
 - [x] 分支重构（master→dev + main 稳定线）
 - [x] 思考模式配置（用户可选 none/low/medium/high/max，默认 high，通过 extra_body 传至 LLM API）
+- [x] 项目落地页（docs/index.html）+ Gitee Pages 国内镜像
+- [x] 双下载源：夸克网盘（国内高速）+ GitHub Release
 
 ### 文档
 - [x] USER_GUIDE.md 用户手册（2026-06-18 新增）
@@ -86,6 +88,7 @@
 | 2026-06-19 | API 地址不是必填、硬编码 DeepSeek | 改为必填 + 移除默认值 + 前端校验 |
 | 2026-06-19 | 错误信息显示 [object Object] | 新增 getErrorMsg() 处理 FastAPI 校验数组 |
 | 2026-06-19 | 未配置 Key 时重试 3 次 + RetryError 不可读 | AIServiceConfigError（不重试）+ 拆包 |
+| 2026-06-21 | 发布项目落地页 + Gitee Pages | 双下载源（夸克+GitHub），国内用户可正常访问 |
 | 2026-06-20 | 新增思考模式配置 | reasoning_effort 字段全链路（DB→Schema→API→Provider→UI） |
 | 2026-06-19 | 代码审查发现多处 bug | v0.2.1 修复（详见 git log） |
 | 2026-06-18 | 分析失败 no such column teacher_feedback | ALTER TABLE 补齐 + 启动自动迁移机制 |
