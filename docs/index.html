@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>教师助手 — AI 课堂分析 · 家长报告 · 录音转文字</title>
+<meta name="description" content="教师助手是一款面向教师的 Windows 桌面软件。录制课堂音频，AI 自动分析教学质量，生成专业家长报告。支持 DeepSeek / OpenAI / Claude 等任意大模型，数据本地存储，保护隐私。">
+<meta name="keywords" content="教师助手,AI课堂分析,家长报告,教学工具,录音转文字,Whisper,DeepSeek,教育软件">
+<meta property="og:title" content="教师助手 — 让 AI 帮你写家长报告">
+<meta property="og:description" content="录制课堂 → AI 分析 → 生成家长报告。免费开源，数据本地存储。">
+<meta property="og:type" content="website">
+<style>
+/* ═══ Reset & Base ═══ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+  color:#2D3748;background:#FFF8F0;line-height:1.7;overflow-x:hidden
+}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ═══ Nav ═══ */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:#1E293B;color:#E2E8F0;padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;height:56px;
+  backdrop-filter:blur(8px);box-shadow:0 1px 8px rgba(0,0,0,.12)
+}
+nav .logo{font-size:18px;font-weight:700;color:#F59E0B;display:flex;align-items:center;gap:8px}
+nav .nav-links{display:flex;gap:24px;font-size:14px}
+nav .nav-links a{transition:color .2s}
+nav .nav-links a:hover{color:#F59E0B}
+nav .nav-cta{
+  background:#F59E0B;color:#1E293B;padding:6px 16px;border-radius:8px;
+  font-weight:600;font-size:14px;transition:background .2s
+}
+nav .nav-cta:hover{background:#D97706}
+
+/* ═══ Sections ═══ */
+section{padding:80px 24px;max-width:960px;margin:0 auto}
+.section-title{text-align:center;margin-bottom:48px}
+.section-title h2{font-size:30px;font-weight:800;color:#1E293B;margin-bottom:8px}
+.section-title p{font-size:16px;color:#64748B}
+
+/* ═══ Hero ═══ */
+.hero{text-align:center;padding:100px 24px 80px;max-width:720px;margin:0 auto}
+.hero .badge{
+  display:inline-block;background:#FEF3C7;color:#B45309;font-size:13px;
+  font-weight:600;padding:4px 14px;border-radius:20px;margin-bottom:20px
+}
+.hero h1{font-size:44px;font-weight:900;color:#1E293B;line-height:1.3;margin-bottom:16px}
+.hero h1 span{color:#F59E0B}
+.hero .subtitle{font-size:20px;color:#64748B;margin-bottom:12px}
+.hero .tagline{font-size:16px;color:#94A3B8;margin-bottom:36px;max-width:480px;margin-left:auto;margin-right:auto}
+.hero .cta-group{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;align-items:center}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:14px 32px;
+  border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;
+  transition:all .2s;border:none;text-decoration:none
+}
+.btn-primary{background:#F59E0B;color:#1E293B;box-shadow:0 4px 16px rgba(245,158,11,.3)}
+.btn-primary:hover{background:#D97706;transform:translateY(-1px);box-shadow:0 6px 24px rgba(245,158,11,.4)}
+.btn-outline{background:transparent;color:#64748B;border:2px solid #CBD5E1}
+.btn-outline:hover{color:#1E293B;border-color:#94A3B8}
+.hero .meta{font-size:13px;color:#94A3B8;margin-top:20px}
+
+/* ═══ Workflow ═══ */
+.workflow-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.workflow-steps .step{
+  background:#fff;border-radius:16px;padding:32px 20px;text-align:center;
+  box-shadow:0 2px 12px rgba(0,0,0,.04);position:relative
+}
+.workflow-steps .step .icon{
+  width:56px;height:56px;border-radius:14px;display:flex;align-items:center;
+  justify-content:center;margin:0 auto 16px;font-size:28px
+}
+.workflow-steps .step:nth-child(1) .icon{background:#FEF3C7}
+.workflow-steps .step:nth-child(2) .icon{background:#DBEAFE}
+.workflow-steps .step:nth-child(3) .icon{background:#EDE9FE}
+.workflow-steps .step:nth-child(4) .icon{background:#D1FAE5}
+.workflow-steps .step h4{font-size:15px;font-weight:700;margin-bottom:4px}
+.workflow-steps .step p{font-size:12px;color:#64748B}
+.workflow-steps .step .arrow{
+  position:absolute;right:-24px;top:50%;transform:translateY(-50%);
+  font-size:20px;color:#CBD5E1
+}
+
+/* ═══ Features ═══ */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feature-card{
+  background:#fff;border-radius:16px;padding:28px 24px;
+  box-shadow:0 2px 12px rgba(0,0,0,.04);transition:transform .2s,box-shadow .2s
+}
+.feature-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.08)}
+.feature-card .f-icon{font-size:28px;margin-bottom:12px}
+.feature-card h4{font-size:15px;font-weight:700;margin-bottom:4px}
+.feature-card p{font-size:13px;color:#64748B;line-height:1.6}
+
+/* ═══ Screenshots ═══ */
+.screenshots-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.screenshot-card{
+  background:#fff;border-radius:16px;overflow:hidden;
+  box-shadow:0 2px 12px rgba(0,0,0,.06)
+}
+.screenshot-card img{width:100%;height:auto;display:block}
+.screenshot-card .caption{font-size:12px;color:#94A3B8;padding:10px 14px;text-align:center}
+
+/* ═══ Download ═══ */
+.download-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.download-card{
+  border-radius:20px;padding:36px 28px;text-align:center;
+  transition:transform .2s
+}
+.download-card:hover{transform:translateY(-2px)}
+.download-card.primary-dl{
+  background:linear-gradient(135deg,#FFF7ED,#FEF3C7);
+  border:2px solid #F59E0B
+}
+.download-card.secondary-dl{
+  background:#fff;border:2px solid #E2E8F0
+}
+.download-card .dl-icon{font-size:36px;margin-bottom:8px}
+.download-card h4{font-size:18px;font-weight:800;margin-bottom:4px}
+.download-card .dl-tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 10px;border-radius:10px;margin-bottom:12px}
+.download-card.primary-dl .dl-tag{background:#F59E0B;color:#fff}
+.download-card.secondary-dl .dl-tag{background:#E2E8F0;color:#64748B}
+.download-card .dl-size{font-size:13px;color:#94A3B8;margin-bottom:16px}
+.download-card .btn{display:inline-flex}
+
+/* ═══ Developer ═══ */
+.dev-section{background:#1E293B;color:#E2E8F0}
+.dev-section .section-title h2{color:#F8FAFC}
+.dev-section .section-title p{color:#94A3B8}
+.dev-stack{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:32px}
+.dev-stack span{
+  background:rgba(255,255,255,.08);color:#CBD5E1;font-size:13px;
+  font-weight:500;padding:6px 16px;border-radius:8px;
+  font-family:"SF Mono","Fira Code","Consolas",monospace
+}
+.dev-links{text-align:center}
+.dev-links a{color:#F59E0B;font-weight:600;margin:0 12px;transition:color .2s}
+.dev-links a:hover{color:#D97706}
+
+/* ═══ Footer ═══ */
+footer{
+  text-align:center;padding:32px 24px;
+  font-size:13px;color:#94A3B8;background:#FFF8F0
+}
+footer span{color:#F59E0B}
+
+/* ═══ Responsive ═══ */
+@media(max-width:768px){
+  nav .nav-links{display:none}
+  .hero h1{font-size:30px}
+  .hero .subtitle{font-size:17px}
+  .workflow-steps{grid-template-columns:repeat(2,1fr)}
+  .workflow-steps .step .arrow{display:none}
+  .features-grid{grid-template-columns:1fr}
+  .screenshots-grid{grid-template-columns:1fr}
+  .download-cards{grid-template-columns:1fr}
+  section{padding:48px 16px}
+}
+@media(max-width:480px){
+  .workflow-steps{grid-template-columns:1fr}
+  .hero h1{font-size:26px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ Nav ═══ -->
+<nav>
+  <a href="#" class="logo">🎓 教师助手</a>
+  <div class="nav-links">
+    <a href="#features">功能</a>
+    <a href="#screenshots">截图</a>
+    <a href="#download">下载</a>
+    <a href="#dev">开发者</a>
+  </div>
+  <a href="#download" class="nav-cta">免费下载</a>
+</nav>
+
+<!-- ═══ Hero ═══ -->
+<section class="hero">
+  <div class="badge">✨ v0.2.1 · 正式发布</div>
+  <h1>让 AI 帮你写<span>家长报告</span></h1>
+  <p class="subtitle">录制课堂 → 自动转录 → 智能分析 → 一键生成</p>
+  <p class="tagline">省下写报告的时间，把精力留给真正重要的——<strong>教学</strong></p>
+  <div class="cta-group">
+    <a href="#download" class="btn btn-primary">📥 免费下载 Windows 版</a>
+    <a href="https://github.com/Person-Luke/teacherAssist" class="btn btn-outline" target="_blank">⭐ GitHub</a>
+  </div>
+  <p class="meta">154 MB · Windows 10/11 · 无需安装 Python · 数据本地存储</p>
+</section>
+
+<!-- ═══ Workflow ═══ -->
+<section id="workflow">
+  <div class="section-title">
+    <h2>四步搞定家长报告</h2>
+    <p>从课堂录音到专业报告，一气呵成</p>
+  </div>
+  <div class="workflow-steps">
+    <div class="step">
+      <div class="icon">🎙️</div>
+      <h4>录制课堂</h4>
+      <p>上传音频文件或实时录制<br>支持 MP3 / WAV / M4A</p>
+      <span class="arrow">→</span>
+    </div>
+    <div class="step">
+      <div class="icon">📝</div>
+      <h4>Whisper 转录</h4>
+      <p>CPU / GPU / API 三引擎<br>45 分钟音频约 12 分钟</p>
+      <span class="arrow">→</span>
+    </div>
+    <div class="step">
+      <div class="icon">🧠</div>
+      <h4>AI 智能分析</h4>
+      <p>知识点覆盖 + 掌握程度<br>课堂互动 + 巩固建议</p>
+      <span class="arrow">→</span>
+    </div>
+    <div class="step">
+      <div class="icon">📋</div>
+      <h4>生成报告</h4>
+      <p>一键输出家长报告<br>支持自定义模板 + AI 修订</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Features ═══ -->
+<section id="features">
+  <div class="section-title">
+    <h2>功能亮点</h2>
+    <p>每位老师都值得拥有的 AI 教学助手</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="f-icon">🔑</div>
+      <h4>自配 AI 大模型</h4>
+      <p>支持 DeepSeek、OpenAI、Claude、Groq、Ollama 等任意厂商。API Key 你自己保管，系统不预设、不上传。</p>
+    </div>
+    <div class="feature-card">
+      <div class="f-icon">⚡</div>
+      <h4>离线语音转录</h4>
+      <p>基于 Whisper.cpp，支持 CPU / GPU 两种本地引擎。无需联网，课堂数据不外传，保护学生隐私。</p>
+    </div>
+    <div class="feature-card">
+      <div class="f-icon">📚</div>
+      <h4>超详细知识点大纲</h4>
+      <p>内置 4 科 2171 个知识点（数学 / 历史 / 地理 / 科学），六级结构精准定位学生掌握情况。</p>
+    </div>
+    <div class="feature-card">
+      <div class="f-icon">📄</div>
+      <h4>自定义报告模板</h4>
+      <p>上传你自己的 .txt 模板，支持 8 个占位符变量。不同科目、不同年级，灵活定制。</p>
+    </div>
+    <div class="feature-card">
+      <div class="f-icon">💬</div>
+      <h4>AI 修订报告</h4>
+      <p>用自然语言告诉 AI 怎么改——"语气再温和一点""多强调数学进步"——AI 立刻帮你润色。</p>
+    </div>
+    <div class="feature-card">
+      <div class="f-icon">🔒</div>
+      <h4>数据完全本地</h4>
+      <p>所有数据（课堂录音、转录文字、分析报告）存在你的电脑上。不上传云端，隐私安全可控。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Screenshots ═══ -->
+<section id="screenshots">
+  <div class="section-title">
+    <h2>应用截图</h2>
+    <p>简洁直观的操作界面，三步导航一目了然</p>
+  </div>
+  <div class="screenshots-grid">
+    <div class="screenshot-card">
+      <div style="background:#F8FAFC;height:260px;display:flex;align-items:center;justify-content:center;color:#CBD5E1;font-size:14px">
+        🖼️ 应用截图待补充
+      </div>
+      <div class="caption">课堂创建与知识点选择</div>
+    </div>
+    <div class="screenshot-card">
+      <div style="background:#F8FAFC;height:260px;display:flex;align-items:center;justify-content:center;color:#CBD5E1;font-size:14px">
+        🖼️ 应用截图待补充
+      </div>
+      <div class="caption">AI 分析报告与知识点覆盖</div>
+    </div>
+    <div class="screenshot-card">
+      <div style="background:#F8FAFC;height:260px;display:flex;align-items:center;justify-content:center;color:#CBD5E1;font-size:14px">
+        🖼️ 应用截图待补充
+      </div>
+      <div class="caption">家长报告生成与修订</div>
+    </div>
+    <div class="screenshot-card">
+      <div style="background:#F8FAFC;height:260px;display:flex;align-items:center;justify-content:center;color:#CBD5E1;font-size:14px">
+        🖼️ 应用截图待补充
+      </div>
+      <div class="caption">LLM 大模型配置</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Download ═══ -->
+<section id="download">
+  <div class="section-title">
+    <h2>📥 获取教师助手</h2>
+    <p>选择适合你的下载方式</p>
+  </div>
+  <div class="download-cards">
+    <div class="download-card primary-dl">
+      <div class="dl-icon">🚀</div>
+      <h4>夸克网盘</h4>
+      <span class="dl-tag">推荐 · 国内高速</span>
+      <p class="dl-size">teacherAssist-setup-0.2.1.exe · 154 MB</p>
+      <a href="#" class="btn btn-primary" id="quarkLink">立即下载</a>
+      <p style="font-size:11px;color:#94A3B8;margin-top:8px">中国大陆用户推荐 · 下载无需登录</p>
+    </div>
+    <div class="download-card secondary-dl">
+      <div class="dl-icon">📦</div>
+      <h4>GitHub Release</h4>
+      <span class="dl-tag">海外 · 备用</span>
+      <p class="dl-size">v0.2.1 · 154 MB</p>
+      <a href="https://github.com/Person-Luke/teacherAssist/releases/download/v0.2.1/teacherAssist-setup-0.2.1.exe" class="btn btn-outline" target="_blank">立即下载</a>
+      <p style="font-size:11px;color:#94A3B8;margin-top:8px">海外用户推荐 · 国内速度略慢</p>
+    </div>
+  </div>
+  <p style="text-align:center;margin-top:24px;font-size:13px;color:#94A3B8">
+    🖥️ Windows 10/11 · 64 位 · 建议 8GB+ 内存 · 10GB+ 磁盘空间
+  </p>
+</section>
+
+<!-- ═══ Developer ═══ -->
+<section id="dev" class="dev-section" style="max-width:100%;border-radius:0">
+  <div style="max-width:720px;margin:0 auto">
+    <div class="section-title">
+      <h2>🛠 开发者</h2>
+      <p>开源 · 可扩展 · 技术栈透明</p>
+    </div>
+    <div class="dev-stack">
+      <span>Python 3.11+</span><span>FastAPI</span><span>SQLAlchemy 2.0</span>
+      <span>Whisper.cpp</span><span>Anthropic SDK</span><span>OpenAI 兼容</span>
+      <span>JWT</span><span>SQLite</span><span>Inno Setup</span>
+    </div>
+    <div class="dev-links">
+      <a href="https://github.com/Person-Luke/teacherAssist" target="_blank">📖 GitHub</a>
+      <a href="https://github.com/Person-Luke/teacherAssist/blob/main/ARCHITECTURE.md" target="_blank">🏗 架构文档</a>
+      <a href="https://github.com/Person-Luke/teacherAssist/blob/main/USER_GUIDE.md" target="_blank">📘 用户手册</a>
+      <a href="https://github.com/Person-Luke/teacherAssist/blob/main/LICENSE" target="_blank">📜 MIT License</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Footer ═══ -->
+<footer>
+  <p>教师助手 v0.2.1 · Made with <span>❤️</span> for teachers · <a href="https://github.com/Person-Luke/teacherAssist" style="color:#F59E0B">GitHub</a></p>
+</footer>
+
+</body>
+</html>
