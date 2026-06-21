@@ -36,7 +36,7 @@ MODEL_FILE = CACHE_DIR / "ggml-medium.bin"
 REQUIREMENTS = PROJECT_DIR / "requirements.txt"
 SETUP_ISS = PROJECT_DIR / "scripts" / "setup.iss"
 # 按优先级查找 ISCC.exe: D 盘自定义 → Inno Setup 7 → Inno Setup 6
-_ISCC_D = Path("D:/teacherAssist-build/InnoSetup/ISCC.exe")
+_ISCC_D = Path("teacherAssist-build/InnoSetup/ISCC.exe")
 _ISCC_7 = Path(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")) / "Inno Setup 7" / "ISCC.exe"
 _ISCC_6 = Path(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")) / "Inno Setup 6" / "ISCC.exe"
 
@@ -270,7 +270,7 @@ def step6_compile():
 
     if not ISCC or not ISCC.exists():
         print(f"  [错误] 未找到 Inno Setup 编译器")
-        print(f"  已搜索: D:/teacherAssist-build/InnoSetup/ISCC.exe")
+        print(f"  已搜索: teacherAssist-build/InnoSetup/ISCC.exe")
         print(f"         Inno Setup 7 / Inno Setup 6 (Program Files)")
         print(f"  请下载安装: https://jrsoftware.org/isdl.php")
         print()

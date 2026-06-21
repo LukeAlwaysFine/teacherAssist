@@ -23,7 +23,7 @@
 ## 安装
 
 > 📖 **用户安装指南**: 详见 **[INSTALL.md](INSTALL.md)**
-
+> 📖 **用户使用手册**: 详见 **[USER_GUIDE.md](USER_GUIDE.md)**
 
 ### 普通用户（推荐）
 

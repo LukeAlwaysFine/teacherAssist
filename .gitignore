@@ -26,6 +26,7 @@ uploads/
 # 构建产物
 build/
 dist/
+teacherAssist-build/
 
 # 运行时数据
 /models/

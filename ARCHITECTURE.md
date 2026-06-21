@@ -111,7 +111,12 @@ TeacherAssit/
 ├── ARCHITECTURE.md                   # 本文档
 ├── README.md                         # 项目说明
 ├── ROADMAP.md                        # 路线图
-
+├── teacherAssist-build/               # 安装包产出目录
+│   ├── teacherAssist-setup-x.x.x.exe   #    Windows 安装包
+│   ├── InnoSetup/                      #    Inno Setup 编译器
+│   └── docs/                           #    随包文档（使用说明 / 安装说明）
+│
+├── USER_GUIDE.md                     # 用户使用手册
 ├── .env.example                      # 环境变量模板
 ├── .gitignore
 ├── pyproject.toml                    # ruff + pytest 配置
