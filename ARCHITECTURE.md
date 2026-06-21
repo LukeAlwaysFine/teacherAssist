@@ -111,7 +111,7 @@ TeacherAssit/
 ├── ARCHITECTURE.md                   # 本文档
 ├── README.md                         # 项目说明
 ├── ROADMAP.md                        # 路线图
-├── USER_GUIDE.md                     # 用户使用手册
+
 ├── .env.example                      # 环境变量模板
 ├── .gitignore
 ├── pyproject.toml                    # ruff + pytest 配置

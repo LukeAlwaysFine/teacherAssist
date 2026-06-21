@@ -37,7 +37,7 @@ teacherAssist/
 ├── static/
 │   ├── index.html           # SPA (20250618-v18)，含 LLM 配置、模板管理、报告修订 UI
 │   └── knowledge_outline.json  # v4.1 — 4 科目 2171 知识点
-├── USER_GUIDE.md            # 用户使用手册（面向教师的操作指南）
+
 ├── ARCHITECTURE.md           # 架构文档
 ├── scripts/                 # 构建/部署工具
 ├── tests/                   # 12 tests

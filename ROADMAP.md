@@ -54,7 +54,7 @@
 - [x] 落地页开发者信息 + 留言反馈区（邮件 + GitHub Issues）
 
 ### 文档
-- [x] USER_GUIDE.md 用户手册（2026-06-18 新增）
+
 - [x] ARCHITECTURE.md 架构文档（2026-06-19 新增）
 - [x] README.md / ROADMAP.md / CLAUDE.md / INSTALL.md
 
