@@ -36,3 +36,6 @@ data/
 
 # Claude Code 本地配置
 .claude/settings.local.json
+
+# Understand Anything 知识图谱
+.understand-anything/

@@ -45,16 +45,7 @@ if exist ".env" (
     for /f "delims=" %%i in ('python -c "import secrets; print(secrets.token_urlsafe(32))" 2^>nul') do set "RANDOM_KEY=%%i"
     if not defined RANDOM_KEY set "RANDOM_KEY=change-me-to-a-random-secret-key"
 
-    :: 交互式输入
-    set /p "API_KEY=   1. DeepSeek API Key（必填）: "
-    if "!API_KEY!"=="" (
-        echo   [✗] API Key 不能为空，安装中止
-        pause
-        exit /b 1
-    )
-
     set "PORT=8000"
-    set /p "PORT=   2. 服务端口 [8000]: "
 
     :: 写入 .env
     (
@@ -65,12 +56,12 @@ if exist ".env" (
         echo SECRET_KEY=!RANDOM_KEY!
         echo ACCESS_TOKEN_EXPIRE_MINUTES=30
         echo REFRESH_TOKEN_EXPIRE_DAYS=7
-        echo LLM_PROVIDER=deepseek
+        echo LLM_PROVIDER=
         echo LLM_DEFAULT_MAX_TOKENS=4096
-        echo DEEPSEEK_API_KEY=!API_KEY!
+        echo DEEPSEEK_API_KEY=
         echo DEEPSEEK_MODEL=deepseek-chat
         echo DEEPSEEK_MAX_TOKENS=4096
-        echo DEEPSEEK_BASE_URL=https://api.deepseek.com
+        echo DEEPSEEK_BASE_URL=
         echo ANTHROPIC_API_KEY=
         echo CLAUDE_MODEL=claude-sonnet-4-6
         echo CLAUDE_MAX_TOKENS=4096
@@ -82,6 +73,7 @@ if exist ".env" (
 
     echo.
     echo   [✓] 配置已保存到 .env
+    echo   AI 服务请在启动后通过网页右上角 ⚙️ 按钮进行配置。
 )
 echo.
 

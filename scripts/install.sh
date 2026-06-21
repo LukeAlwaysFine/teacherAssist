@@ -42,15 +42,6 @@ else
     RANDOM_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))" 2>/dev/null || echo "change-me-to-a-random-secret-key")
     PORT=8000
 
-    read -p "  1. DeepSeek API Key（必填）: " API_KEY
-    if [ -z "$API_KEY" ]; then
-        echo "  [✗] API Key 不能为空，安装中止"
-        exit 1
-    fi
-
-    read -p "  2. 服务端口 [8000]: " USER_PORT
-    PORT=${USER_PORT:-8000}
-
     cat > .env <<EOF
 # 教师助手 — 环境配置
 PROJECT_NAME=teacherAssist
@@ -59,12 +50,12 @@ DATABASE_URL=sqlite+aiosqlite:///./data/teacher_assist.db
 SECRET_KEY=$RANDOM_KEY
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_EXPIRE_DAYS=7
-LLM_PROVIDER=deepseek
+LLM_PROVIDER=
 LLM_DEFAULT_MAX_TOKENS=4096
-DEEPSEEK_API_KEY=$API_KEY
+DEEPSEEK_API_KEY=
 DEEPSEEK_MODEL=deepseek-chat
 DEEPSEEK_MAX_TOKENS=4096
-DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_BASE_URL=
 ANTHROPIC_API_KEY=
 CLAUDE_MODEL=claude-sonnet-4-6
 CLAUDE_MAX_TOKENS=4096
@@ -76,6 +67,7 @@ EOF
 
     echo ""
     echo "  [✓] 配置已保存到 .env"
+    echo "  AI 服务请在启动后通过网页右上角 ⚙️ 按钮进行配置。"
 fi
 echo ""
 

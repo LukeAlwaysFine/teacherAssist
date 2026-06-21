@@ -98,18 +98,8 @@ def ensure_config():
     if ENV_FILE.exists():
         return
 
-    print("首次运行 — 需要配置 AI 服务")
+    print("首次运行 — 正在初始化配置文件...")
     print()
-    api_key = input("请输入 API Key: ").strip()
-    if api_key:
-        api_url = input("请输入 API 地址（如 https://api.deepseek.com）: ").strip()
-    else:
-        api_url = ""
-
-    if not api_key:
-        print("跳过配置，稍后可在 .env 文件中手动设置")
-        print(f"配置文件位置: {ENV_FILE}")
-        return
 
     secret = __import__('secrets').token_urlsafe(32)
 
@@ -122,10 +112,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_EXPIRE_DAYS=7
 LLM_PROVIDER=
 LLM_DEFAULT_MAX_TOKENS=4096
-DEEPSEEK_API_KEY={api_key}
+DEEPSEEK_API_KEY=
 DEEPSEEK_MODEL=deepseek-chat
 DEEPSEEK_MAX_TOKENS=4096
-DEEPSEEK_BASE_URL={api_url}
+DEEPSEEK_BASE_URL=
 ANTHROPIC_API_KEY=
 CLAUDE_MODEL=claude-sonnet-4-6
 CLAUDE_MAX_TOKENS=4096
@@ -134,8 +124,8 @@ WHISPER_MODEL=whisper-1
 CORS_ORIGINS=["http://localhost:3000","http://localhost:5173"]
 """, encoding="utf-8")
 
+    print("配置已保存！AI 服务请在启动后通过网页右上角 [设置] 按钮进行配置。")
     print()
-    print("配置已保存！")
 
 
 def start_uvicorn(host: str, port: int) -> subprocess.Popen:

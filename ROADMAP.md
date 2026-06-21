@@ -90,7 +90,7 @@
 | 2026-06-19 | 错误信息显示 [object Object] | 新增 getErrorMsg() 处理 FastAPI 校验数组 |
 | 2026-06-19 | 未配置 Key 时重试 3 次 + RetryError 不可读 | AIServiceConfigError（不重试）+ 拆包 |
 | 2026-06-21 | 发布项目落地页 + Gitee Pages | 双下载源（夸克+GitHub），国内用户可正常访问 |
-| 2026-06-21 | 落地页缺开发者信息 + 反馈入口 | 新增 Luke 联系方式 + 留言反馈区（邮件 + GitHub Issues） |
+| 2026-06-21 | 安装包/Docker 首次启动询问 DeepSeek API Key | 移除安装流程中所有 API 提示，LLM 配置统一走 Web UI ⚙️ |
 | 2026-06-21 | GitHub Pages 推送后未自动部署 | 手动触发 Pages build，确认构建后上线 |
 | 2026-06-20 | 新增思考模式配置 | reasoning_effort 字段全链路（DB→Schema→API→Provider→UI） |
 | 2026-06-19 | 代码审查发现多处 bug | v0.2.1 修复（详见 git log） |

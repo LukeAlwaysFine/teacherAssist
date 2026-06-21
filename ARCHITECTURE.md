@@ -482,11 +482,11 @@ user: User = Depends(get_current_user)       # JWT 认证
 ### 4. 用户可覆盖的 LLM 配置
 
 ```python
-系统默认 → .env 文件 → 用户 UI 配置 (user_llm_configs 表) → 调用时传参
-                                ↑ 优先级最高
+系统默认(.env 自动生成, LLM 字段全空) → 用户 UI 配置 (user_llm_configs 表) → 调用时传参
+                                            ↑ 优先级最高
 ```
 
-每个用户可以设置自己的 API Key 和模型，AIService 自动加载。
+每个用户通过右上角 ⚙️ API 按钮自行配置 API Key 和模型，AIService 自动加载。安装时不再询问 API Key，`.env` 中 LLM 字段留空。
 
 ### 5. 自动迁移（轻量级）
 
